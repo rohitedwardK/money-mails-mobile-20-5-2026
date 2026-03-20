@@ -83,3 +83,18 @@ yarn-error.log
 
 # Local export/report artifacts
 MoneyMails 2023-07-08 13-09-04/
+
+# Repo cleanup: local scratch, backups, and stale generated trees
+UI_PARITY_SPEC.md
+new.sh
+new2.sh
+new3.sh
+new4.sh
+new5.sh
+*-old.js
+src/screens/User/Home/indexwork.js
+src/screens/User/Mails/index22.js
+src/screens/User/profileComplete/ProfileSetting/index.style.js 17-05-33-398.js
+android/app/src/main/re/
+ios/MyApp/
+ios/MyApp.xcodeproj/
