@@ -21,6 +21,9 @@ DerivedData
 *.ipa
 *.xcuserstate
 **/.xcode.env.local
+.env
+.env.*
+!.env.example
 
 # Android/IntelliJ
 #
@@ -55,13 +58,10 @@ yarn-error.log
 
 # Bundle artifact
 *.jsbundle
-*.bundle
-*.zip
 
 # Ruby / CocoaPods
 **/Pods/
 /vendor/bundle/
-.bundle/
 
 # Temporary files created by Metro to check the health of the file watcher
 .metro-health-check*
@@ -76,25 +76,3 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
-
-# Local editor files
-.vscode/
-*.code-workspace
-
-# Local export/report artifacts
-MoneyMails 2023-07-08 13-09-04/
-
-# Repo cleanup: local scratch, backups, and stale generated trees
-UI_PARITY_SPEC.md
-new.sh
-new2.sh
-new3.sh
-new4.sh
-new5.sh
-*-old.js
-src/screens/User/Home/indexwork.js
-src/screens/User/Mails/index22.js
-src/screens/User/profileComplete/ProfileSetting/index.style.js 17-05-33-398.js
-android/app/src/main/re/
-ios/MyApp/
-ios/MyApp.xcodeproj/

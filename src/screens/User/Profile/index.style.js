@@ -3,28 +3,35 @@ import {StyleSheet} from 'react-native';
 import {DeviceContext} from '../../../context/DeviceContext';
 import getColors from '../../../utils/colors';
  
-export const myProfileScreenStyles = () => {
+const useMyProfileScreenStyles = () => {
   const {screenWidth} = useContext(DeviceContext);
   const {themeColors, myProfileScreenColors, isDarkMode} = getColors();
  
   return StyleSheet.create({
     pageContainer: {
       flex: 1,
-      backgroundColor: themeColors.bgPrimary,
-      paddingHorizontal: 35,
+      backgroundColor: 'transparent',
+      paddingHorizontal: 20,
       height: '100%',
-      paddingTop: 70,
+      paddingTop: 28,
       width: '100%',
     },
     header: {
-      fontSize: 22,
+      fontSize: 26,
       color: themeColors.fontPrimary,
-      fontWeight: '600',
+      fontWeight: '800',
+      textAlign: 'center',
     },
     readOnlyFormContainer: {
       width: '100%',
-      backgroundColor: 'transparent',
-      paddingBottom: 30,
+      backgroundColor: themeColors.surfacePrimary,
+      padding: 14,
+      paddingBottom: 22,
+      borderRadius: 22,
+      borderWidth: 1,
+      borderColor: themeColors.borderSubtle,
+      shadowOpacity: 0,
+      elevation: 0,
     },
     detailsItem: {
       borderWidth: 1,
@@ -39,9 +46,11 @@ export const myProfileScreenStyles = () => {
       flexDirection: 'row',
     },
     detailsItemNew: {
-      width: screenWidth - 70,
-      backgroundColor: 'transparent',
-      color : 'black'
+      width: screenWidth - 68,
+      backgroundColor: themeColors.surfaceSecondary,
+      color: themeColors.fontPrimary,
+      borderRadius: 14,
+      marginBottom: 2,
     },
     detailsItemInfo: {
       color: myProfileScreenColors.fontColor,
@@ -50,3 +59,5 @@ export const myProfileScreenStyles = () => {
     },
   });
 };
+
+export const myProfileScreenStyles = useMyProfileScreenStyles;

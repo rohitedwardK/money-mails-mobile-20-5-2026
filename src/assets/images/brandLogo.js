@@ -2,7 +2,7 @@ import * as React from 'react';
 import { SvgCss } from 'react-native-svg/css';
 
 const xml = `
-  <svg xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com" version="1.1" id="Layer_1" x="0px" y="0px" style="enable-background:new 0 0 1429.4 975.81;" width="314px" height="75px" viewBox="0 0 314 75">
+  <svg xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com" version="1.1" id="Layer_1" x="0px" y="0px" style="enable-background:new 0 0 360 75;" width="360px" height="75px" viewBox="0 0 360 75">
   <defs/>
   <style type="text/css">
 	.st0{fill:#EA9A01;}

@@ -1,89 +1,104 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { ScrollView, View, Text, TouchableOpacity, BackHandler } from 'react-native';
+import React, {useContext, useEffect, useState} from 'react';
+import {ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import moment from 'moment';
+import {TextInput} from 'react-native-paper';
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Avatar from '../../../components/atoms/Avatar';
 import Grid from '../../../components/atoms/Grid';
-import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
-import { myProfileScreenStyles } from './index.style';
+import {COUNTRY} from '../../../constants';
+import {UserContext} from '../../../context/UserContext';
+import {useCityData} from '../../../hooks/services/useCityData';
+import {useCountyData} from '../../../hooks/services/useCountyData';
+import {useStateData} from '../../../hooks/services/useStateData';
 import getColors from '../../../utils/colors';
-import { UserContext } from "../../../context/UserContext";
-import { zipFormat } from "../../../utils";
-import { useStateData } from "../../../hooks/services/useStateData";
-import { useCountyData } from "../../../hooks/services/useCountyData";
-import { useCityData } from "../../../hooks/services/useCityData";
-import { COUNTRY } from "../../../constants";
-import { TextInput } from 'react-native-paper';
-import axios from 'axios';
-import { useFocusEffect } from '@react-navigation/native';
+import {myProfileScreenStyles} from './index.style';
 
-const Profile = ({ navigation }) => {
+const asList = value => {
+  if (Array.isArray(value)) return value.join(', ');
+  return value || '';
+};
+
+const formatDate = value => {
+  if (!value) return '';
+  const date = moment(value);
+  return date.isValid() ? date.format('DD-MM-YYYY') : String(value);
+};
+
+const ProfileField = ({label, value, style, colors}) => (
+  <TextInput
+    label={label}
+    placeholder={label}
+    value={String(value || '')}
+    placeholderTextColor={colors.fontMuted}
+    textColor={colors.fontPrimary}
+    outlineColor={colors.borderPrimary}
+    activeOutlineColor={colors.highlightPrimary}
+    editable={false}
+    mode="outlined"
+    style={style}
+  />
+);
+
+const Profile = ({navigation}) => {
   const styles = myProfileScreenStyles();
-  const { userDetails } = useContext(UserContext);
-  const { themeColors } = getColors();
-  const [selCountry, setSelCountry] = useState();
-  const [selState, setSelState] = useState();
-  const [selCounty, setSelCounty] = useState();
-  const [selCity, setSelCity] = useState();
-  const { stateData, setStateData } = useStateData();
-  const { countyData, setCountyData } = useCountyData();
-  const { cityData, setCityData } = useCityData();
-
-
-  useEffect(() => {
-    setStateData(userDetails?.address?.country);
-    setCountyData(userDetails?.address?.state);
-    setCityData(userDetails?.address?.county);
-  }, [userDetails])
-
-  // BackHandler
-  useFocusEffect(
-    React.useCallback(() => {
-      const backAction = () => {
-        navigation.navigate('User', {
-          screen: 'Home',
-        });
-        return true;
-      };
-
-      const backHandler = BackHandler.addEventListener(
-        'hardwareBackPress',
-        backAction
-      );
-
-      return () => backHandler.remove();
-    }, [navigation])
-  );
-
-
-
+  const {themeColors: colors} = getColors();
+  const {userDetails} = useContext(UserContext);
+  const address = userDetails?.address || {};
+  const demographics = userDetails?.demographics || {};
+  const [selCountry, setSelCountry] = useState('');
+  const [selState, setSelState] = useState('');
+  const [selCounty, setSelCounty] = useState('');
+  const [selCity, setSelCity] = useState('');
+  const {stateData, setStateData} = useStateData();
+  const {countyData, setCountyData} = useCountyData();
+  const {cityData, setCityData} = useCityData();
 
   useEffect(() => {
-    if (userDetails) {
-      const country = COUNTRY.find((val) => userDetails?.address?.country == val.id);
-      setSelCountry(country?.title);
-    }
-  }, [userDetails])
+    if (address.country) setStateData(address.country);
+    if (address.state) setCountyData(address.state);
+    if (address.county) setCityData(address.county);
+  }, [address.country, address.county, address.state, setCityData, setCountyData, setStateData]);
 
   useEffect(() => {
-    if (stateData) {
-      const state = stateData.find((val) => userDetails?.address?.state === val.uuid);
-      setSelState(state?.name);
-    }
-  }, [stateData])
+    const country = COUNTRY.find(item => address.country === item.id);
+    setSelCountry(country?.title || address.country || '');
+  }, [address.country]);
 
   useEffect(() => {
-    if (countyData) {
-      const county = countyData.find((val) => userDetails?.address?.county === val.uuid);
-      setSelCounty(county?.name);
-    }
-  }, [countyData])
+    const state = stateData?.find(item => address.state === item.uuid);
+    setSelState(state?.name || address.state || '');
+  }, [address.state, stateData]);
 
   useEffect(() => {
-    if (cityData) {
-      const city = cityData.find((val) => userDetails?.address?.city === val.uuid);
-      setSelCity(city?.name);
-    }
-  }, [cityData])
+    const county = countyData?.find(item => address.county === item.uuid);
+    setSelCounty(county?.name || address.county || '');
+  }, [address.county, countyData]);
+
+  useEffect(() => {
+    const city = cityData?.find(item => address.city === item.uuid);
+    setSelCity(city?.name || address.city || '');
+  }, [address.city, cityData]);
+
+  const profileFields = [
+    ['First Name', userDetails?.firstName],
+    ['Last Name', userDetails?.lastName],
+    ['Phone', userDetails?.mobile || userDetails?.phone?.value],
+    ['Primary Email', userDetails?.primaryEmail || userDetails?.email],
+    ['Address Line 1', address.location],
+    ['Address Line 2', address.addressLine1],
+    ['Country', selCountry],
+    ['State', selState],
+    ['County', selCounty],
+    ['City', selCity],
+    ['House No', address.apartmentNo],
+    ['ZIP Code', address.zip],
+    ['Landmark/Housing Community', address.landmark],
+    ['Race/Ethnicity', demographics.race || userDetails?.ethnicity],
+    ['Date of Birth', formatDate(demographics.dob || userDetails?.dob)],
+    ['Religion', userDetails?.religion],
+    ['Interests', asList(userDetails?.interests || userDetails?.intrests)],
+    ['Languages', asList(userDetails?.languages)],
+  ];
 
   return (
     <ScrollView
@@ -91,24 +106,27 @@ const Profile = ({ navigation }) => {
       contentContainerStyle={{
         alignItems: 'center',
       }}>
-      <View style={{ marginBottom: 30 }}>
+      <View style={{marginBottom: 30}}>
         <Grid gap={20} dir="column">
           <Text style={styles.header}>My Profile</Text>
-          <View style={{ position: 'relative', height: '8%', marginTop: 10, alignItems: 'center' }}>
+          <View
+            style={{
+              alignItems: 'center',
+              height: '8%',
+              marginTop: 10,
+              position: 'relative',
+            }}>
             <Avatar
               src={userDetails?.avatar}
               flatStyle
               rounded
               size={100}
               userDetails={userDetails}
-
             />
           </View>
-          <View style={{ alignItems: 'center' }} >
-            <TouchableOpacity onPress={() =>
-              navigation.navigate('CompleteInfo')
-            }>
-              <FontAwesomeIcon name="pencil-square-o" size={20} color={"black"} />
+          <View style={{alignItems: 'center'}}>
+            <TouchableOpacity onPress={() => navigation.navigate('CompleteInfo')}>
+              <FontAwesomeIcon name="pencil-square-o" size={22} color={colors.highlightPrimary} />
             </TouchableOpacity>
           </View>
 
@@ -116,156 +134,15 @@ const Profile = ({ navigation }) => {
             gap={10}
             dir="column"
             containerStyles={styles.readOnlyFormContainer}>
-
-            <TextInput
-              label="First Name"
-              placeholder="Enter First Name"
-              value={userDetails?.firstName}
-              placeholderTextColor={"black"}
-              editable={false}
-              style={[styles.detailsItemNew, { color: '#222' }]}
-            />
-            <TextInput
-              label="Last Name"
-              placeholder="Enter Last Name"
-              value={userDetails?.lastName}
-              placeholderTextColor={"black"}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-            <TextInput
-              label="Mobile"
-              placeholder="Mobile"
-              value={userDetails?.mobile}
-              placeholderTextColor={"black"}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-            <TextInput
-              label="Email"
-              placeholder="EMail"
-              value={userDetails?.primaryEmail}
-              placeholderTextColor={"black"}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-            <TextInput
-              label="Address"
-              placeholder="Address"
-              value={userDetails?.address?.location}
-              right={<TextInput.Icon icon="map-marker" color={'black'} />}
-              placeholderTextColor={"black"}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-            <TextInput
-              label="Address Line1"
-              placeholder='Address Line1'
-              value={userDetails?.address?.addressLine1}
-              placeholderTextColor={"black"}
-              right={<TextInput.Icon icon="map-marker" color={'black'} />}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-            <TextInput
-              label="Country"
-              placeholder='Country'
-              placeholderTextColor={"black"}
-              value={selCountry || userDetails?.address?.country}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-            <TextInput
-              label="State"
-              placeholder='State'
-              placeholderTextColor={"black"}
-              value={selState || userDetails?.address?.state}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-            <TextInput
-              label="County"
-              placeholder='County'
-              placeholderTextColor={"black"}
-              value={selCounty || userDetails?.address?.county}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-            <TextInput
-              label="City"
-              placeholder='City'
-              placeholderTextColor={"black"}
-              value={selCity || userDetails?.address?.city}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-            <TextInput
-              label="Appartment No."
-              placeholder='Appartment No.'
-              placeholderTextColor={"black"}
-              value={userDetails?.address?.apartmentNo}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-            <TextInput
-              label="Landmark"
-              placeholder='Landmark'
-              placeholderTextColor={"black"}
-              value={userDetails?.address?.landmark}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-            <TextInput
-              label="Zip Code"
-              placeholder='Zip Code'
-              placeholderTextColor={"black"}
-              value={userDetails?.address?.zip}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-            <TextInput
-              label="SSN."
-              placeholder='SSN.'
-              placeholderTextColor={"black"}
-              value={userDetails?.ssn}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-
-            <TextInput
-              label="Race / Ethincity"
-              placeholder='Race / Ethincity'
-              placeholderTextColor={"black"}
-              value={userDetails?.demographics?.race}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-            <TextInput
-              label="D-O-B"
-              placeholder='D-O-B'
-              placeholderTextColor={"black"}
-              value={moment(userDetails?.demographics?.dob).format('DD-MM-YYYY')}
-              editable={false}
-              right={<TextInput.Icon icon="calendar-month" color={'black'} />}
-              style={styles.detailsItemNew}
-            />
-            <TextInput
-              label="Gender"
-              placeholder='Gender'
-              placeholderTextColor={"black"}
-              value={userDetails?.gender}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
-
-            <TextInput
-              label="ID Number"
-              placeholder='ID Number'
-              placeholderTextColor={"black"}
-              value={userDetails?.id_number}
-              editable={false}
-              style={styles.detailsItemNew}
-            />
+            {profileFields.map(([label, value]) => (
+              <ProfileField
+                key={label}
+                label={label}
+                value={value}
+                colors={colors}
+                style={styles.detailsItemNew}
+              />
+            ))}
           </Grid>
         </Grid>
       </View>

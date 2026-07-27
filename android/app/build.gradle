@@ -1,7 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
-apply plugin: 'com.google.gms.google-services'
+apply from: "../../node_modules/react-native-config/android/dotenv.gradle"
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -73,23 +73,28 @@ def enableProguardInReleaseBuilds = true
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
-// Hermes is controlled via hermesEnabled in gradle.properties
+project.ext.react = [
+    enableHermes: false  // <- Enable Hermes
+]
 
 android {
 
-   packaging {
-       jniLibs {
-           pickFirsts += ['lib/x86/libc++_shared.so', 'lib/x86_64/libjsc.so', 'lib/arm64-v8a/libjsc.so', 'lib/arm64-v8a/libc++_shared.so', 'lib/x86_64/libc++_shared.so', 'lib/armeabi-v7a/libc++_shared.so']
-       }
-   }
+   packagingOptions {
+       pickFirst 'lib/x86/libc++_shared.so'
+       pickFirst 'lib/x86_64/libjsc.so'
+       pickFirst 'lib/arm64-v8a/libjsc.so'
+       pickFirst 'lib/arm64-v8a/libc++_shared.so'
+       pickFirst 'lib/x86_64/libc++_shared.so'
+       pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+     }
 
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.moneymailss"
+    namespace "com.moneymails.app"
     defaultConfig {
-        applicationId "com.moneymailss"
+        applicationId "com.moneymails.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 7010
@@ -133,14 +138,13 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation 'androidx.core:core-ktx:1.13.1' // Make sure this is updated
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    // vector-icons is autolinked in RN 0.78+
+    implementation project(':react-native-vector-icons')
 
         implementation "androidx.core:core:1.13.1"
 
-    // Ensure no old support libraries are included and prevent 1.17.0 core-ktx mismatch
+    // Ensure no old support libraries are included
     configurations.all {
         resolutionStrategy.force "androidx.core:core:1.13.1"
-        resolutionStrategy.force "androidx.core:core-ktx:1.13.1"
         resolutionStrategy.force "androidx.appcompat:appcompat:1.6.1"
     }
 
@@ -151,4 +155,4 @@ dependencies {
     }
 }
 
-// apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"

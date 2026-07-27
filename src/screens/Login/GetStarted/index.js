@@ -36,12 +36,17 @@ const GetStarted = ({navigation}) => {
     return unsubscribe;
   }, [navigation]);
 
+  useEffect(() => {
+    if (auth) {
+      navigation.navigate('UserScreens');
+    }
+  }, [auth, navigation]);
+
   if (loading) {
     return <ActivityIndicator size="large" color="#00ff00" />; // or return a loading indicator
   }
 
   if (auth) {
-    navigation.navigate('UserScreens');
     return null; // Prevent rendering anything else if already redirected
   }
 
@@ -78,7 +83,7 @@ const GetStarted = ({navigation}) => {
         btnText="Sign Up"
         type="link"
         linkpreText="Don't have an account?"
-        onPress={() => navigation.navigate('SignUpInfo')}
+        onPress={() => navigation.navigate('SignUp')}
       />
     </View>
      

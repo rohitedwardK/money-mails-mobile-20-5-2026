@@ -1,4 +1,5 @@
-import { useEffect, useState, useContext, useCallback } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState, useContext } from "react";
 import { baseUrl } from "../../connections";
 import { UserContext } from "../../context/UserContext";
 
@@ -11,172 +12,172 @@ export const useMail = () => {
   const [updateMailFav, setUpdateMailFav] = useState();
   const [redeemError, setRedeemError] = useState(false);
   const [isRedeem, setIsRedeem] = useState(false);
-  const [redeemMessage, setRedeemMessage] = useState("");
-  const [redeemSuccessMessage, setRedeemSuccessMessage] = useState("");
+  const [redeemMessage, setRedeemMessage] = useState('');
+  const [redeemSuccessMessage,setRedeemSuccessMessage] = useState('');
   const [updateMailRedeem, setUpdateMailRedeem] = useState();
   const [count, setCount] = useState(0);
-  const [mailURL, setMailURL] = useState("");
-  const [mailHTML, setMailHTML] = useState("");
-  const [unsubscribeMail, setUnsubscribeMail] = useState(null);
-  const [unsubscribeResult, setUnsubscribeResult] = useState("");
-  const [unsubscribeError, setUnsubscribeError] = useState("");
+  const [mailURL, setMailURL] = useState('');
+  const [mailHTML, setMailHTML] = useState('');
 
-  const buildHeaders = useCallback(() => {
-    const headers = new Headers();
-    headers.append("Content-Type", "application/json");
-    if (userDetails?.token) {
-      headers.append("x-auth-token", userDetails.token);
-    }
-    return headers;
-  }, [userDetails?.token]);
-
-  const parseResponse = async response => {
-    const res = await response.text();
-    if (response.status !== 200) {
-      throw res;
-    }
-    return JSON.parse(res);
-  };
-
-  const onMailLoad = useCallback(() => {
-    if (!payload) return;
+  const onMailLoad = () => {
     setIsLoading(true);
 
-    const requestOptions = {
-      method: "GET",
-      headers: buildHeaders(),
-      redirect: "follow",
-    };
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
+      headers.append("x-auth-token", userDetails?.token);
 
-    fetch(`${baseUrl}/mail/list?${payload}`, requestOptions)
-      .then(parseResponse)
-      .then(result => {
-        setData([...result.data]);
-        setCount(result?.count || 0);
-        setError(false);
-      })
-      .catch(err => {
-        setError(err);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [buildHeaders, payload]);
+
+      const params = JSON.stringify(payload);
+      const requestOptions = {
+        method: "GET",
+        headers: headers,
+        redirect: "follow",
+      };
+      // country_uuid=CO-42A82D09&state_uuid=ST-D8830887&city_uuid=CITY-DF2C30CF&sub_category_uuid=SCAT-AA55973A&user_uuid=CN-DE684BE9&county_uuid=CNTY-2C7F097B&brand_uuid=&category_uuid=CAT-AB727D5A&type=filter&seen=
+      // fetch(`${baseUrl}/mail/list?${payload}&seen=`, requestOptions)
+      fetch(`${baseUrl}/mail/list?${payload}`, requestOptions)
+        .then(async (response) => {
+          const res = await response.text();
+          if (response.status !== 200) {
+            throw res;
+          }
+          return JSON.parse(res);
+        })
+        .then((result) => {
+          // const dsfdsf = [...result.data]
+          setData([...result.data]);
+          setCount(result?.count);
+          setError(false);
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          setError(err);
+          setIsLoading(false);
+        });
+  }
 
   useEffect(() => {
-    if (!payload) return;
-    onMailLoad();
-    const intervalID = setInterval(() => {
+    if(payload) {
       onMailLoad();
-    }, 30000);
-    return () => clearInterval(intervalID);
-  }, [payload, onMailLoad]);
+      const intervalID =  setInterval(()=>{
+        onMailLoad()
+      },30000);
+      return ()=> clearInterval(intervalID)
+    }
+  }, [payload]);
 
   useEffect(() => {
-    if (!updateMailFav) return;
+    if(updateMailFav) {
     setIsLoading(true);
 
-    const requestOptions = {
-      method: "PUT",
-      headers: buildHeaders(),
-      body: JSON.stringify(updateMailFav),
-      redirect: "follow",
-    };
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
+      headers.append("x-auth-token", userDetails?.token);
 
-    fetch(`${baseUrl}/mail/update/favourite`, requestOptions)
-      .then(parseResponse)
-      .then(() => {
-        onMailLoad();
-        setError(false);
-      })
-      .catch(err => {
-        setError(err);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [updateMailFav, buildHeaders, onMailLoad]);
+      const params = JSON.stringify(updateMailFav);
+
+      const requestOptions = {
+        method: "PUT",
+        headers: headers,
+        body: params,
+        redirect: "follow",
+      };
+
+      fetch(`${baseUrl}/mail/update/favourite`, requestOptions)
+        .then(async (response) => {
+          const res = await response.text();
+          if (response.status !== 200) {
+            throw res;
+          }
+          return JSON.parse(res);
+        })
+        .then((result) => {
+          onMailLoad();
+          setError(false);
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          setError(err);
+          setIsLoading(false);
+        });
+    }
+  }, [updateMailFav]);
 
   useEffect(() => {
-    if (!updateMailRedeem?.mail_uuid) return;
+    if(updateMailRedeem) {
+    if(!updateMailRedeem?.mail_uuid) return;
     setIsLoading(true);
-    setRedeemSuccessMessage("");
 
-    const requestOptions = {
-      method: "PUT",
-      headers: buildHeaders(),
-      body: JSON.stringify(updateMailRedeem),
-      redirect: "follow",
-    };
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
+      headers.append("x-auth-token", userDetails?.token);
 
-    fetch(`${baseUrl}/mail/update/redeem`, requestOptions)
-      .then(parseResponse)
-      .then(result => {
-        setRedeemSuccessMessage(result?.message || "");
-        onMailLoad();
-        setRedeemError(false);
-        setIsRedeem(true);
-      })
-      .catch(err => {
-        setRedeemError(true);
-        setRedeemMessage(`${err}`);
-        setIsRedeem(true);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [updateMailRedeem, buildHeaders, onMailLoad]);
+      const params = JSON.stringify(updateMailRedeem);
+
+      const requestOptions = {
+        method: "PUT",
+        headers: headers,
+        body: params,
+        redirect: "follow",
+      };
+      setRedeemSuccessMessage('');
+      fetch(`${baseUrl}/mail/update/redeem`, requestOptions)
+        .then(async (response) => {
+          const res = await response.text();
+          if (response.status !== 200) {
+            throw res;
+          }
+          let messageJson =  JSON.parse(res);
+          setRedeemSuccessMessage(messageJson.message);
+          return JSON.parse(res);
+        })
+        .then((result) => {
+          onMailLoad();
+          setRedeemError(false);
+          setIsRedeem(true);
+        })
+        .catch((err) => {
+          setRedeemError(true);
+          setRedeemMessage(err);
+          setIsRedeem(true);
+        });
+    }
+  }, [updateMailRedeem]);
 
   useEffect(() => {
-    if (!mailURL?.html_url) return;
+    if(mailURL) {
+    if(!mailURL) return;
     setIsLoading(true);
 
-    const requestOptions = {
-      method: "POST",
-      headers: buildHeaders(),
-      body: JSON.stringify(mailURL),
-      redirect: "follow",
-    };
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
+      headers.append("x-auth-token", userDetails?.token);
 
-    fetch(`${baseUrl}/mail/read/html/file`, requestOptions)
-      .then(parseResponse)
-      .then(result => {
-        setMailHTML(result?.htmlData || "");
-      })
-      .catch(() => {
-        setMailHTML("");
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [mailURL, buildHeaders]);
+      const params = JSON.stringify(mailURL);
 
-  useEffect(() => {
-    if (!unsubscribeMail?.mail_uuid) return;
-    setUnsubscribeError("");
-    setUnsubscribeResult("");
-    setIsLoading(true);
+      const requestOptions = {
+        method: "POST",
+        headers: headers,
+        body: params,
+        redirect: "follow",
+      };
 
-    const requestOptions = {
-      method: "PUT",
-      headers: buildHeaders(),
-      body: JSON.stringify(unsubscribeMail),
-      redirect: "follow",
-    };
-
-    fetch(`${baseUrl}/mail/unsubscribe`, requestOptions)
-      .then(parseResponse)
-      .then(result => {
-        setUnsubscribeResult(result?.message || "Mail unsubscribed successfully.");
-        onMailLoad();
-      })
-      .catch(err => {
-        setUnsubscribeError(`${err}`);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [unsubscribeMail, buildHeaders, onMailLoad]);
+      fetch(`${baseUrl}/mail/read/html/file`, requestOptions)
+        .then(async (response) => {
+          const res = await response.text();
+          if (response.status !== 200) {
+            throw res;
+          }
+          return JSON.parse(res);
+        })
+        .then((result) => {
+          setMailHTML(result?.htmlData)
+        })
+        .catch((err) => {
+          // console.log('result', err);
+        });
+    }
+  }, [mailURL]);
 
   return {
     mailList: data,
@@ -188,12 +189,9 @@ export const useMail = () => {
     redeemMessage,
     redeemSuccessMessage,
     mailHTML,
-    unsubscribeResult,
-    unsubscribeError,
     setMailPayload,
     setUpdateMailFav,
     setUpdateMailRedeem,
-    setMailURL,
-    setUnsubscribeMail,
+    setMailURL
   };
 };

@@ -8,6 +8,7 @@ const ProgressBar = ({progress = 0}) => {
 
   return (
     <View style={styles.wrapper}>
+      <View style={styles.track} />
       <View style={styles.highlight} />
       <Text style={styles.text}>{`${progress} Points`}</Text>
     </View>

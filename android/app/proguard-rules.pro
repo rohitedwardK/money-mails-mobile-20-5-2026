@@ -14,8 +14,8 @@
 -keep class com.facebook.react.** { *; }
 -dontwarn com.facebook.react.**
 
-# Keep your Application class
--keep class com.yourappname.** { *; }
+# Keep react-native-config environment fields available in release builds.
+-keep class com.moneymails.app.BuildConfig { *; }
 
 # Keep native methods
 -keepclasseswithmembernames class * {

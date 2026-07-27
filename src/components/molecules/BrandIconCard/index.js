@@ -10,6 +10,7 @@ import { SlideInUp, AnimatedLayout, runOnJS } from 'react-native-reanimated';
 import { Tooltip } from "react-native-elements";
 
 const BrandIconCard = ({
+  variant,
   rounded,
   src,
   size,
@@ -36,6 +37,7 @@ const BrandIconCard = ({
 
   const { themeColors: colors, iconFills } = getColors();
   const styles = brandIconCardStyles({
+    variant,
     rounded,
     size,
     color,
@@ -43,6 +45,12 @@ const BrandIconCard = ({
     isSelected: isActive,
     animate,
   });
+
+  const isStoreCard = variant === 'store';
+  const locationText = getLocationText(item);
+  const addressText = getAddressText(item);
+  const ratingText = getRatingText(item);
+  const statusText = getStatusText(item);
 
   // const singleTap = Gesture.Tap()
   //   .runOnJS(true)
@@ -100,6 +108,134 @@ const BrandIconCard = ({
     const favAddRes = await onFavouriteToggle(!isFav);
     setIsFav(prevState => !prevState);
   };
+
+  if (variant === 'storeChip') {
+    return (
+      <GestureDetector key={item?.uuid} gesture={Gesture.Exclusive(longPress, doubleTap, singleTap)}>
+        <View style={[styles.storeChipWrapper, wrapperStyles]}>
+          <View style={styles.storeChipImageWrap}>
+            {src ? (
+              <Image resizeMode="contain" style={styles.storeChipImage} source={{ uri: `${src}` }} />
+            ) : (
+              <EntypoIcon name="shop" size={24} color={colors.fontMuted} />
+            )}
+          </View>
+          <Text style={styles.storeChipName} numberOfLines={1} ellipsizeMode="tail">
+            {item?.company_name || item?.name || 'Store'}
+          </Text>
+        </View>
+      </GestureDetector>
+    );
+  }
+
+  if (variant === 'storeFeature') {
+    return (
+      <GestureDetector key={item?.uuid} gesture={Gesture.Exclusive(longPress, doubleTap, singleTap)}>
+        <View style={[styles.storeFeatureCard, wrapperStyles]}>
+          <View style={styles.storeFeatureImageWrap}>
+            {src ? (
+              <Image resizeMode="cover" style={styles.storeFeatureImage} source={{ uri: `${src}` }} />
+            ) : (
+              <View style={styles.storeFeatureFallback}>
+                <EntypoIcon name="shop" size={30} color={colors.fontMuted} />
+              </View>
+            )}
+            <View style={styles.storeFeatureBadge}>
+              <Text style={styles.storeFeatureBadgeText} numberOfLines={1}>
+                {item?.company_name || item?.name || 'Store'}
+              </Text>
+            </View>
+            <View style={styles.storeFeatureFooter}>
+              <EntypoIcon name="location-pin" size={12} color={colors.white} />
+              <Text style={styles.storeFeatureAddress} numberOfLines={1} ellipsizeMode="tail">
+                {locationText}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </GestureDetector>
+    );
+  }
+
+  if (isStoreCard) {
+    return (
+      <GestureDetector key={item?.uuid} gesture={Gesture.Exclusive(longPress, doubleTap, singleTap)}>
+        <View style={[styles.selectionWrapper, wrapperStyles]} key={item?.uuid}>
+          <View style={styles.cardWrapper}>
+            <View style={styles.storeImageFrame}>
+              {src ? (
+                <Image resizeMode="contain" style={styles.storeImage} source={{ uri: `${src}` }} />
+              ) : (
+                <View style={styles.storeImagePlaceholder}>
+                  <EntypoIcon name="shop" size={28} color={colors.fontMuted} />
+                </View>
+              )}
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={onFavClick}
+                style={styles.storeFavButton}>
+                <EntypoIcon
+                  name={isFav ? 'heart' : 'heart-outlined'}
+                  size={15}
+                  color={iconFills.red}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.storeInfo}>
+              <Text style={styles.storeName} numberOfLines={1} ellipsizeMode="tail">
+                {item?.company_name || item?.name || 'Store'}
+              </Text>
+              <View style={styles.storeMetaRow}>
+                <EntypoIcon name="location-pin" size={13} color={colors.fontMuted} />
+                <Text style={styles.storeMetaText} numberOfLines={1} ellipsizeMode="tail">
+                  {locationText}
+                </Text>
+              </View>
+              <View style={styles.storeFooterRow}>
+                <View style={styles.storeStatusPill}>
+                  <EntypoIcon
+                    name={ratingText ? 'star' : 'mail'}
+                    size={12}
+                    color={colors.highlightPrimary}
+                  />
+                  <Text style={styles.storeStatusText} numberOfLines={1}>
+                    {ratingText || statusText}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {showAddress && (
+              <Tooltip
+                height={72}
+                width={300}
+                withOverlay={false}
+                toggleOnPress={true}
+                popover={
+                  <View>
+                    <Text style={styles.storeTooltipText}>{addressText}</Text>
+                  </View>
+                }>
+                <View
+                  accessible
+                  accessibilityRole="button"
+                  style={styles.storeAddressButton}>
+                  <DirectionSvgIcon
+                    width={13}
+                    height={13}
+                    fill={colors.highlightPrimary}
+                    style={styles.actionBtnIcon}
+                  />
+                  <Text style={styles.storeAddressButtonText}>View Address</Text>
+                </View>
+              </Tooltip>
+            )}
+          </View>
+        </View>
+      </GestureDetector>
+    );
+  }
 
   return (
     <GestureDetector key={item?.uuid} gesture={Gesture.Exclusive(longPress, doubleTap, singleTap)}>
@@ -222,11 +358,54 @@ const BrandIconCard = ({
 };
 
 BrandIconCard.defaultProps = {
+  variant: 'default',
   onPress: () => void 0,
   onFavouriteToggle: false,
   onActionPress: false,
   enableLongPressAction: false,
   showActionByDefault: false,
+};
+
+const getFirstName = list => (Array.isArray(list) && list[0]?.name ? list[0].name : '');
+
+const getLocationText = item => {
+  const distance = item?.distance || item?.distance_text || item?.distanceText;
+  const city = getFirstName(item?.cities);
+  const county = getFirstName(item?.counties);
+  const state = getFirstName(item?.states);
+  const place = [city, county || state].filter(Boolean).join(', ');
+
+  if (distance && place) {
+    return `${distance} • ${place}`;
+  }
+
+  return distance || place || 'Nearby';
+};
+
+const getAddressText = item => {
+  const addressParts = [
+    item?.address1,
+    getFirstName(item?.cities),
+    getFirstName(item?.counties),
+    getFirstName(item?.states),
+    getFirstName(item?.countries),
+  ].filter(Boolean);
+
+  return addressParts.length ? addressParts.join(', ') : 'Address unavailable';
+};
+
+const getRatingText = item => {
+  const rating = item?.rating || item?.avg_rating || item?.average_rating;
+  return rating ? `${rating} rating` : '';
+};
+
+const getStatusText = item => {
+  if (item?.is_highlight === 'true' || item?.is_highlight === true) {
+    return 'Featured';
+  }
+
+  const mailCount = Number(item?.mails_count || 0);
+  return `${mailCount} ${mailCount === 1 ? 'mail' : 'mails'}`;
 };
 
 export default BrandIconCard;

@@ -3,15 +3,15 @@ import getColors from '../../../utils/colors';
 
 const sizeMapping = {
   small: {
-    height: 15,
-    font: 13,
+    height: 32,
+    font: 12,
   },
   medium: {
-    height: 27,
-    font: 13,
+    height: 42,
+    font: 14,
   },
   large: {
-    height: 57,
+    height: 54,
     font: 16,
   },
 };
@@ -19,9 +19,9 @@ const sizeMapping = {
 export const buttonStyles = ({justifyIconSpace, fontStrong, size}) => {
   const {buttonColors: colors, themeColors} = getColors();
   const textStyles = {
-    fontWeight: fontStrong ? '700' : 'normal',
+    fontWeight: fontStrong ? '700' : '600',
     fontSize: sizeMapping[size]?.font,
-    fontFamily: themeColors.fontFamily,
+    letterSpacing: 0,
   };
 
   return StyleSheet.create({
@@ -32,15 +32,19 @@ export const buttonStyles = ({justifyIconSpace, fontStrong, size}) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: justifyIconSpace || 'center',
-      paddingHorizontal: 12,
-      borderRadius: 8,
+      paddingHorizontal: 16,
+      borderRadius: 14,
       backgroundColor: 'transparent',
     },
     primary: {
       backgroundColor: colors.btnPrimary,
+      shadowOpacity: 0,
+      elevation: 0,
     },
     secondary: {
       backgroundColor: colors.btnSecondary,
+      borderWidth: 1,
+      borderColor: themeColors.borderSubtle,
     },
     textPrimary: {
       color: colors.btnFontPrimary,

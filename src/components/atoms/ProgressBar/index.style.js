@@ -8,8 +8,7 @@ export const progressBarStyles = ({progressBar}) => {
     wrapper: {
       marginHorizontal: 5,
       width: '98%',
-      backgroundColor: ProgressBarColors?.progressBG,
-      height: 8,
+      height: 28,
       borderRadius: 30,
       position: 'relative',
     },
@@ -22,12 +21,23 @@ export const progressBarStyles = ({progressBar}) => {
       top: 0,
       left: 0,
     },
+    track: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 8,
+      borderRadius: 30,
+      backgroundColor: ProgressBarColors?.progressBG,
+    },
     text: {
       position: 'absolute',
-      top: 9,
-      left: `${progressBar > 100 ? 90 - 6 : progressBar - 6}%`,
+      top: 12,
+      left: 0,
       color: ProgressBarColors?.progressHighlight,
-      fontSize: 12,
+      fontSize: 11,
+      lineHeight: 14,
+      fontWeight: '700',
     },
   });
 };

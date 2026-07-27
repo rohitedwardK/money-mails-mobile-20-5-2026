@@ -1,6 +1,10 @@
 export const BRANDS_DEFAULT_COMPACT_SIZE = 11;
 export const OFFER_REDEEMED = 'OFFER_REDEEMED';
 export const NEW_OFFER = 'NEW_OFFER';
+export const PRIVACY_POLICY_URL =
+    'https://app.termly.io/policy-viewer/policy.html?policyUUID=7089623c-d46c-4c3f-8c53-cf21a21be25c';
+export const TERMS_CONDITIONS_URL =
+    'https://app.termly.io/policy-viewer/policy.html?policyUUID=1153fdbd-a0a0-4473-b12f-cf0057c434ca';
 export const IDENTITYTYPE = [
     {title: 'Driving Licence', id: 'driving_licence'},
     {title: 'Voter ID', id: 'voter_id'}

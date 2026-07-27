@@ -16,9 +16,7 @@ export const useBrandPage = () => {
   const { userDetails } = useContext(UserContext);
 
   useEffect(() => {
-  console.log(payload, "payload")
-    
-    if (payload) {
+    if (payload && userDetails?.token) {
       setIsLoading(true);
       const headers = new Headers();
       headers.append("Content-Type", "application/json");
@@ -38,9 +36,10 @@ export const useBrandPage = () => {
           return JSON.parse(res);
         })
         .then((result) => {
-  console.log(result, "payload")
-
-          setData([...data,...result.data])
+          const isFirstPage = /(?:^|&)pagenum=0(?:&|$)/.test(payload);
+          setData(current =>
+            isFirstPage ? [...result.data] : [...current, ...result.data],
+          )
             setIsLoading(false);
             setError(false);
         })
@@ -55,7 +54,7 @@ export const useBrandPage = () => {
           setIsLoading(false);
         });
     }
-  }, [payload]);
+  }, [payload, userDetails?.token]);
 
 
   return {

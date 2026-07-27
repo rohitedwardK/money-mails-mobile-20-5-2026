@@ -143,12 +143,18 @@
 // };
 
 // export default TabView;
-import React, { useContext, useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { FlatList, Text, View, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { DeviceContext } from '../../../context/DeviceContext';
+import {
+  FlatList,
+  Text,
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from 'react-native';
 import getColors from '../../../utils/colors';
- 
+
 const TabView = ({
   tabs,
   actTab,
@@ -159,26 +165,40 @@ const TabView = ({
   onTabChange,
   renderActiveTabContent,
 }) => {
-  const { tabBarColors } = getColors();
-  const { screenWidth } = useContext(DeviceContext);
- 
+  const { themeColors: colors, tabBarColors } = getColors();
+
   // State to track the active tab index
   const [activeTabIndex, setActiveTabIndex] = useState(() => {
     const initialIndex = subCheck
       ? tabs.findIndex(item => item?.uuid === actTab)
-      : tabs.findIndex(item => item?.mails_count > 0);
+      : tabs.findIndex(item => item?.isProfileTab) >= 0
+        ? tabs.findIndex(item => item?.isProfileTab)
+        : tabs.findIndex(item => item?.mails_count > 0);
     return initialIndex >= 0 ? initialIndex : 0;
   });
- 
-  // Update active tab when actTab or tabs change
+
+  // Keep the visible tab stable across data refreshes.
   useEffect(() => {
-    const newIndex = subCheck
-      ? tabs.findIndex(item => item?.uuid === actTab)
-      : tabs.findIndex(item => item?.mails_count > 0);
-    const validIndex = newIndex >= 0 ? newIndex : 0;
-    setActiveTabIndex(validIndex);
+    setActiveTabIndex(previousIndex => {
+      const activeTabIndexByUuid = tabs.findIndex(item => item?.uuid === actTab);
+      if (activeTabIndexByUuid >= 0) {
+        return activeTabIndexByUuid;
+      }
+
+      if (tabs[previousIndex]) {
+        return previousIndex;
+      }
+
+      const profileTabIndex = tabs.findIndex(item => item?.isProfileTab);
+      if (!subCheck && profileTabIndex >= 0) {
+        return profileTabIndex;
+      }
+
+      const tabWithMailIndex = tabs.findIndex(item => item?.mails_count > 0);
+      return tabWithMailIndex >= 0 ? tabWithMailIndex : 0;
+    });
   }, [actTab, tabs, subCheck]);
- 
+
   // Handle tab button press
   const handleTabPress = (index) => {
     if (index !== activeTabIndex) {
@@ -186,17 +206,17 @@ const TabView = ({
       onTabChange(index);
     }
   };
- 
+
   // Prepare FlatList data: only show content for the active tab
   const flatListData = useMemo(() => {
     const activeTab = tabs[activeTabIndex];
-    if (!activeTab) return [];
+    if (!activeTab) {return [];}
     return [
-      { type: 'header', id: activeTab.uuid, title: `${activeTab.name} (${activeTab.mails_count})` },
+      { type: 'header', id: activeTab.uuid, title: activeTab.name },
       { type: 'content', id: `content-${activeTab.uuid}`, data: activeTab },
     ];
   }, [activeTabIndex, tabs]);
- 
+
   // Render FlatList items
   const renderItem = ({ item }) => {
     if (item.type === 'header') {
@@ -210,35 +230,48 @@ const TabView = ({
       </View>
     );
   };
- 
+
   // Render tab buttons
   const renderTabButtons = () => (
-   <ScrollView horizontal={true}>
-     <View style={[styles.tabBar, ]}>
+   <View style={[
+     styles.tabStrip,
+     {
+       backgroundColor: colors.homeBand || colors.surfacePrimary,
+       borderColor: colors.borderSubtle,
+     },
+     tabHeaderWrapperStyles,
+   ]}>
+     <ScrollView
+       horizontal
+       showsHorizontalScrollIndicator={false}
+       contentContainerStyle={styles.tabScrollContent}>
+     <View style={styles.tabBar}>
       {tabs.map((tab, index) => (
         <TouchableOpacity
           key={tab.uuid}
+          activeOpacity={0.82}
           style={[
             styles.tabButton,
-            activeTabIndex === index ? styles.activeTabButton : null,
-            // { backgroundColor: activeTabIndex === index ? tabBarColors.indicatorColor : tabBarColors.inactiveColor },
+            activeTabIndex === index
+              ? [styles.activeTabButton, {borderBottomColor: tabBarColors.activeColor}]
+              : null,
           ]}
           onPress={() => handleTabPress(index)}
           {...tabHeaderProps}
         >
           <Text style={[
             styles.tabButtonText,
-            // { color: activeTabIndex === index ? '#fff' : tabBarColors.textPrimary },
-            { color: activeTabIndex === index ? tabBarColors.indicatorColor : tabBarColors.inactiveColor }
+            { color: activeTabIndex === index ? tabBarColors.activeColor : tabBarColors.inactiveColor },
           ]}>
-            {`${tab.name} (${tab.mails_count})`}
+            {tab.name}
           </Text>
         </TouchableOpacity>
       ))}
     </View>
    </ScrollView>
+   </View>
   );
- 
+
   return (
     <View style={styles.container}>
       {renderTabButtons()}
@@ -246,8 +279,8 @@ const TabView = ({
         data={flatListData}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={[styles.flatListContent, tabContentBaseStyles]}
-        scrollEnabled={true} // Rely on parent ScrollView for scrolling
+        contentContainerStyle={styles.flatListContent}
+        scrollEnabled={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No content available</Text>
@@ -257,33 +290,40 @@ const TabView = ({
     </View>
   );
 };
- 
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: '100%',
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  tabStrip: {
+    borderTopWidth: 0,
+    borderBottomWidth: 1,
+  },
+  tabScrollContent: {
+    paddingHorizontal: 10,
   },
   tabButton: {
- 
-    margin: 5,
- 
+    minHeight: 40,
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+    marginRight: 8,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
   },
   activeTabButton: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
   },
   tabButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '700',
   },
   flatListContent: {
     // paddingHorizontal: 15,
-    paddingBottom: 20,
+    paddingBottom: 0,
   },
   header: {
     paddingVertical: 10,
@@ -298,7 +338,9 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   contentContainer: {
-    marginTop: 10,
+    width: '100%',
+    marginTop: 0,
+    paddingTop: 10,
   },
   emptyContainer: {
     flex: 1,
@@ -311,7 +353,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
 });
- 
+
 TabView.propTypes = {
   tabs: PropTypes.arrayOf(PropTypes.shape({
     uuid: PropTypes.string,
@@ -326,7 +368,7 @@ TabView.propTypes = {
   onTabChange: PropTypes.func,
   renderActiveTabContent: PropTypes.func.isRequired,
 };
- 
+
 TabView.defaultProps = {
   tabs: [],
   actTab: '',
@@ -337,5 +379,5 @@ TabView.defaultProps = {
   onTabChange: () => {},
   renderActiveTabContent: () => null,
 };
- 
+
 export default TabView;

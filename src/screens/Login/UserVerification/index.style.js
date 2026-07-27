@@ -104,14 +104,8 @@ export const styles = ({ screenHeight, isIos }) => {
       borderRadius: 20,
       padding: 5,
       alignItems: 'center',
-      shadowColor: '#000',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 10,
+      shadowOpacity: 0,
+      elevation: 0,
     },
     modalContents:{
       borord: 1,

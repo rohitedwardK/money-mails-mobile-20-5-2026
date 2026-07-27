@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext, useEffect } from 'react';
+import React, { useState, useRef, useContext, useEffect, useCallback } from 'react';
 import { View, StyleSheet, Image, Pressable, Animated, Dimensions, Text } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { UserContext } from '../../../context/UserContext';
@@ -46,7 +46,7 @@ export default function StoriesScreen() {
 
   const { userDetails } = useContext(UserContext);
 
-  const getListStories = () => {
+  const getListStories = useCallback(() => {
 
     axios.get(`${baseUrl}/popup/list?user_uuid=${userDetails?.uuid}`, {
       headers: {
@@ -71,10 +71,10 @@ export default function StoriesScreen() {
       .catch((err) => {
         console.log(err, "errr")
       })
-  }
+  }, [userDetails?.token, userDetails?.uuid]);
   useEffect(() => {
     getListStories();
-  }, [userDetails])
+  }, [getListStories])
  
   const startStoryAnimation = (index) => {
     if (index >= stories?.length || index < 0) {
@@ -235,11 +235,8 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     overflow: 'hidden',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    elevation: 0,
+    shadowOpacity: 0,
   },
   gradientButton: {
     flex: 1,

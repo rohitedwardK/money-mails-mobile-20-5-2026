@@ -1,24 +1,21 @@
-import React, { useState, useContext, useEffect, useRef } from 'react';
+import React, { useState, useContext, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
-  Image,
   Modal,
+  Alert,
+  Platform,
   FlatList,
   Pressable,
-  TouchableHighlight,
   StyleSheet,
   BackHandler,
 } from 'react-native';
 import Button from '../../../components/atoms/Button';
 import Avatar from '../../../components/atoms/Avatar';
 import { rewardsScreenStyles } from './index.style';
-import Grid from '../../../components/atoms/Grid';
-import BrandIconCard from '../../../components/molecules/BrandIconCard';
 import OfferCard from '../../../components/organisms/OfferCard';
-import SubCatCard from '../../../components/molecules/SubCatCard';
+import TabView from '../../../components/organisms/TabView';
 import getColors from '../../../utils/colors';
 import ProgressBar from '../../../components/atoms/ProgressBar';
 import { UserContext } from '../../../context/UserContext';
@@ -26,36 +23,29 @@ import { useCategory } from '../../../hooks/services/useCategory';
 import { useReward } from '../../../hooks/services/useReward';
 import { usePointRedeem } from '../../../hooks/services/usePointRedeem';
 import { useFavourites } from '../../../hooks/services/useFavourites';
-import ListItem from './ListItem';
 import { useNavigation } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import { baseUrl } from '../../../connections';
 
 const Rewards = () => {
   const [pageNum, setPageNum] = useState(0);
-  const [PageSize, setPageSize] = useState(10);
-  const [filterValue, setFilterValue] = useState('');
+  const pageSize = 10;
+  const filterValue = '';
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const styles = rewardsScreenStyles();
   const { userDetails } = useContext(UserContext);
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const {
     categoryList = [],
-    point,
-    isCatLoading,
-    catError,
     catDetails,
     setCatPayload,
-    setCatDetails,
     SetPege,
     setCatDetailsPayload,
   } = useCategory();
   const { setUpdateMailFav } = useFavourites();
   const { rewards, setPayload } = useReward();
   const [selCategory, setSelectCategory] = useState('');
-  const [category, setCategory] = useState('');
-  const ref = React.createRef();
+  const [category, setCategory] = useState(null);
   const { setRedeemPayload, data, setRedeemPayloads, datas } = usePointRedeem();
   const [modalVisible, setModalVisible] = useState(false);
   const [pointRedeemData, setPointRedeemData] = useState({ point: 0, available: 0 })
@@ -77,11 +67,7 @@ const Rewards = () => {
     };
   }, [navigation]);
 
-  const {
-    themeColors,
-    rewardsScreenColors,
-    offerCardColors: colors,
-  } = getColors();
+  const {themeColors} = getColors();
 
   useEffect(() => {
     setCatPayload('search=');
@@ -89,9 +75,27 @@ const Rewards = () => {
 
   useEffect(() => {
     setPayload(`${userDetails?.uuid}`);
-  }, [userDetails?.uuid]);
+  }, [setPayload, userDetails?.uuid]);
 
-  const rewardsData = () => {
+  const onCategoryHandle = useCallback((item) => {
+    if (!item?.uuid || !userDetails?.uuid) return;
+
+    SetPege(0);
+    setPageNum(0);
+    setCategory(item);
+    setSelectCategory(item.name);
+    setCatDetailsPayload(
+      `user_uuid=${userDetails?.uuid}&category_uuid=${item?.uuid}&page=0&limit=${pageSize}`,
+    );
+  }, [SetPege, pageSize, setCatDetailsPayload, userDetails?.uuid]);
+
+  useEffect(() => {
+    if (!categoryList?.length || category?.uuid || !userDetails?.uuid) return;
+    onCategoryHandle(categoryList[0]);
+  }, [category?.uuid, categoryList, onCategoryHandle, userDetails?.uuid]);
+
+  const rewardsData = useCallback(() => {
+    if (!userDetails?.uuid) return;
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
     headers.append("x-auth-token", userDetails?.token);
@@ -115,13 +119,13 @@ const Rewards = () => {
       .catch((err) => {
         console.log(err)
       });
-  }
+  }, [userDetails?.token, userDetails?.uuid]);
 
   useEffect(() => {
     if (isFocused) {
       rewardsData();
     }
-  }, [isFocused, pageNum]);
+  }, [isFocused, pageNum, rewardsData]);
 
   const onFavouriteMailToggle = mail_uuid => {
     setUpdateMailFav({
@@ -133,20 +137,24 @@ const Rewards = () => {
     }, 1000);
   };
 
-  const onCategoryHandle = (item, i) => {
-    SetPege(0);
-    setPageNum(0);
-    if (i) setSelectedIndex(i);
+  const rewardTabs = useMemo(
+    () => categoryList?.map(item => ({
+      ...item,
+      mails_count: item?.mails_count || 0,
+    })) || [],
+    [categoryList],
+  );
 
-    setCategory(item);
-    setSelectCategory(item.name);
-    setCatDetailsPayload(
-      `user_uuid=${userDetails?.uuid}&category_uuid=${item?.uuid}&page=${pageNum}&limit=${PageSize}`,
-    );
-    setTimeout(() => {
-      ref.current?.scrollIntoView({ block: 'end', behavior: 'smooth' });
-    }, 100);
-  };
+  const filteredRewards = useMemo(() => {
+    if (!catDetails) return [];
+    if (!filterValue) return catDetails;
+
+    return catDetails.filter(item => {
+      return item?.brand?.some(val =>
+        val.company_name.toLowerCase().startsWith(filterValue?.toLowerCase()),
+      );
+    });
+  }, [catDetails, filterValue]);
 
 
   const redeemCheck = () => {
@@ -233,144 +241,64 @@ const Rewards = () => {
           </View>
         </View>
       </Modal>
-      <View styles={styles.header}>
-        <Grid gap={10}>
+      <View style={styles.header}>
+        <View style={styles.headerSummary}>
           <Avatar
+            size={64}
+            rounded
             src={userDetails?.src}
             userDetails={userDetails}
             fit="cover"
           />
           <View style={styles.headerTextWrapper}>
-            <Text style={styles.headerTextSecondary}>Minimum Redeem</Text>
+            <Text style={styles.headerTextSecondary} numberOfLines={1}>
+              Minimum Redeem
+            </Text>
             <Text style={styles.headerTextPrimary}>
-              {userDetails?.rewards?.max_point} Points
+              {userDetails?.rewards?.max_point || 0}
             </Text>
             <Text style={styles.headerTextSecondary}>Points</Text>
           </View>
-          <View style={{ flexDirection: 'column' }}>
-            <View style={{ marginBottom: 5 }}>
-              <Button variant="primary" btnText="Redeem Now"
-                btnTextOverrideStyles={{ fontSize: 12 }}
-                overridingStyles={styles.redeedBtn} onPress={redeemCheck} />
-            </View>
+          <View style={styles.headerActions}>
             <Button
-              btnTextOverrideStyles={{ fontSize: 12 }}
-              variant="primary" btnText="Redeem History" overridingStyles={styles.redeedBtn} onPress={() => navigation.navigate('PointRedeemHistory')} />
+              variant="primary"
+              btnText="Redeem Now"
+              btnTextOverrideStyles={styles.redeemBtnText}
+              overridingStyles={styles.redeedBtn}
+              onPress={redeemCheck}
+            />
+            <Button
+              btnTextOverrideStyles={styles.redeemBtnText}
+              variant="primary"
+              btnText="History"
+              overridingStyles={styles.redeedBtn}
+              onPress={() => navigation.navigate('PointRedeemHistory')}
+            />
           </View>
-        </Grid>
+        </View>
         <View style={styles.statusContainer}>
           <Text style={styles.statusTitle}>My Status</Text>
 
           {rewards !== null && (
-            <View style={{ width: '90%', marginHorizontal: 5 }}>
+            <View style={styles.progressTrack}>
               <ProgressBar progress={userPoints} />
             </View>
           )}
         </View>
-        {/* {categoryList?.length > 0 && (
-          <Grid
-            gap={10}
-            dir="column"
-            containerStyles={styles.rewardsItemsWrapper}>
-            {categoryList?.map((item, i) => {
-              const isSelected = true;
-              return (
-                <TouchableOpacity
-                  onPress={() => onCategoryHandle(item, i)}
-                  style={[
-                    styles.rewardItemContainer,
-                    isSelected ? styles.rewardItemContainerSelected : {},
-                  ]}
-                  key={i}>
-                  <SubCatCard
-                    color={
-                      isSelected
-                        ? rewardsScreenColors.rewardIconSelectedBg
-                        : themeColors.bgPrimary
-                    }
-                    disableSelect
-                    rounded
-                    wrapperStyles={styles.rewardCategoryIcon}
-                    size={78}>
-                    <Image
-                      key={i}
-                      source={{uri: `${item?.image}`}}
-                      style={{width: 50, height: 50}}
-                      resizeMode={'cover'}
-                    />
-                  </SubCatCard>
-                  <View>
-                    <Text style={styles.rewardItemTitle}>{item?.name}</Text>
-                     <Text style={styles.rewardItemSubTitle}>
-                      You have 0 Points!
-                    </Text>
-                    <Text style={styles.rewardItemInfoText}>
-                      1,000 Points = $1 USD
-                    </Text> 
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </Grid>
-        )} */}
-
-
-        <ScrollView horizontal>
-          <View style={{ flexDirection: 'row', backgroundColor: '#BCE5D7', width: '200%', }}>
-            {categoryList?.map((item, i) => {
-              const isSelected = true;
-              return (
-                <TouchableOpacity
-                  onPress={() => onCategoryHandle(item, i)}
-                  style={[
-                    styles.rewardItemContainer,
-                    isSelected ? styles.rewardItemContainerSelected : {},
-                  ]}
-                  key={i}>
-                  {/* <SubCatCard
-                    color={
-                      isSelected
-                        ? rewardsScreenColors.rewardIconSelectedBg
-                        : themeColors.bgPrimary
-                    }
-                    disableSelect
-                    rounded
-                    wrapperStyles={styles.rewardCategoryIcon}
-                    size={78}>
-                    <Image
-                      key={i}
-                      source={{uri: `${item?.image}`}}
-                      style={{width: 50, height: 50}}
-                      resizeMode={'cover'}
-                    />
-                  </SubCatCard> */}
-
-                  {selCategory == item.name && <View style={{ flexDirection: 'column', padding: 10, backgroundColor: '#16A2A0', borderRadius: 15 }}>
-                    <View>
-                      <Text style={[styles.rewardItemTitle, { color: 'white' }]}>{item?.name}</Text>
-                    </View>
-                  </View>}
-                  {selCategory != item.name && <View style={{ flexDirection: 'column', padding: 10 }}>
-                    <View>
-                      <Text style={styles.rewardItemTitle}>{item?.name}</Text>
-                    </View>
-                  </View>}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </ScrollView>
-
-        <ListItem ref={ref}>
-          {catDetails?.length > 0 && (
-            <View style={styles.catTitle}>
-              <Text>{selCategory} </Text>
-            </View>
-          )}
-          <View style={styles.categoryView}>
-
-
-            {catDetails && <FlatList
+      </View>
+        {rewardTabs.length > 0 && (
+          <View style={styles.rewardsTabsWrapper}>
+            <TabView
+              tabs={rewardTabs}
+              actTab={category?.uuid || rewardTabs[0]?.uuid}
+              subCheck
+              onTabChange={index => onCategoryHandle(rewardTabs[index], index)}
+              tabHeaderWrapperStyles={styles.rewardsTabHeader}
+              tabContentBaseStyles={styles.tabContentBase}
+              renderActiveTabContent={() => (
+              <View style={styles.rewardTabContent}>
+                {filteredRewards?.length > 0 ? (
+                  <FlatList
               ItemSeparatorComponent={
                 Platform.OS !== 'android' &&
                 (({ highlighted }) => (
@@ -379,44 +307,46 @@ const Rewards = () => {
                   />
                 ))
               }
-              columnWrapperStyle={{ flex: 1, justifyContent: 'space-around', alignItems: 'center' }}
-              numColumns={2}
+              numColumns={1}
               horizontal={false}
               onEndReached={() => {
                 setPageNum((prevPage) => prevPage + 1);
               }}
               onEndReachedThreshold={0.1}
               scrollEnabled={false}
-              onScrollEndDrag={() => console.log("end")}
-              data={filterValue ? catDetails.filter((item) => {
-                return item?.brand.some((val) => val.company_name.toLowerCase().startsWith(filterValue?.toLowerCase()));
-              }) : catDetails}
+              data={filteredRewards}
               renderItem={({ item, index }) => {
-                item.subject = item.mails[0].subject;
-                item.type = item.mails[0].type;
-                let j = index % 4;
+                const cardItem = {
+                  ...item,
+                  subject: item?.mails?.[0]?.subject || item?.subject || 'Reward',
+                  type: item?.mails?.[0]?.type || item?.type,
+                };
                 return (
-                  <TouchableHighlight
-                    key={index}>
                     <OfferCard
+                      variant="reward"
                       containerStyles={{
-                        margin: 5,
-                        marginBottom: index + 1 < catDetails?.length ? 10 : 0,
-                        backgroundColor: colors[j],
+                        marginBottom: index + 1 < filteredRewards?.length ? 14 : 0,
                       }}
                       isRedeemed={true}
                       isFavourite={item?.is_favourite === 'true' ? true : false}
                       onFavouriteToggle={e => onFavouriteMailToggle(item?.uuid)}
                       key={index}
-                      item={item}
+                      item={cardItem}
                     />
-                  </TouchableHighlight>
                 )
               }}
-            />}
+                  />
+                ) : (
+                  <View style={styles.emptyRewardState}>
+                    <Text style={styles.emptyRewardTitle}>No Rewards Found</Text>
+                    <Text style={styles.emptyRewardText}>Try another category or check back for fresh rewards.</Text>
+                  </View>
+                )}
+              </View>
+              )}
+            />
           </View>
-        </ListItem>
-      </View>
+        )}
     </ScrollView>
   );
 };
@@ -434,19 +364,13 @@ const styless = StyleSheet.create({
     borderRadius: 20,
     padding: 35,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   button: {
     borderRadius: 20,
     padding: 10,
-    elevation: 2,
+    elevation: 0,
     width: 100,
   },
   btnOk: {

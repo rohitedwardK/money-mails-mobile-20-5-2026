@@ -1,5 +1,5 @@
 import React, {useContext, useState, useEffect} from 'react';
-import {View, Text, TextInput, Image, ActivityIndicator, FlatList, TouchableHighlight, TouchableOpacity} from 'react-native';
+import {View, Text, TextInput, Image, ActivityIndicator, FlatList, TouchableHighlight, TouchableOpacity, Platform} from 'react-native';
 import OfferCard from '../../../components/organisms/OfferCard';
 import { WebView } from 'react-native-webview';
 import {categoryPageStyles} from './index.style';
@@ -18,6 +18,66 @@ import RedeemModalContent from '../Home/RedeemModalContent';
 import { styles as homeScreenStyles } from '../Home/index.style';
 import { useIsFocused } from '@react-navigation/native';
 import Toast from 'react-native-simple-toast';
+
+const hasHtmlTags = value => /<\/?[a-z][\s\S]*>/i.test(String(value || ''));
+
+const buildHtmlDocument = (html, textColor = '#111827') => `
+  <!doctype html>
+  <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+      <style>
+        body {
+          margin: 0;
+          padding: 0;
+          color: ${textColor};
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          font-size: 16px;
+          line-height: 1.45;
+          overflow-wrap: anywhere;
+        }
+        img, video, iframe {
+          max-width: 100%;
+          height: auto;
+        }
+        table {
+          max-width: 100%;
+        }
+      </style>
+    </head>
+    <body>${html || ''}</body>
+  </html>
+`;
+
+const getAddressFilters = userDetails => {
+  const address = userDetails?.address || {};
+
+  return {
+    country: address.country || userDetails?.country_uuid || userDetails?.country || '',
+    state: address.state || userDetails?.state_uuid || userDetails?.state || '',
+    county: address.county || userDetails?.county_uuid || userDetails?.county || '',
+    city: address.city || userDetails?.city_uuid || userDetails?.city || '',
+  };
+};
+
+const buildMailPagePayload = ({
+  pageNum,
+  PageSize,
+  userDetails,
+  catuid,
+  branduid,
+  subCatuid,
+  key,
+}) => {
+  const filters = getAddressFilters(userDetails);
+  const keyParam = key ? `key=${key}&` : '';
+
+  if (!userDetails?.uuid || !filters.country || !filters.city || !catuid) {
+    return '';
+  }
+
+  return `${keyParam}pagenum=${pageNum}&limit=${PageSize}&country_uuid=${filters.country}&state_uuid=${filters.state}&city_uuid=${filters.city}&category_uuid=${catuid}&brand_uuid=${branduid}&sub_category_uuid=${subCatuid}&user_uuid=${userDetails?.uuid}&county_uuid=${filters.county}`;
+};
 
 const Mails = () => {
   const [pageNum, setPageNum] = useState(1);
@@ -46,9 +106,10 @@ const Mails = () => {
   const isFocused = useIsFocused();
 
   useEffect(()=>{
-    setSubCatPayload(`search=`);
-    
-  },[])
+    if (userDetails?.uuid) {
+      setSubCatPayload(`search=&user_uuid=${userDetails.uuid}`);
+    }
+  },[setSubCatPayload, userDetails?.uuid])
 
   useEffect(()=>{
     
@@ -57,18 +118,42 @@ const Mails = () => {
         setCatuid(route.params.category_uuid)
         setBranduid(route.params.brand_uuid)
         setSubCatuid(route.params.sub_cat_uuid)
-        if(userDetails?.address && subCategoryList)setMailPagePayload(`pagenum=${pageNum}&limit=${PageSize}&country_uuid=${userDetails?.address?.country}&state_uuid=${userDetails?.address?.state}&city_uuid=${userDetails?.address?.city}&category_uuid=${route.params.category_uuid}&brand_uuid=${route.params.brand_uuid}&sub_category_uuid=${route.params.sub_cat_uuid}&user_uuid=${userDetails?.uuid}&county_uuid=${userDetails?.address?.county}`);
+        const nextPayload = buildMailPagePayload({
+          pageNum,
+          PageSize,
+          userDetails,
+          catuid: route.params.category_uuid,
+          branduid: route.params.brand_uuid,
+          subCatuid: route.params.sub_cat_uuid,
+        });
+        if(nextPayload)setMailPagePayload(nextPayload);
 
       }
   },[route.params,isFocused])
 
   useEffect(()=>{
     setPage(pageNum)
-    if(userDetails?.address)setMailPagePayload(`pagenum=${pageNum}&limit=${PageSize}&country_uuid=${userDetails?.address?.country}&state_uuid=${userDetails?.address?.state}&city_uuid=${userDetails?.address?.city}&category_uuid=${catuid}&brand_uuid=${branduid}&sub_category_uuid=${subCatuid}&user_uuid=${userDetails?.uuid}&county_uuid=${userDetails?.address?.county}`);
+    const nextPayload = buildMailPagePayload({
+      pageNum,
+      PageSize,
+      userDetails,
+      catuid,
+      branduid,
+      subCatuid,
+    });
+    if(nextPayload)setMailPagePayload(nextPayload);
   },[userDetails, subCategoryList,branduid,isFocused,pageNum])
 
   const loadMoreData = () => {
-    if(userDetails?.address)setMailPagePayload(`pagenum=${pageNum}&limit=${PageSize}&country_uuid=${userDetails?.address?.country}&state_uuid=${userDetails?.address?.state}&city_uuid=${userDetails?.address?.city}&category_uuid=${catuid}&brand_uuid=${branduid}&sub_category_uuid=${subCatuid}&user_uuid=${userDetails?.uuid}&county_uuid=${userDetails?.address?.county}`);
+    const nextPayload = buildMailPagePayload({
+      pageNum,
+      PageSize,
+      userDetails,
+      catuid,
+      branduid,
+      subCatuid,
+    });
+    if(nextPayload)setMailPagePayload(nextPayload);
   }
 
   const onFavouriteMailToggle = (mail_uuid) => {
@@ -77,6 +162,60 @@ const Mails = () => {
       mail_uuid : mail_uuid
       });
   }
+
+  const renderHtmlBlock = (html, {textColor = '#111827', minHeight = 40} = {}) => (
+    <WebView
+      originWhitelist={['*']}
+      source={{html: buildHtmlDocument(html, textColor)}}
+      style={{
+        width: screenWidth - 24,
+        minHeight,
+        backgroundColor: 'transparent',
+      }}
+      containerStyle={{
+        backgroundColor: 'transparent',
+      }}
+      scrollEnabled={false}
+      showsVerticalScrollIndicator={false}
+    />
+  );
+
+  const renderMailMessage = textColor => {
+    const message = offerCard?.message || '';
+    if (!message) return null;
+
+    return (
+      <View style={{alignItems: 'center', width: '100%', padding: 5}}>
+        {hasHtmlTags(message) ? (
+          renderHtmlBlock(message, {textColor, minHeight: 56})
+        ) : (
+          <Text style={{color: textColor, fontSize: 18, textAlign: 'center'}}>
+            {message}
+          </Text>
+        )}
+      </View>
+    );
+  };
+
+  const renderMailHtml = () => {
+    if (offerCard?.mime_type !== 'text/html' || !offerCard?.image_url) return null;
+
+    return (
+      <View style={{flex: 1, width: '100%'}}>
+        <WebView
+          originWhitelist={['*']}
+          source={{html: buildHtmlDocument(mailHTML)}}
+          style={{
+            flex: 1,
+            minWidth: screenWidth - 10,
+            minHeight: 360,
+            backgroundColor: '#fff',
+          }}
+          showsVerticalScrollIndicator
+        />
+      </View>
+    );
+  };
 
   useEffect(()=>{
     if(seconds==0){
@@ -150,22 +289,8 @@ const Mails = () => {
           </View>
       }
       </View>
-      <View style={{alignItems:'center'}}>
-        <Text style={{ color: '#fff', fontSize: 18, padding: 5 }}>{offerCard?.message}</Text>
-      </View>
-        {(offerCard?.mime_type === 'text/html' && offerCard?.image_url) && <View style={{ flex: 1 }}><WebView
-          source={{
-            html : mailHTML
-            // uri: `${offerCard?.image_url}`,
-          }}
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            minWidth: screenWidth - 10,
-            minHeight: '40%'
-          }}
-        /></View>}
+      {renderMailMessage('#fff')}
+        {renderMailHtml()}
         {(offerCard?.mime_type === 'image/png' || offerCard?.mime_type === 'image/jpeg') && <View style={{alignItems:'center'}}>
         <Image
           resizeMode="contain"
@@ -185,7 +310,16 @@ const Mails = () => {
     stop();
     setPage(1)
     let key = Math.random();
-    if(userDetails?.address)setMailPagePayload(`key=${key}&pagenum=1&limit=${PageSize}&country_uuid=${userDetails?.address?.country}&state_uuid=${userDetails?.address?.state}&city_uuid=${userDetails?.address?.city}&category_uuid=${catuid}&brand_uuid=${branduid}&sub_category_uuid=${subCatuid}&user_uuid=${userDetails?.uuid}&county_uuid=${userDetails?.address?.county}`);
+    const nextPayload = buildMailPagePayload({
+      key,
+      pageNum: 1,
+      PageSize,
+      userDetails,
+      catuid,
+      branduid,
+      subCatuid,
+    });
+    if(nextPayload)setMailPagePayload(nextPayload);
     setModalDetails({})
   }
 
@@ -212,23 +346,9 @@ const Mails = () => {
                     />
           </TouchableOpacity>
       </View>
-      <View style={{alignItems:'center'}}>
-        <Text style={{ color: '#000000', fontSize: 18, padding: 5 }}>{offerCard?.message}</Text>
-      </View>
+      {renderMailMessage('#000000')}
      
-        {(offerCard?.mime_type === 'text/html' && offerCard?.image_url) && <View style={{ flex: 1 }}><WebView
-          source={{
-            // uri: `${offerCard?.image_url}`,
-            html : mailHTML
-          }}
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            minWidth: screenWidth - 10,
-            minHeight: '40%'
-          }}
-        /></View>}
+        {renderMailHtml()}
         {(offerCard?.mime_type === 'image/png' || offerCard?.mime_type === 'image/jpeg') && <View style={{alignItems:'center'}}><Image
           resizeMode="contain"
           style={{ width: 200, height: 200 }}

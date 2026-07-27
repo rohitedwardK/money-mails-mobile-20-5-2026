@@ -1,4 +1,4 @@
-package com.moneymailss
+package com.moneymails.app
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

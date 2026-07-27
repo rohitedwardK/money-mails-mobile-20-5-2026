@@ -11,14 +11,15 @@ export const textFieldStyles = ({isFocused, isFilled, isOutLined}) => {
 
   return StyleSheet.create({
     textFieldContainer: {
-      backgroundColor: 'transparent',
+      backgroundColor: isOutLined ? colors.surfacePrimary : 'transparent',
       left: 0,
       display: 'flex',
-      paddingHorizontal: isOutLined && (isFocused || isFilled) ? 16 : 0,
+      paddingHorizontal: isOutLined && (isFocused || isFilled) ? 14 : 0,
       fontSize: 16,
       position: 'relative',
       color: textInputColors.value,
       width: '100%',
+      borderRadius: isOutLined ? 14 : 0,
     },
     phoneField: {
       container: {
@@ -27,7 +28,6 @@ export const textFieldStyles = ({isFocused, isFilled, isOutLined}) => {
         flexDirection: 'row',
         alignItems: 'flex-end',
         position: 'relative',
-        position: 'absolute',
         bottom: isOutLined ? 16 : 8,
       },
       flag: {
@@ -54,11 +54,10 @@ export const textFieldStyles = ({isFocused, isFilled, isOutLined}) => {
     },
     label: {
       color: labelColor,
-      fontFamily: colors.fontFamily,
       ...(isOutLined
         ? {
             backgroundColor:
-              isFocused || isFilled ? colors.bgPrimary : 'transparent',
+              isFocused || isFilled ? colors.surfacePrimary : 'transparent',
             paddingVertical: isFocused || isFilled ? 6 : 0,
             paddingHorizontal: isFocused || isFilled ? 6 : 0,
           }
@@ -73,13 +72,11 @@ export const textFieldStyles = ({isFocused, isFilled, isOutLined}) => {
     passwordDot: {
       letterSpacing: 6,
       fontSize: 16,
-      fontFamily: colors.fontFamily,
       color: textInputColors.password,
       bottom: 8,
       position: 'absolute',
       left: 0,
       width: '100%',
-      
     },
   });
 };

@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {buildUserSession} from '../../utils/authSession';
 
 export const UserContext = createContext();
 
@@ -35,16 +36,25 @@ const UserContextProvider = ({ children }) => {
   const [activeBrand, setActiveBrand] = useState([]);
   const [activeCategory, setActiveCategory] = useState([]);
   const [location, setLocation] = useState({});
+  const [isUserSessionLoading, setIsUserSessionLoading] = useState(true);
 
-  const onLoad = async() => {
-    if(userDetails?.firstName === '') {
-        setUserDetails(JSON.parse(await AsyncStorage.getItem('user')));
+  useEffect(() => {
+    const onLoad = async () => {
+      try {
+        const rawUser = await AsyncStorage.getItem('user');
+        const parsedUser = rawUser ? JSON.parse(rawUser) : null;
+        if (parsedUser?.uuid || parsedUser?.user_uuid || parsedUser?.token) {
+          setUserDetails(buildUserSession(parsedUser));
+        }
+      } catch (_error) {
+        await AsyncStorage.removeItem('user');
+      } finally {
+        setIsUserSessionLoading(false);
       }
-  };
+    };
 
-  useEffect(()=> {
     onLoad();
-  },[userDetails])
+  }, []);
 
   const value = {
     userDetails,
@@ -54,7 +64,8 @@ const UserContextProvider = ({ children }) => {
     activeCategory,
     setActiveCategory,
     setLocation,
-    location
+    location,
+    isUserSessionLoading,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

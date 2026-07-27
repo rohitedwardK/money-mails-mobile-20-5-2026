@@ -20,10 +20,8 @@ export const tabViewStyles = () => {
             borderBottomColor: colors.white,
           }
         : {
-            shadowColor: tabBarColors.shadowColor,
-            shadowOffset: {width: -2, height: 10},
-            shadowOpacity: 1,
-            shadowRadius: 3,
+            shadowOpacity: 0,
+            elevation: 0,
           }),
     },
     tabItem: {
@@ -51,11 +49,9 @@ export const tabViewStyles = () => {
             backgroundColor: colors.bgPrimary,
           }
         : {
-            shadowColor: tabBarColors.shadowColor,
             backgroundColor: tabBarColors.tabContentBg,
-            shadowOffset: {width: -8, height: 10},
-            shadowOpacity: 1,
-            shadowRadius: 3,
+            shadowOpacity: 0,
+            elevation: 0,
           }),
     },
   });

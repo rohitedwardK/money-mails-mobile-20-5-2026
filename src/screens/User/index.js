@@ -1,940 +1,240 @@
-import React, { useEffect, useContext, useState } from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import StatusBar from '../../components/atoms/StatusBar';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, {useEffect, useRef} from 'react';
+import {Animated, Image, StatusBar, Text, TouchableOpacity, View} from 'react-native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import Home from './Home';
 import Category from './Category';
-import Favourites from './Favourites';
-import Rewards from './Rewards';
-import Stores from './Stores';
-import Profile from './Profile';
+import Store from './Stores';
 import Mails from './Mails';
+import Rewards from './Rewards';
+import Favourites from './Favourites';
+import Profile from './Profile';
+import AccountMenu from './AccountMenu';
 import Bingo from './Bingo';
 import Notification from './Notifications';
-import AppHeader from '../../components/molecules/AppHeader';
-import EntypoIcon from 'react-native-vector-icons/Entypo';
-import AntIcon from 'react-native-vector-icons/AntDesign';
-import getColors from '../../utils/colors';
-import EvilIcon from 'react-native-vector-icons/EvilIcons';
-import { Text, TouchableHighlight, TouchableOpacity, View, Alert } from 'react-native';
-import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
-import Octicon from 'react-native-vector-icons/Octicons';
-import Drawer from '../../components/organisms/Drawer';
-import Avatar from '../../components/atoms/Avatar';
-import Button from '../../components/atoms/Button';
-import { useNavigation } from '@react-navigation/native';
-import ModalDialog from '../../components/organisms/Dialog';
-import { useLogin } from "../../hooks/services/useLogin";
-import { UserContext } from "../../context/UserContext";
-import { styles } from './index.style';
-import { COUNTRY } from "../../constants";
-import { useStateData } from "../../hooks/services/useStateData";
-import { useCountyData } from "../../hooks/services/useCountyData";
-import { useCityData } from "../../hooks/services/useCityData";
 import PointRedeemHistory from './PointRedeemHistory';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useNotification } from '../../hooks/services/useNotification';
-import Snackbar from 'react-native-snackbar';
-import { baseUrl } from "../../connections";
-
-// User Complete Profile
+import Campaigns from './Campaigns';
+import CampaignDetail from './Campaigns/CampaignDetail';
+import CampaignTicketHistory from './Campaigns/TicketHistory';
 import CompleteInfo from './profileComplete/completeInfo';
 import ProfileSetting from './profileComplete/ProfileSetting';
-import PersonalizationDetails from './profileComplete/PersonalizationDetails';
 import AddressDetails from './profileComplete/AddressDetails';
+import PersonalizationDetails from './profileComplete/PersonalizationDetails';
 import VerificationInformation from './profileComplete/VerificationInformation';
-import colors from '../../utils/colors';
+import {
+  AboutScreen,
+  DeleteAccountScreen,
+  FAQScreen,
+  PopupAdsScreen,
+  PrivacyScreen,
+  SupportScreen,
+  TermsScreen,
+} from './StaticPages';
+import getColors from '../../utils/colors';
+import appBackground from '../../assets/images/appBackground.png';
+import {styles as userScreenStyles} from './index.style';
 
-// New Static Screens
-import Terms from './Terms';
-import Privacy from './Privacy';
-import About from './About';
-import Faq from './Faq';
-import PopupAds from './PopupAds';
-import Support from './Support';
-
-const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
+const footerItems = [
+  {label: 'Home', routeName: 'Home', icon: 'home'},
+  {label: 'Bookings', routeName: 'CampaignTicketHistory', icon: 'calendar-outline'},
+  {label: 'Campaign', routeName: 'Campaigns', icon: 'megaphone-outline'},
+];
 
+const FooterNav = ({navigation, activeRouteName, animatedStyle, onInteraction}) => {
+  const {themeColors} = getColors();
+  const styles = userScreenStyles();
 
-const tabBarIconMap = {
-  Home: 'home',
-  Category: 'list',
-  Store: 'price-tag',
-  Mails: 'mail',
-  Favourites: 'heart',
-  Rewards: 'star',
-  Profile: 'user',
-  Bingo: 'game-controller',
-  PointRedeemHistory: 'book',
-  Notification: 'bell'
+  return (
+    <Animated.View style={[styles.footerNav, animatedStyle]}>
+      {footerItems.map(item => {
+        const isActive = activeRouteName === item.routeName;
+
+        return (
+          <TouchableOpacity
+            key={item.routeName}
+            activeOpacity={0.82}
+            style={styles.footerNavItem}
+            onPress={() => {
+              onInteraction();
+              navigation.navigate(item.routeName);
+            }}>
+            <View
+              style={[
+                styles.footerIconWrap,
+                isActive ? styles.footerIconWrapActive : null,
+              ]}>
+              <Ionicons
+                name={item.icon}
+                size={19}
+                color={isActive ? themeColors.highlightPrimary : themeColors.fontMuted}
+              />
+            </View>
+            <Text
+              style={[
+                styles.footerNavLabel,
+                isActive ? styles.footerNavLabelActive : null,
+              ]}>
+              {item.label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </Animated.View>
+  );
 };
 
-const UserHome = () => {
-  const { themeColors: colors } = getColors();
-  const { userDetails, setUserDetails, setLocation } = useContext(UserContext);
-  const { data, setNotificationPayload, count } = useNotification();
-  const { stateData, setStateData } = useStateData();
-  const { countyData, setCountyData } = useCountyData();
-  const { cityData, setCityData } = useCityData();
-  const [openDrawer, setOpenDrawer] = useState(false);
-  const [showDialog, setShowDialog] = useState(false);
-  const [selCountry, setSelCountry] = useState();
-  const [selState, setSelState] = useState();
-  const [selCounty, setSelCounty] = useState();
-  const [selCity, setSelCity] = useState();
-  const navigation = useNavigation();
-  const { setData } = useLogin();
-  const [badgeCount, setBadgeCount] = useState(0);
+const ScreenWithFooter = ({component: Component, ...props}) => {
+  const styles = userScreenStyles();
+  const footerTranslateY = useRef(new Animated.Value(90)).current;
+  const hideFooterTimer = useRef(null);
 
-  useEffect(() => {
-    setInterval(() => {
-      setNotificationPayload({ user_uuid: userDetails?.uuid, page: 0, key: Math.random(5) });
-    }, 5000)
-  }, [])
-
-  const headerOptions = {
-    headerTitleStyle: {
-      color: colors.fontPrimary,
-    },
-    headerStyle: {
-      backgroundColor: colors.bgPrimary,
-    },
-    statusBarColor: colors.statusbarUserPrimaryColor,
-    headerTitleAlign: 'left',
-    headerLeft: () => (
-      <TouchableOpacity >
-        <EvilIcon
-          name="chevron-left"
-          size={40}
-          color={colors.accent}
-          onPress={() => {
-            navigation.navigate('Home')
-          }}
-        />
-      </TouchableOpacity>
-    ),
-    headerRight: () => (
-      <TouchableOpacity>
-        <></>
-        {/* <Octicon
-          style={{
-            marginRight: 12,
-          }}
-          name="bell-fill"
-          size={20}
-          color={colors.accent}
-        /> */}
-      </TouchableOpacity>
-    ),
+  const hideFooter = () => {
+    Animated.timing(footerTranslateY, {
+      toValue: 90,
+      duration: 240,
+      useNativeDriver: true,
+    }).start();
   };
 
-  const logoutHandlerAlert = async () => {
-    Alert.alert('Alert', 'Are you sure wants to Logout?', [
-      {
-        text: 'Cancel',
-        onPress: () => console.log('Cancel Pressed'),
-        style: 'cancel',
-      },
-      { text: 'OK', onPress: () => logoutHandler() },
-    ]);
-  }
-
-  const deleteAccountHandlerAlert = async () => {
-    Alert.alert('Alert', 'Are you sure wants to Delete Account?', [
-      {
-        text: 'Cancel',
-        onPress: () => console.log('Cancel Pressed'),
-        style: 'cancel',
-      },
-      { text: 'OK', onPress: () => deleteAccountHandler() },
-    ]);
-  }
-
-
-  const deleteAccountHandler = async () => {
-    try {
-      const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
-      const requestOptions = {
-        method: "DELETE",
-        headers: headers,
-        redirect: "follow",
-      };
-
-      fetch(`${baseUrl}/user/delete/account/${userDetails?.uuid}`, requestOptions)
-        .then(async (response) => {
-          const res = await response.text();
-          if (response.status !== 200) {
-            throw res;
-          }
-          return JSON.parse(res);
-        })
-        .then(async (result) => {
-          await AsyncStorage.removeItem("token");
-          await AsyncStorage.removeItem("auth");
-          await AsyncStorage.removeItem("user");
-          await AsyncStorage.clear();
-          setData({});
-          setUserDetails({});
-          setOpenDrawer(false);
-          Snackbar.show({
-            text: 'Account Deleted Successfully.',
-            duration: Snackbar.LENGTH_SHORT,
-          });
-          navigation.navigate('SignIn');
-        })
-        .catch((err) => {
-          Alert.alert('Alert', 'Something went wrong!')
-        });
-
+  const showFooter = () => {
+    if (hideFooterTimer.current) {
+      clearTimeout(hideFooterTimer.current);
     }
-    catch (exception) {
-      return false;
-    }
-  }
 
-  const logoutHandler = async () => {
-    try {
-      await AsyncStorage.removeItem("token");
-      await AsyncStorage.removeItem("auth");
-      await AsyncStorage.removeItem("user");
-      await AsyncStorage.clear();
-      setData({});
-      setUserDetails({});
-      setOpenDrawer(false);
-      Snackbar.show({
-        text: 'User Logged Out Successfully.',
-        duration: Snackbar.LENGTH_SHORT,
-      });
-      // navigation.navigate('SignIn');
-      navigation.navigate('LoginScreens', { screen: 'SignIn' });
-    }
-    catch (exception) {
-      return false;
-    }
-  }
+    Animated.timing(footerTranslateY, {
+      toValue: 0,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
 
-  // get state list
-  useEffect(() => {
-    setStateData('CO-42A82D09');
-  }, [])
+    hideFooterTimer.current = setTimeout(hideFooter, 1500);
+  };
 
-  // get county list
-  useEffect(() => {
-    if (userDetails?.address?.state !== '') setCountyData(userDetails?.address?.state);
-  }, [userDetails?.address?.state])
-
-  // get city list
-  useEffect(() => {
-    if (userDetails?.address?.county !== '') setCityData(userDetails?.address?.county);
-  }, [userDetails?.address?.county])
-
-  const handleDropdownChange = (id, val) => {
-    if (id === 'country') {
-      setSelCountry(val);
-      setStateData(val?.uuid);
-      setSelState('');
+  useEffect(() => () => {
+    if (hideFooterTimer.current) {
+      clearTimeout(hideFooterTimer.current);
     }
-    if (id === 'state') {
-      setSelState(val);
-      setSelCounty('');
-      setCountyData(val?.uuid);
-    }
-    if (id === 'county') {
-      setSelCounty(val);
-      setSelCity('');
-      setCityData(val?.uuid);
-    }
-    if (id === 'city') setSelCity(val);
-  }
-
-  const onCancelHandler = () => {
-    setSelCountry('');
-    setSelState('');
-    setSelCounty('');
-    setSelCity('');
-    setShowDialog(false)
-  }
-  const onSubmitHandler = () => {
-    const payload = {
-      country: selCountry,
-      state: selState,
-      county: selCounty,
-      city: selCity,
-    }
-    setLocation(payload);
-    setShowDialog(false)
-  }
+  }, []);
 
   return (
     <View
-      style={{
-        display: 'flex',
-        backgroundColor: colors.bgPrimary,
-        flex: 1,
+      style={styles.screenWithFooter}
+      onTouchStart={showFooter}
+      onMoveShouldSetResponderCapture={() => {
+        showFooter();
+        return false;
       }}>
-      {/* <StatusBar color={colors.statusbarUserPrimaryColor} /> */}
-      {/* <AppHeader /> */}
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          tabBarIcon: ({ focused, color, size }) => {
-            if (route?.name === 'Category') {
-              return (
-                <EntypoIcon
-                  name={tabBarIconMap[route?.name]}
-                  size={size}
-                  color={color}
-                />
-              );
-            } else if (route?.name === 'Store') {
-              return (
-                <EntypoIcon
-                  name={tabBarIconMap[route?.name]}
-                  size={size}
-                  color={color}
-                />
-              );
-            } else if (route?.name === 'Bingo') {
-              return (
-                <EntypoIcon
-                  name={tabBarIconMap[route.name]}
-                  size={size}
-                  color={color}
-                />
-              );
-            } else if (route?.name === 'Notification') {
-              return (
-                <>
-                  <EvilIcon
-                    name={tabBarIconMap[route?.name]}
-                    size={size}
-                    color={color}
-                  />
-                  <View style={{ marginTop: -30, marginLeft: 20 }}>
-                    <View style={{ backgroundColor: '#09A57D', borderRadius: 25 }}>
-                      <Text style={{ fontSize: 10, padding: 3, color: '#fff' }}>{count}</Text>
-                    </View>
-                  </View>
-                </>
-              );
-            } else {
-              return (
-                <AntIcon
-                  name={tabBarIconMap[route?.name]}
-                  size={size}
-                  color={color}
-                />
-              );
-            }
-          },
-          tabBarStyle: {
-            backgroundColor: colors.bgPrimary,
-            paddingBottom: 10
-          },
-          tabBarInactiveTintColor: 'gray',
-          tabBarActiveTintColor: 'tomato',
-          // headerShown: false,
-        })}>
-        <Tab.Screen
-          name="Home"
-          options={{
-            headerTitle: props => (
-              <AppHeader onMenuPress={() => setOpenDrawer(true)} onLocationPress={() => setShowDialog(true)} />
-            ),
-            headerStyle: {
-              backgroundColor: colors.bgPrimary,
-            },
-            statusBarColor: colors.statusbarUserPrimaryColor,
-          }}
-          component={Home}
-        />
-        <Tab.Screen
-          options={({ navigation }) => ({
-            ...headerOptions,
-            headerLeft: () => (
-              <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-                <EvilIcon name="chevron-left" size={40} color={colors.accent} />
-              </TouchableOpacity>
-            ),
-          })}
-          name="Rewards"
-          component={Rewards}
-        />
-        <Tab.Screen
-          options={{
-            headerShown: false,
-          }}
-          name="Profile"
-          component={Profile}
-        />
-        <Tab.Screen
-          // options={headerOptions}
-          options={{
-            headerShown: true,
-          }}
-          name="Bingo"
-          component={Bingo}
-        />
-        <Tab.Screen
-          name="Notification"
-          component={Notification}
-        />
-      </Tab.Navigator>
-      <Drawer open={openDrawer} onClose={setOpenDrawer}>
-        <View style={{
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
-          <View>
-            <View
-              style={{
-                backgroundColor: 'rgba(50, 157, 154, 0.8)',
-                paddingTop: 70,
-                paddingHorizontal: 10,
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingBottom: 30,
-              }}>
-              <Avatar
-                src={(userDetails?.avatar) ? userDetails?.avatar : require('../../assets/images/dp.jpg')}
-                flatStyle
-                rounded
-                size={70}
-                userDetails={userDetails}
-              />
-              <View
-                style={{
-                  marginLeft: 40,
-                  justifyContent: 'flex-start',
-                }}>
-                <Text
-                  style={{
-                    fontSize: 22,
-                    color: 'white',
-                  }}>
-                  {userDetails?.firstName}{'\n'}{userDetails?.lastName}
-                </Text>
-                <Button
-                  type="text"
-                  btnText="View Profile"
-                  overridingStyles={{
-                    width: 70,
-                    paddingHorizontal: 0,
-                    margin: 0,
-                  }}
-                  btnTextOverrideStyles={{
-                    fontSize: 12,
-                    color: '#EBEBEB',
-                  }}
-                  onPress={() => {
-                    setOpenDrawer(false);
-                    navigation.navigate('profileDrawer');
-                  }}
-                />
-              </View>
-            </View>
-          </View>
-          <View style={{
-            clear: 'both',
-            alignItems: 'flex-start'
-
-          }}>
-            <View
-              style={{
-                paddingHorizontal: 10,
-                flexDirection: 'column',
-                paddingBottom: 30,
-              }}>
-              <TouchableHighlight
-                underlayColor="#E1FFFF"
-                onPress={() => {
-                  setOpenDrawer(false);
-                  navigation.navigate('RewardsDrawer');
-                }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    padding: 16,
-                  }}>
-                  <EntypoIcon name="star" size={25} color={'rgba(50, 157, 154, 0.8)'} />
-                  <Text style={{ paddingLeft: 16, color: '#454545' }}>Rewards</Text>
-                </View>
-              </TouchableHighlight>
-              <TouchableHighlight
-                underlayColor="#E1FFFF"
-                onPress={() => {
-                  setOpenDrawer(false);
-                  navigation.navigate('Favourites');
-                }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    padding: 16,
-                  }}>
-                  <EntypoIcon name="heart" size={25} color={'rgba(50, 157, 154, 0.8)'} />
-                  <Text style={{ paddingLeft: 16, color: '#454545' }}>Favourites</Text>
-                </View>
-              </TouchableHighlight>
-              <TouchableHighlight
-                underlayColor="#E1FFFF"
-                onPress={() => {
-                  setOpenDrawer(false);
-                  navigation.navigate('Category');
-                }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    padding: 16,
-                  }}>
-                  <EntypoIcon
-                    name="grid"
-                    size={25}
-                    color={'rgba(50, 157, 154, 0.8)'}
-                  />
-                  <Text style={{ paddingLeft: 16, color: '#454545' }}>Categories</Text>
-                </View>
-              </TouchableHighlight>
-              <TouchableHighlight
-                underlayColor="#E1FFFF"
-                onPress={() => {
-                  setOpenDrawer(false);
-                  navigation.navigate('Store');
-                }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    padding: 16,
-                  }}>
-                  <EntypoIcon
-                    name="price-tag"
-                    size={25}
-                    color={'rgba(50, 157, 154, 0.8)'}
-                  />
-                  <Text style={{ paddingLeft: 16, color: '#454545' }}>Stores</Text>
-                </View>
-              </TouchableHighlight>
-
-              <TouchableHighlight
-                underlayColor="#E1FFFF"
-                onPress={() => {
-                  setOpenDrawer(false);
-                  navigation.navigate('Mails');
-                }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    padding: 16,
-                  }}>
-                  <EntypoIcon
-                    name="mail"
-                    size={25}
-                    color={'rgba(50, 157, 154, 0.8)'}
-                  />
-                  <Text style={{ paddingLeft: 16, color: '#454545' }}>Mails</Text>
-                </View>
-              </TouchableHighlight>
-
-              <TouchableHighlight
-                underlayColor="#E1FFFF"
-                onPress={() => {
-                  setOpenDrawer(false);
-                  navigation.navigate('PointRedeemHistory');
-                }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    padding: 16,
-                  }}>
-                  <EntypoIcon
-                    name="book"
-                    size={25}
-                    color={'rgba(50, 157, 154, 0.8)'}
-                  />
-                  <Text style={{ paddingLeft: 16, color: '#454545' }}>Point Redeem History</Text>
-                </View>
-              </TouchableHighlight>
-
-              <TouchableHighlight
-                underlayColor="#E1FFFF"
-                onPress={() => {
-                  setOpenDrawer(false);
-                  navigation.navigate('PopupAds');
-                }}>
-                <View style={{ flexDirection: 'row', padding: 16 }}>
-                  <EntypoIcon name="popup" size={25} color={'rgba(50, 157, 154, 0.8)'} />
-                  <Text style={{ paddingLeft: 16, color: '#454545' }}>Popup Ads</Text>
-                </View>
-              </TouchableHighlight>
-
-              <TouchableHighlight
-                underlayColor="#E1FFFF"
-                onPress={() => {
-                  setOpenDrawer(false);
-                  navigation.navigate('About');
-                }}>
-                <View style={{ flexDirection: 'row', padding: 16 }}>
-                  <EntypoIcon name="info" size={25} color={'rgba(50, 157, 154, 0.8)'} />
-                  <Text style={{ paddingLeft: 16, color: '#454545' }}>About Us</Text>
-                </View>
-              </TouchableHighlight>
-
-              <TouchableHighlight
-                underlayColor="#E1FFFF"
-                onPress={() => {
-                  setOpenDrawer(false);
-                  navigation.navigate('Faq');
-                }}>
-                <View style={{ flexDirection: 'row', padding: 16 }}>
-                  <EntypoIcon name="help" size={25} color={'rgba(50, 157, 154, 0.8)'} />
-                  <Text style={{ paddingLeft: 16, color: '#454545' }}>FAQ</Text>
-                </View>
-              </TouchableHighlight>
-
-              <TouchableHighlight
-                underlayColor="#E1FFFF"
-                onPress={() => {
-                  setOpenDrawer(false);
-                  navigation.navigate('Privacy');
-                }}>
-                <View style={{ flexDirection: 'row', padding: 16 }}>
-                  <EntypoIcon name="shield" size={25} color={'rgba(50, 157, 154, 0.8)'} />
-                  <Text style={{ paddingLeft: 16, color: '#454545' }}>Privacy Policy</Text>
-                </View>
-              </TouchableHighlight>
-
-              <TouchableHighlight
-                underlayColor="#E1FFFF"
-                onPress={() => {
-                  setOpenDrawer(false);
-                  navigation.navigate('Terms');
-                }}>
-                <View style={{ flexDirection: 'row', padding: 16 }}>
-                  <EntypoIcon name="text-document" size={25} color={'rgba(50, 157, 154, 0.8)'} />
-                  <Text style={{ paddingLeft: 16, color: '#454545' }}>Terms & Conditions</Text>
-                </View>
-              </TouchableHighlight>
-
-              <TouchableHighlight
-                underlayColor="#E1FFFF"
-                onPress={() => {
-                  setOpenDrawer(false);
-                  navigation.navigate('Support');
-                }}>
-                <View style={{ flexDirection: 'row', padding: 16 }}>
-                  <EntypoIcon name="network" size={25} color={'rgba(50, 157, 154, 0.8)'} />
-                  <Text style={{ paddingLeft: 16, color: '#454545' }}>Support</Text>
-                </View>
-              </TouchableHighlight>
-
-              <TouchableHighlight
-                underlayColor="#fff"
-                onPress={deleteAccountHandlerAlert}>
-                <View style={{
-                  flexDirection: 'row',
-                  padding: 16,
-                }}>
-                  <EntypoIcon
-                    name="trash"
-                    size={25}
-                    color={'rgba(50, 157, 154, 0.8)'}
-                  />
-                  <Text style={{ paddingLeft: 16, color: '#454545' }}>Delete Account</Text>
-                </View>
-              </TouchableHighlight>
-
-              <TouchableHighlight
-                underlayColor="#fff"
-                onPress={logoutHandlerAlert}>
-                <View style={{
-                  flexDirection: 'row',
-                  padding: 16,
-                }}>
-                  <EntypoIcon
-                    name="log-out"
-                    size={25}
-                    color={'rgba(50, 157, 154, 0.8)'}
-                  />
-                  <Text style={{ paddingLeft: 16, color: '#454545' }}>Logout</Text>
-                </View>
-              </TouchableHighlight>
-            </View>
-          </View>
-        </View>
-      </Drawer>
-      <ModalDialog
-        content={
-          <View style={{ paddingBottom: 10 }}>
-            <AutocompleteDropdown
-              direction={'down'}
-              clearOnFocus={false}
-              closeOnBlur={true}
-              closeOnSubmit={false}
-              initialValue={selCountry}
-              onSelectItem={val => handleDropdownChange('country', val)}
-              dataSet={COUNTRY}
-              containerStyle={{ flexGrow: 1, flexShrink: 1 }}
-              textInputProps={{
-                placeholder: 'select country'
-              }}
-              inputContainerStyle={{
-                marginTop: 25,
-                backgroundColor: '#fff',
-                borderColor: '#bbb',
-                borderWidth: 1,
-                borderRadius: 5,
-              }}
-            />
-            <AutocompleteDropdown
-              direction={'up'}
-              clearOnFocus={false}
-              closeOnBlur={true}
-              closeOnSubmit={false}
-              initialValue={selState}
-              onSelectItem={val => handleDropdownChange('state', val)}
-              dataSet={stateData}
-              containerStyle={{ flexGrow: 1, flexShrink: 1 }}
-              textInputProps={{
-                placeholder: 'select state'
-              }}
-              inputContainerStyle={{
-                marginTop: 25,
-                backgroundColor: '#fff',
-                borderColor: '#bbb',
-                borderWidth: 1,
-                borderRadius: 5,
-              }}
-            />
-            <AutocompleteDropdown
-              direction={'up'}
-              clearOnFocus={false}
-              closeOnBlur={true}
-              closeOnSubmit={false}
-              initialValue={selCounty}
-              onSelectItem={val => handleDropdownChange('county', val)}
-              dataSet={countyData}
-              containerStyle={{ flexGrow: 1, flexShrink: 1 }}
-              textInputProps={{
-                placeholder: 'select county'
-              }}
-              inputContainerStyle={{
-                marginTop: 25,
-                backgroundColor: '#fff',
-                borderColor: '#bbb',
-                borderWidth: 1,
-                borderRadius: 5,
-              }}
-            />
-            <AutocompleteDropdown
-              direction={'up'}
-              clearOnFocus={false}
-              closeOnBlur={true}
-              closeOnSubmit={false}
-              initialValue={selCity}
-              onSelectItem={val => handleDropdownChange('city', val)}
-              dataSet={cityData}
-              containerStyle={{ flexGrow: 1, flexShrink: 1 }}
-              textInputProps={{
-                placeholder: 'select city'
-              }}
-              inputContainerStyle={{
-                marginTop: 25,
-                backgroundColor: '#fff',
-                borderColor: '#bbb',
-                borderWidth: 1,
-                borderRadius: 5,
-              }}
-            />
-            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
-              <Button
-                btnText="Cancel"
-                size="large"
-                overridingStyles={{ width: '48%', height: 40 }}
-                onPress={onCancelHandler}
-              />
-              <Button
-                btnText="Submit"
-                size="large"
-                overridingStyles={{ width: '48%', height: 40 }}
-                onPress={onSubmitHandler}
-              />
-            </View>
-          </View>
-        }
-        open={showDialog}
-        onDismiss={() => setShowDialog(false)}
+      <View style={styles.screenContentWithFooter}>
+        <Component {...props} />
+      </View>
+      <FooterNav
+        navigation={props.navigation}
+        activeRouteName={props.route?.name || 'Home'}
+        animatedStyle={{transform: [{translateY: footerTranslateY}]}}
+        onInteraction={showFooter}
       />
     </View>
   );
 };
 
+const HomeWithFooter = props => <ScreenWithFooter component={Home} {...props} />;
+const BookingsWithFooter = props => <ScreenWithFooter component={CampaignTicketHistory} {...props} />;
+const OffersWithFooter = props => <ScreenWithFooter component={Rewards} {...props} />;
+const ProfileWithFooter = props => <ScreenWithFooter component={Profile} {...props} />;
+const CampaignsWithFooter = props => <ScreenWithFooter component={Campaigns} {...props} />;
+const MoreWithFooter = props => <ScreenWithFooter component={AccountMenu} {...props} />;
 
 const UserScreens = () => {
+  const {themeColors} = getColors();
+  const styles = userScreenStyles();
+  const internalHeader = title => ({
+    headerShown: true,
+    title,
+    headerBackTitleVisible: false,
+    headerTintColor: themeColors.fontPrimary,
+    headerStyle: {
+      backgroundColor: themeColors.homeBackground || themeColors.bgPrimary,
+    },
+    headerTitleStyle: {
+      color: themeColors.fontPrimary,
+      fontSize: 16,
+      fontWeight: '800',
+    },
+    headerShadowVisible: false,
+    contentStyle: {
+      backgroundColor: 'transparent',
+    },
+  });
+
   return (
+  <View style={styles.appBackground}>
+    <View pointerEvents="none" style={styles.appBackgroundFill} />
+    <View pointerEvents="none" style={styles.appBackgroundImageBand}>
+      <Image
+        source={appBackground}
+        resizeMode="cover"
+        style={styles.appBackgroundImage}
+      />
+    </View>
+  <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <StatusBar
+      backgroundColor={themeColors.homeBackground || themeColors.bgPrimary}
+      barStyle="dark-content"
+      translucent={false}
+    />
     <Stack.Navigator
-      // initialRouteName="User"
-      screenOptions={{ headerShown: false }}
-    >
+      initialRouteName="Home"
+      screenOptions={{
+        headerShown: false,
+        contentStyle: {
+          backgroundColor: 'transparent',
+        },
+      }}>
+      <Stack.Screen name="Home" component={HomeWithFooter} />
+      <Stack.Screen name="Category" component={Category} options={internalHeader('Category')} />
+      <Stack.Screen name="Store" component={Store} options={internalHeader('Stores')} />
+      <Stack.Screen name="MoreBrands" component={Store} options={internalHeader('More Brands')} />
+      <Stack.Screen name="Mails" component={Mails} options={internalHeader('Mails')} />
+      <Stack.Screen name="MoreMails" component={Mails} options={internalHeader('More Mails')} />
+      <Stack.Screen name="Rewards" component={OffersWithFooter} options={internalHeader('Rewards')} />
+      <Stack.Screen name="RewardsDrawer" component={Rewards} options={internalHeader('Rewards')} />
+      <Stack.Screen name="Favourites" component={Favourites} options={internalHeader('Favourites')} />
+      <Stack.Screen name="Profile" component={ProfileWithFooter} options={internalHeader('Profile')} />
+      <Stack.Screen name="profileDrawer" component={Profile} options={internalHeader('Profile')} />
+      <Stack.Screen name="AccountMenu" component={MoreWithFooter} />
+      <Stack.Screen name="Bingo" component={Bingo} options={internalHeader('Bingo')} />
+      <Stack.Screen name="Notification" component={Notification} options={internalHeader('Notifications')} />
+      <Stack.Screen name="PointRedeemHistory" component={PointRedeemHistory} options={internalHeader('Redeem History')} />
+      <Stack.Screen name="Campaigns" component={CampaignsWithFooter} options={internalHeader('Campaigns')} />
+      <Stack.Screen name="CampaignDetail" component={CampaignDetail} options={internalHeader('Campaign Detail')} />
+      <Stack.Screen name="CampaignTicketHistory" component={BookingsWithFooter} options={internalHeader('Ticket History')} />
+      <Stack.Screen name="CompleteInfo" component={CompleteInfo} options={internalHeader('Complete Profile')} />
+      <Stack.Screen name="ProfileSetting" component={ProfileSetting} options={internalHeader('Profile Settings')} />
+      <Stack.Screen name="AddressDetails" component={AddressDetails} options={internalHeader('Address Details')} />
       <Stack.Screen
-        options={{
-          headerShown: false,
-          title: ''
-        }}
-        name='User'
-        component={UserHome}
-      />
-
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'Point Redeem History'
-        }}
-        name='PointRedeemHistory'
-        component={PointRedeemHistory}
-      />
-      {/* Profile Complete Info */}
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'Profile Completion'
-        }}
-        name='CompleteInfo'
-        component={CompleteInfo}
-      />
-      <Stack.Screen
-
-        options={{
-          headerShown: true,
-          headerBackTitleVisible: false,
-          title: 'Profile Setting'
-        }}
-        name='ProfileSetting'
-        component={ProfileSetting}
-      />
-      <Stack.Screen
-
-        options={{
-          headerShown: true,
-          headerBackTitleVisible: false,
-          title: 'Personalization Details'
-        }}
-        name='PersonalizationDetails'
+        name="PersonalizationDetails"
         component={PersonalizationDetails}
+        options={internalHeader('Personalization')}
       />
       <Stack.Screen
-
-        options={{
-          headerShown: true,
-          headerBackTitleVisible: false,
-          title: 'Address Details'
-        }}
-        name='AddressDetails'
-        component={AddressDetails}
-      />
-      <Stack.Screen
-
-        options={{
-          headerShown: true,
-          headerBackTitleVisible: false,
-          title: 'Verification Informations'
-        }}
-        name='VerificationInformation'
+        name="VerificationInformation"
         component={VerificationInformation}
+        options={internalHeader('Verification')}
       />
-      <Stack.Screen
-        options={{
-          headerShown: true
-        }}
-        name="Category"
-        component={Category}
-      />
-      <Stack.Screen
-        options={{
-          headerShown: true
-        }}
-        name='Mails'
-        component={Mails}
-      />
-      <Stack.Screen
-        options={{
-          headerShown: true
-        }}
-        name='RewardsDrawer'
-        component={Rewards}
-      />
-      <Stack.Screen
-        options={{
-          headerShown: true
-        }}
-        name='profileDrawer'
-        component={Profile}
-      />
-      <Stack.Screen
-        options={{
-          headerShown: true
-        }}
-        name="Favourites"
-        component={Favourites}
-      />
-      <Stack.Screen
-        options={{
-          headerShown: true
-        }}
-        name="Store"
-        component={Stores}
-      />
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'Terms & Conditions'
-        }}
-        name='Terms'
-        component={Terms}
-      />
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'Privacy Policy'
-        }}
-        name='Privacy'
-        component={Privacy}
-      />
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'About Us'
-        }}
-        name='About'
-        component={About}
-      />
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'FAQ'
-        }}
-        name='Faq'
-        component={Faq}
-      />
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'Popup Ads'
-        }}
-        name='PopupAds'
-        component={PopupAds}
-      />
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'Support'
-        }}
-        name='Support'
-        component={Support}
-      />
+      <Stack.Screen name="Terms" component={TermsScreen} options={internalHeader('Terms')} />
+      <Stack.Screen name="Privacy" component={PrivacyScreen} options={internalHeader('Privacy')} />
+      <Stack.Screen name="About" component={AboutScreen} options={internalHeader('About')} />
+      <Stack.Screen name="FAQ" component={FAQScreen} options={internalHeader('FAQ')} />
+      <Stack.Screen name="Support" component={SupportScreen} options={internalHeader('Support')} />
+      <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} options={internalHeader('Delete Account')} />
+      <Stack.Screen name="PopupAds" component={PopupAdsScreen} options={internalHeader('Ads')} />
     </Stack.Navigator>
-  )
-}
+  </SafeAreaView>
+  </View>
+  );
+};
 
 export default UserScreens;

@@ -1,55 +1,83 @@
-import React, { useContext, useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, Image, FlatList, TouchableHighlight } from 'react-native';
+import React, { useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { View, TextInput, FlatList } from 'react-native';
 import BrandIconCard from '../../../components/molecules/BrandIconCard';
-import { useFocusEffect } from "@react-navigation/core";
+import { useFocusEffect } from '@react-navigation/core';
 import { favPageStyles } from './index.style';
 import getColors from '../../../utils/colors';
-import { ScrollView } from 'react-native-gesture-handler';
-import { DeviceContext } from '../../../context/DeviceContext';
 import EvilIcon from 'react-native-vector-icons/EvilIcons';
-import { useBrand } from "../../../hooks/services/useBrand";
+import EntypoIcon from 'react-native-vector-icons/Entypo';
+import { useBrand } from '../../../hooks/services/useBrand';
 import { useBrandPage } from '../../../hooks/services/useBrandPage';
-import { UserContext } from "../../../context/UserContext";
+import { UserContext } from '../../../context/UserContext';
+import { DeviceContext } from '../../../context/DeviceContext';
 
+const storeDoodleItems = [
+  {name: 'leaf', size: 22, top: 10, left: 0, rotate: '18deg'},
+  {name: 'star', size: 21, top: 22, left: 44, rotate: '-10deg'},
+  {name: 'wallet', size: 27, top: 4, left: 142, rotate: '0deg'},
+  {name: 'shopping-basket', size: 24, top: 34, left: 172, rotate: '8deg'},
+  {name: 'mail', size: 29, top: 9, left: 230, rotate: '-12deg'},
+  {name: 'price-tag', size: 23, top: 8, right: 88, rotate: '17deg'},
+  {name: 'star', size: 27, top: 23, right: 38, rotate: '4deg'},
+  {name: 'leaf', size: 22, top: 43, right: 2, rotate: '-14deg'},
+];
 
 const Store = ({ navigation }) => {
   const { themeColors: colors, isDarkMode } = getColors();
-  const { userDetails, location, setActiveBrand, activeBrand, activeCategory,  } = useContext(UserContext);
+  const { userDetails, location, setActiveBrand, activeBrand, activeCategory } = useContext(UserContext);
   const { screenWidth } = useContext(DeviceContext);
-  const { barndList, brandCount, isBrandLoading, brandError, setBrandPayload, setUpdateBrandFav } = useBrand();
+  const { setUpdateBrandFav } = useBrand();
   const { brandPageData, setBrandPagePayload } = useBrandPage();
-  const styles = favPageStyles();
+  const styles = favPageStyles(screenWidth);
 
   const [filterValue, setFilterValue] = useState('');
   const [selCountry, setSelCountry] = useState('');
   const [selState, setSelState] = useState('');
   const [selCounty, setSelCounty] = useState('');
   const [selCity, setSelCity] = useState('');
-  const [PageSize, setPageSize] = useState(20);
-  const [pageNum, setPageNum] = useState(0)
+  const [PageSize] = useState(20);
+  const [pageNum, setPageNum] = useState(0);
+  const filtersReady = Boolean(userDetails?.uuid && selCountry && selCity && activeCategory?.uuid);
 
 
   useEffect(() => {
-    if (location.country?.uuid) setSelCountry(location.country?.uuid)
-    if (location.state?.uuid) setSelState(location.state?.uuid)
-    if (location.county?.uuid) setSelCounty(location.county?.uuid)
-    if (location.city?.uuid) setSelCity(location.city?.uuid)
-  }, [location])
+    const address = userDetails?.address || {};
+
+    setSelCountry(location.country?.uuid || address.country || userDetails?.country_uuid || userDetails?.country || '');
+    setSelState(location.state?.uuid || address.state || userDetails?.state_uuid || userDetails?.state || '');
+    setSelCounty(location.county?.uuid || address.county || userDetails?.county_uuid || userDetails?.county || '');
+    setSelCity(location.city?.uuid || address.city || userDetails?.city_uuid || userDetails?.city || '');
+  }, [location, userDetails]);
 
 
   useFocusEffect(useCallback(() => {
+    if (!filtersReady) {
+      return;
+    }
+
     let key = Math.random();
-    setBrandPagePayload(`pagenum=${pageNum}&limit=${PageSize}&country_uuid=${selCountry}&state_uuid=${selState}&city_uuid=${selCity}&county_uuid=${selCounty}&user_uuid=${userDetails?.uuid}&category_uuid=${activeCategory?.uuid}&key=${key}`);
-  }, [activeCategory, pageNum]))
+    setBrandPagePayload(`pagenum=${pageNum}&limit=${PageSize}&country_uuid=${selCountry}&state_uuid=${selState || ''}&city_uuid=${selCity}&county_uuid=${selCounty || ''}&user_uuid=${userDetails?.uuid}&category_uuid=${activeCategory?.uuid}&key=${key}`);
+  }, [
+    PageSize,
+    activeCategory,
+    filtersReady,
+    pageNum,
+    selCity,
+    selCountry,
+    selCounty,
+    selState,
+    setBrandPagePayload,
+    userDetails?.uuid,
+  ]));
 
 
 
   const onFavouriteToggle = (brand_uuid) => {
     setUpdateBrandFav({
       user_uuid: userDetails?.uuid,
-      brand_uuid: brand_uuid
+      brand_uuid: brand_uuid,
     });
-  }
+  };
 
   const onBrandSelect = (e, brand_uuid) => {
     setActiveBrand(e ? brand_uuid : '');
@@ -57,118 +85,97 @@ const Store = ({ navigation }) => {
 
     navigation.navigate('User', {
       screen: 'Home',
-      params: { 
+      params: {
         brand_uuid: brand_uuid,
-        category_uuid: categoryObj
-      }
+        category_uuid: categoryObj,
+      },
     });
-  }
+  };
+
+  const filteredStores = useMemo(() => {
+    if (!Array.isArray(brandPageData)) {
+      return [];
+    }
+
+    if (!filterValue) {
+      return brandPageData;
+    }
+
+    return brandPageData.filter(item =>
+      item?.company_name
+        ?.toLowerCase()
+        .startsWith(filterValue?.toLowerCase()),
+    );
+  }, [brandPageData, filterValue]);
 
   return (
 
     <View style={styles.pageContainer}>
-      <View
-        style={{
-          width: '100%',
-          paddingVertical: 10,
-          backgroundColor: '#00AEEF',
-          alignItems: 'center',
-          marginBottom: 5
-        }}>
-        <View
-          style={{
-            position: 'relative',
-            width: '70%',
-            height: 35,
-          }}>
+      <View style={styles.searchBand}>
+        <View pointerEvents="none" style={styles.searchDoodleLayer}>
+          {storeDoodleItems.map((item, index) => (
+            <EntypoIcon
+              key={`${item.name}-${index}`}
+              name={item.name}
+              size={item.size}
+              color={colors.white}
+              style={[
+                styles.searchDoodleIcon,
+                {
+                  top: item.top,
+                  left: item.left,
+                  right: item.right,
+                  transform: [{rotate: item.rotate}],
+                },
+              ]}
+            />
+          ))}
+        </View>
+        <View style={styles.searchWrapper}>
           <EvilIcon
             name="search"
             size={25}
-            color="#A7A7A7"
-            style={{
-              position: 'absolute',
-              left: 7,
-              zIndex: 1,
-              top: 7,
-            }}
+            color={colors.fontMuted}
+            style={styles.searchIcon}
           />
           <TextInput
-            style={{
-              backgroundColor: colors.bgPrimary,
-              width: '100%',
-              height: '100%',
-              color: '#222',
-              paddingVertical: 10,
-              borderRadius: 50,
-              paddingRight: 15,
-              paddingLeft: 35,
-            }}
-            placeholderTextColor="#A7A7A7"
+            style={styles.searchInput}
+            placeholderTextColor={colors.fontMuted}
             placeholder="Search for brands"
             value={filterValue}
             onChange={e => setFilterValue(e.nativeEvent.text)}
           />
         </View>
       </View>
-      <View style={{ clear: 'both', width: '100%' }}>
+      <View style={styles.listWrapper}>
         {brandPageData && <FlatList
-          ItemSeparatorComponent={
-            Platform.OS !== 'android' &&
-            (({ highlighted }) => (
-              <View
-                style={[styles.separator, highlighted && { marginLeft: 0 }]}
-              />
-            ))
-          }
-          columnWrapperStyle={{ flex: 1, justifyContent: 'space-around', alignItems: 'center' }}
-          numColumns={3}
+          key="store-grid-2"
+          columnWrapperStyle={styles.storeListRow}
+          contentContainerStyle={styles.storeListContent}
+          numColumns={2}
           horizontal={false}
           onEndReached={() => {
-            setPageNum(pageNum + 1)
+            setPageNum(pageNum + 1);
           }}
           onEndReachedThreshold={0.1}
-          onScrollEndDrag={() => console.log("end")}
-          data={filterValue !== "" ? brandPageData.filter((item) => {
-            return item?.company_name
-              .toLowerCase()
-              .startsWith(filterValue?.toLowerCase());
-          }) : brandPageData}
+          data={filteredStores}
+          keyExtractor={(item, index) => item?.uuid || `${index}`}
           renderItem={({ item, i }) => (
-            <TouchableHighlight
-              key={i}>
-              <View
-                key={i}
-                style={{
-                  width: 120,
-                  height: 120,
-                  alignItems: 'center',
-                  marginBottom: 5,
-                }}>
-                <BrandIconCard
-                  key={i}
-                  isActive={activeBrand?.indexOf(item?.uuid) !== -1 || item?.is_highlight === 'true' ? true : false}
-                  isFavourite={item?.is_faviourate === 'true' ? true : false}
-                  item={item}
-                  color={isDarkMode ? colors.bgPrimary : '#EEF8FF'}
-                  onActionPress={() => console.log('okk')}
-                  onFavouriteToggle={(e) => onFavouriteToggle(item?.uuid)}
-                  onBrandSelect={(e) => onBrandSelect(e, item?.uuid)}
-                  showActionByDefault
-                  actionBtnOverridingStyles={{
-                    backgroundColor: '#f8f8f8',
-                  }}
-                  showAddress={true}
-                  src={item?.logo_url}
-                  size="100%">
-                  {/* <Image 
-                    style={{width: '70%', height: '70%'}}
-                    key={i}
-                    source={{uri:`${item?.logo_url}`}} 
-                    resizeMode={'cover'}
-                  /> */}
-                </BrandIconCard>
-              </View>
-            </TouchableHighlight>
+            <View style={styles.storeCardShell}>
+              <BrandIconCard
+                variant="store"
+                wrapperStyles={styles.storeCard}
+                isActive={activeBrand?.indexOf(item?.uuid) !== -1 || item?.is_highlight === 'true' ? true : false}
+                isFavourite={item?.is_faviourate === 'true' ? true : false}
+                item={item}
+                color={isDarkMode ? colors.bgPrimary : colors.surfacePrimary}
+                onFavouriteToggle={() => onFavouriteToggle(item?.uuid)}
+                onBrandSelect={(e) => onBrandSelect(e, item?.uuid)}
+                showActionByDefault
+                showAddress={true}
+                src={item?.logo_url}
+              />
+            </View>
           )}
         />}
       </View>
@@ -186,7 +193,7 @@ const Store = ({ navigation }) => {
           width: screenWidth,
           justifyContent: 'center',
         }}>
-          
+
          {barndList && barndList
           .filter((item, i) => {
             if (!filterValue) {
@@ -217,7 +224,7 @@ const Store = ({ navigation }) => {
                     backgroundColor: '#f8f8f8',
                   }}
                   size="100%">
-                  <Image 
+                  <Image
                     style={{width: 50, height: 50}}
                     key={i}
                     source={{uri:`${item?.logo_url}`}}
@@ -226,7 +233,7 @@ const Store = ({ navigation }) => {
                 </BrandIconCard>
               </View>
             );
-          })} 
+          })}
       </Grid>} */}
     </View>
 

@@ -1,0 +1,487 @@
+import {useContext} from 'react';
+import {StyleSheet} from 'react-native';
+import {DeviceContext} from '../../../context/DeviceContext';
+import getColors from '../../../utils/colors';
+
+const useCampaignStyles = () => {
+  const {themeColors: colors, isDarkMode} = getColors();
+  const {screenWidth, screenHeight} = useContext(DeviceContext);
+  const cardWidth = Math.max(260, screenWidth - 24);
+  const compactCardWidth = (screenWidth - 24) / 2;
+  const compactTitleFontSize = Math.max(11, Math.min(14, screenWidth * 0.032));
+
+  return StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: 'transparent',
+    },
+    content: {
+      paddingHorizontal: 12,
+      paddingTop: 12,
+      paddingBottom: 28,
+    },
+    sectionHeader: {
+      alignItems: 'flex-start',
+      paddingHorizontal: 12,
+      paddingTop: 14,
+      paddingBottom: 8,
+      gap: 8,
+    },
+    sectionHeaderCopy: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      flexWrap: 'wrap',
+      gap: 9,
+    },
+    sectionTitle: {
+      color: colors.fontPrimary,
+      fontSize: 18,
+      lineHeight: 24,
+      fontWeight: '800',
+    },
+    sectionLink: {
+      color: colors.fontMuted,
+      fontSize: 12,
+      lineHeight: 18,
+      fontWeight: '700',
+    },
+    sectionSubtitle: {
+      color: colors.highlightPrimary,
+      fontSize: 12,
+      lineHeight: 18,
+      fontWeight: '700',
+    },
+    sectionActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 9,
+    },
+    sectionAction: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    sectionActionDivider: {
+      width: 1,
+      height: 15,
+      backgroundColor: colors.borderPrimary,
+    },
+    recommendedTitle: {
+      color: colors.fontPrimary,
+      fontSize: 18,
+      lineHeight: 24,
+      fontWeight: '800',
+      marginBottom: 10,
+    },
+    panel: {
+      backgroundColor: colors.surfacePrimary,
+      borderWidth: 1,
+      borderColor: colors.borderSubtle,
+      borderRadius: 8,
+      padding: 12,
+      marginHorizontal: 12,
+      marginBottom: 14,
+    },
+    horizontalList: {
+      paddingHorizontal: 12,
+      paddingBottom: 12,
+    },
+    card: {
+      width: cardWidth,
+      marginBottom: 14,
+      backgroundColor: colors.surfacePrimary,
+      borderRadius: 8,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.borderSubtle,
+    },
+    compactCard: {
+      width: compactCardWidth,
+      height: compactCardWidth * 2 / 3,
+      marginBottom: 0,
+      borderWidth: 0,
+      borderRadius: 14,
+      backgroundColor: colors.bgSecondary,
+    },
+    compactCardImage: {
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+    },
+    compactStatus: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      zIndex: 2,
+    },
+    compactGradient: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      paddingHorizontal: 12,
+      paddingTop: 38,
+      paddingBottom: 12,
+      backgroundColor: 'rgba(0, 0, 0, 0.58)',
+    },
+    compactTitle: {
+      color: colors.white,
+      fontSize: compactTitleFontSize,
+      lineHeight: compactTitleFontSize + 4,
+      fontWeight: '900',
+    },
+    compactBottomRow: {
+      marginTop: 8,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 8,
+    },
+    compactAvailability: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    compactAvailabilityText: {
+      color: colors.white,
+      fontSize: 13,
+      lineHeight: 18,
+      fontWeight: '800',
+    },
+    compactAction: {
+      minHeight: 30,
+      paddingHorizontal: 12,
+      borderRadius: 15,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.highlightPrimary,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.4)',
+    },
+    compactActionReserved: {
+      backgroundColor: '#C2410C',
+    },
+    compactActionBooked: {
+      backgroundColor: '#175CD3',
+    },
+    compactActionText: {
+      color: colors.white,
+      fontSize: 11,
+      lineHeight: 14,
+      fontWeight: '900',
+    },
+    carouselDots: {
+      minHeight: 24,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+    },
+    carouselDot: {
+      width: 7,
+      height: 7,
+      borderRadius: 4,
+      backgroundColor: colors.brandSoft,
+    },
+    carouselDotActive: {
+      width: 20,
+      backgroundColor: colors.highlightPrimary,
+    },
+    cardImageWrap: {
+      height: 150,
+      backgroundColor: colors.bgSecondary,
+    },
+    cardImage: {
+      width: '100%',
+      height: '100%',
+    },
+    cardImageFallback: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: isDarkMode ? colors.surfaceSecondary : '#EAF8F5',
+    },
+    cardOverlayAction: {
+      position: 'absolute',
+      right: 10,
+      bottom: 10,
+      minHeight: 30,
+      paddingHorizontal: 12,
+      borderRadius: 15,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.highlightPrimary,
+    },
+    cardOverlayText: {
+      color: colors.white,
+      fontSize: 12,
+      lineHeight: 16,
+      fontWeight: '800',
+    },
+    cardBody: {
+      padding: 12,
+    },
+    cardTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 8,
+    },
+    cardTitle: {
+      flex: 1,
+      color: colors.fontPrimary,
+      fontSize: 15,
+      lineHeight: 20,
+      fontWeight: '800',
+    },
+    cardMetaRow: {
+      marginTop: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 8,
+    },
+    cardMetaText: {
+      flex: 1,
+      color: colors.fontMuted,
+      fontSize: 12,
+      lineHeight: 16,
+      fontWeight: '700',
+    },
+    cardPrice: {
+      color: colors.fontPrimary,
+      fontSize: 14,
+      lineHeight: 18,
+      fontWeight: '900',
+    },
+    statusBadge: {
+      minHeight: 24,
+      paddingHorizontal: 9,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    badgeAvailable: {
+      backgroundColor: '#E9F8EA',
+    },
+    badgeReserved: {
+      backgroundColor: '#FFF4D8',
+    },
+    badgeBooked: {
+      backgroundColor: '#E7F1FF',
+    },
+    statusBadgeText: {
+      color: colors.fontPrimary,
+      fontSize: 11,
+      lineHeight: 14,
+      fontWeight: '800',
+    },
+    statusBadgeSmall: {
+      minHeight: 20,
+      paddingHorizontal: 8,
+      borderRadius: 10,
+    },
+    statusBadgeTextSmall: {
+      fontSize: 10,
+      lineHeight: 12,
+    },
+    stateBox: {
+      minHeight: 140,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 22,
+      paddingVertical: 18,
+    },
+    stateTitle: {
+      color: colors.fontPrimary,
+      fontSize: 16,
+      lineHeight: 22,
+      fontWeight: '800',
+      textAlign: 'center',
+    },
+    stateText: {
+      color: colors.fontMuted,
+      fontSize: 13,
+      lineHeight: 18,
+      textAlign: 'center',
+      marginTop: 6,
+    },
+    detailImage: {
+      width: '100%',
+      height: Math.max(190, screenHeight * 0.26),
+      backgroundColor: colors.bgSecondary,
+    },
+    detailBody: {
+      padding: 14,
+    },
+    detailTitle: {
+      color: colors.fontPrimary,
+      fontSize: 22,
+      lineHeight: 28,
+      fontWeight: '900',
+      marginTop: 10,
+    },
+    detailText: {
+      color: colors.fontSecondary,
+      fontSize: 14,
+      lineHeight: 21,
+      marginTop: 10,
+    },
+    detailMetaGrid: {
+      marginTop: 14,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      rowGap: 10,
+    },
+    detailMeta: {
+      width: '48.5%',
+      backgroundColor: colors.bgSecondary,
+      borderRadius: 8,
+      padding: 10,
+    },
+    detailMetaLabel: {
+      color: colors.fontMuted,
+      fontSize: 11,
+      lineHeight: 15,
+      fontWeight: '700',
+    },
+    detailMetaValue: {
+      color: colors.fontPrimary,
+      fontSize: 14,
+      lineHeight: 18,
+      fontWeight: '800',
+      marginTop: 4,
+    },
+    primaryButton: {
+      minHeight: 46,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.highlightPrimary,
+      marginTop: 16,
+    },
+    secondaryButton: {
+      backgroundColor: colors.surfacePrimary,
+      borderWidth: 1,
+      borderColor: colors.highlightPrimary,
+    },
+    disabledButton: {
+      opacity: 0.55,
+    },
+    primaryButtonText: {
+      color: colors.white,
+      fontSize: 14,
+      lineHeight: 18,
+      fontWeight: '900',
+    },
+    secondaryButtonText: {
+      color: colors.highlightPrimary,
+    },
+    ticketRow: {
+      backgroundColor: colors.surfacePrimary,
+      borderWidth: 1,
+      borderColor: colors.borderSubtle,
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 12,
+    },
+    ticketCard: {
+      backgroundColor: colors.surfacePrimary,
+      borderWidth: 1,
+      borderColor: colors.borderSubtle,
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 12,
+      shadowColor: colors.shadowColor,
+      shadowOffset: {width: 0, height: 8},
+      shadowOpacity: isDarkMode ? 0.18 : 0.08,
+      shadowRadius: 14,
+      elevation: 2,
+    },
+    ticketCardHeader: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 10,
+    },
+    ticketIconWrap: {
+      width: 42,
+      height: 42,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.brandSoft,
+    },
+    ticketHeaderContent: {
+      flex: 1,
+      minWidth: 0,
+    },
+    ticketSubtitle: {
+      color: colors.fontMuted,
+      fontSize: 12,
+      lineHeight: 16,
+      fontWeight: '700',
+      marginTop: 4,
+    },
+    ticketInfoPanel: {
+      marginTop: 12,
+      padding: 10,
+      borderRadius: 8,
+      backgroundColor: colors.bgSecondary,
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      gap: 10,
+    },
+    ticketInfoItem: {
+      flex: 1,
+      minWidth: 0,
+    },
+    ticketInfoDivider: {
+      width: 1,
+      backgroundColor: colors.borderPrimary,
+    },
+    ticketInfoLabel: {
+      color: colors.fontMuted,
+      fontSize: 11,
+      lineHeight: 14,
+      fontWeight: '800',
+    },
+    ticketInfoValue: {
+      color: colors.fontPrimary,
+      fontSize: 13,
+      lineHeight: 18,
+      fontWeight: '900',
+      marginTop: 3,
+    },
+    ticketActions: {
+      flexDirection: 'row',
+      gap: 10,
+      marginTop: 12,
+    },
+    ticketAction: {
+      flex: 1,
+      minHeight: 40,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'row',
+      gap: 6,
+      backgroundColor: colors.highlightPrimary,
+    },
+    ticketActionOutline: {
+      backgroundColor: colors.surfacePrimary,
+      borderWidth: 1,
+      borderColor: colors.highlightPrimary,
+    },
+    ticketActionText: {
+      color: colors.white,
+      fontSize: 12,
+      fontWeight: '900',
+    },
+    ticketActionOutlineText: {
+      color: colors.highlightPrimary,
+    },
+  });
+};
+
+export const styles = useCampaignStyles;

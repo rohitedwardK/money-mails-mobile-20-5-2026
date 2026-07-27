@@ -6,11 +6,13 @@ export const categoryPageStyles = () => {
 
   return StyleSheet.create({
     pageContainer: {
-      backgroundColor: colors.bgPrimary,
+      backgroundColor: 'transparent',
+      flex: 1,
+      paddingBottom: 104,
     },
     brandIconCardsWrapper: {
-      paddingHorizontal: 10,
-      marginVertical: 40,
+      paddingHorizontal: 14,
+      marginVertical: 24,
     },
     viewMore: {
       width: 3,
@@ -20,8 +22,9 @@ export const categoryPageStyles = () => {
       display: 'flex',
       flexDirection: 'row',
       flexWrap: 'wrap',
-      paddingVertical: 30,
-      paddingHorizontal: 10,
+      paddingTop: 22,
+      paddingBottom: 104,
+      paddingHorizontal: 14,
       justifyContent: 'space-between',
     },
   });

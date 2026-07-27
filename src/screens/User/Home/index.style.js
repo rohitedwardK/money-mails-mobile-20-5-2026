@@ -3,66 +3,235 @@ import {StyleSheet} from 'react-native';
 import {DeviceContext} from '../../../context/DeviceContext';
 import getColors from '../../../utils/colors';
 
-export const styles = () => {
-  const {themeColors: colors, tabBarColors} = getColors();
+const useHomeStyles = () => {
+  const {themeColors: colors, isDarkMode} = getColors();
   const {screenWidth, screenHeight} = useContext(DeviceContext);
+  const softSectionOverlay = isDarkMode ? 'rgba(24, 33, 31, 0.78)' : 'rgba(247, 250, 248, 0.92)';
+  const shortcutPanelBg = isDarkMode ? colors.surfaceSecondary : '#2F8438';
 
   return StyleSheet.create({
-    dropdown: {
-      height: 50,
-      color:'black',
-      width: screenWidth,
-      borderColor: 'gray',
-      borderWidth: 0.5,
-      borderRadius: 8,
-      paddingHorizontal: 8,
-    },
-    placeholderStyle: {
-      fontSize: 16,
-      color:'black'
-    },
-    selectedTextStyle: {
-      fontSize: 16,
-      color:'black'
-    },
-    
-    inputSearchStyle: {
-      color:'black',
-      width:"100%",
-      height: 40,
-      fontSize: 16,
-    },
     pageContainer: {
       // marginTop: -600,
       flex: 1,
-      backgroundColor: colors.bgPrimary,
+      backgroundColor: 'transparent',
+    },
+    filterSection: {
+      marginHorizontal: 0,
+      marginTop: 2,
+      marginBottom: 10,
+      paddingTop: 10,
+      paddingBottom: 8,
+      backgroundColor: shortcutPanelBg,
+      borderRadius: 0,
+      borderBottomWidth: 0,
+      borderBottomColor: 'transparent',
+      zIndex: 5,
+      elevation: 0,
+      overflow: 'hidden',
+    },
+    categoryDoodleLayer: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: isDarkMode ? shortcutPanelBg : 'rgba(32, 166, 74, 0.12)',
+    },
+    categoryDoodleIcon: {
+      position: 'absolute',
+      opacity: isDarkMode ? 0.1 : 0.13,
+    },
+    categoryScroller: {
+      paddingHorizontal: 12,
+      alignItems: 'center',
+    },
+    categoryChip: {
+      width: 68,
+      alignItems: 'center',
+      marginRight: 10,
+    },
+    categoryIconWrap: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.homeCard,
+      borderWidth: 1,
+      borderColor: colors.borderSubtle,
+      overflow: 'hidden',
+    },
+    categoryImage: {
+      width: '100%',
+      height: '100%',
+    },
+    categoryChipText: {
+      width: '100%',
+      color: isDarkMode ? colors.fontPrimary : colors.white,
+      fontSize: 9,
+      lineHeight: 12,
+      fontWeight: '700',
+      textAlign: 'center',
+      marginTop: 6,
+    },
+    categoryChipTextActive: {
+      color: colors.warning,
     },
     brandIconCardsWrapper: {
       width: screenWidth,
-      marginVertical: 12,
-      paddingVertical: 10,
-      backgroundColor: '#EEF5E6',
-      borderRadius: 10,
+      marginTop: 4,
+      marginBottom: 0,
+      paddingTop: 0,
+      paddingBottom: 0,
+      backgroundColor: colors.homeSection,
+      borderBottomWidth: 0,
+      borderBottomColor: 'transparent',
     },
-    brandListContent: {
-      paddingHorizontal: 8,
+    homeAdList: {
+      paddingHorizontal: 12,
+      paddingTop: 12,
+      paddingBottom: 10,
+      backgroundColor: colors.homeBackground,
+    },
+    homeAdCard: {
+      width: screenWidth - 24,
+      height: 152,
+      borderRadius: colors.radiusLg,
+      overflow: 'hidden',
+      backgroundColor: colors.orangePrimary,
+      borderWidth: 0,
+      marginRight: 12,
+    },
+    homeAdImage: {
+      width: '100%',
+      height: '100%',
+    },
+    storeSectionTitle: {
+      color: colors.fontPrimary,
+      fontSize: 14,
+      lineHeight: 18,
+      fontWeight: '800',
+      marginHorizontal: 12,
+      marginBottom: 10,
+    },
+    homeStoreScroller: {
+      paddingHorizontal: 10,
+      paddingTop: 12,
+      paddingBottom: 14,
       alignItems: 'center',
     },
-    brandListItem: {
-      marginHorizontal: 6,
-      marginVertical: 4,
+    homeStoreFeature: {
+      marginRight: 8,
+    },
+    emptyStoreText: {
+      color: colors.fontPrimary,
+      fontSize: 13,
+      lineHeight: 18,
+      paddingHorizontal: 12,
+    },
+    emptyStoreState: {
+      flex: 1,
+      minHeight: Math.max(220, screenHeight * 0.28),
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginHorizontal: 12,
+      marginVertical: 16,
+      borderRadius: 16,
+      backgroundColor: colors.homeCard,
+      borderWidth: 1,
+      borderColor: colors.borderSubtle,
+      paddingHorizontal: 28,
+      paddingVertical: 24,
+    },
+    emptyStoreIconWrap: {
+      width: 70,
+      height: 70,
+      borderRadius: 35,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.bgSecondary,
+      borderWidth: 1,
+      borderColor: colors.borderSubtle,
+      marginBottom: 14,
+    },
+    emptyStoreTitle: {
+      color: colors.fontPrimary,
+      fontSize: 17,
+      lineHeight: 22,
+      fontWeight: '700',
+      textAlign: 'center',
+    },
+    emptyStoreSubText: {
+      color: colors.fontMuted,
+      fontSize: 13,
+      lineHeight: 18,
+      textAlign: 'center',
+      marginTop: 6,
     },
     viewMore: {
       width: 3,
       height: 3,
     },
     tabContent: {
-      display: 'flex',
       flexDirection: 'row',
       flexWrap: 'wrap',
-      paddingVertical: 30,
-      paddingHorizontal: 10,
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      paddingTop: 12,
+      paddingBottom: 96,
+      paddingHorizontal: 16,
+      backgroundColor: colors.homeBackground,
+    },
+    mailSection: {
+      marginHorizontal: 0,
+      marginTop: 0,
+      minHeight: Math.max(260, screenHeight * 0.34),
+      backgroundColor: colors.homeBackground,
+    },
+    mailToolbar: {
+      minHeight: 46,
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+      paddingHorizontal: 12,
+      backgroundColor: softSectionOverlay,
+      borderBottomWidth: 0,
+    },
+    mailToggle: {
+      alignSelf: 'flex-start',
+    },
+    emptyMailState: {
+      flex: 1,
+      minHeight: Math.max(220, screenHeight * 0.28),
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginHorizontal: 12,
+      borderRadius: 16,
+      backgroundColor: colors.homeCard,
+      borderWidth: 1,
+      borderColor: colors.borderSubtle,
+      paddingHorizontal: 28,
+      paddingBottom: 20,
+    },
+    emptyMailIconWrap: {
+      width: 66,
+      height: 66,
+      borderRadius: 33,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.bgSecondary,
+      borderWidth: 1,
+      borderColor: colors.borderSubtle,
+      marginBottom: 14,
+    },
+    emptyMailTitle: {
+      color: colors.fontPrimary,
+      fontSize: 17,
+      lineHeight: 22,
+      fontWeight: '700',
+      textAlign: 'center',
+    },
+    emptyMailText: {
+      color: colors.fontMuted,
+      fontSize: 13,
+      lineHeight: 18,
+      textAlign: 'center',
+      marginTop: 6,
     },
     drawer: {
       backgroundColor: 'transparent',
@@ -100,16 +269,29 @@ export const styles = () => {
     },
     dropdown: {
       height: 50,
-      color:'black',
-      width: screenWidth/2.15,
-      borderColor: 'gray',
-      borderWidth: 0.5,
-      borderRadius: 8,
-      paddingHorizontal: 8,
+      color: colors.fontPrimary,
+      width: (screenWidth - 36) / 2,
+      borderColor: colors.borderPrimary,
+      borderWidth: 1,
+      borderRadius: 14,
+      paddingHorizontal: 12,
+      backgroundColor: colors.surfacePrimary,
+    },
+    disabledCityInput: {
+      height: 50,
+      width: (screenWidth - 36) / 2,
+      marginTop: 5,
+      borderColor: colors.borderPrimary,
+      borderWidth: 1,
+      borderRadius: 14,
+      paddingHorizontal: 12,
+      color: colors.fontPrimary,
+      backgroundColor: colors.bgSecondary,
+      opacity: 0.85,
     },
     icon: {
       marginRight: 5,
-      color:'black'
+      color: colors.fontPrimary,
     },
     label: {
       // position: 'absolute',
@@ -122,18 +304,18 @@ export const styles = () => {
     },
     placeholderStyle: {
       fontSize: 16,
-      color:'black'
+      color: colors.fontMuted,
     },
     selectedTextStyle: {
       fontSize: 16,
-      color:'black'
+      color: colors.fontPrimary,
     },
     iconStyle: {
       width: 20,
       height: 20,
     },
     inputSearchStyle: {
-      color:'black',
+      color: colors.fontPrimary,
       height: 40,
       fontSize: 16,
     },
@@ -143,3 +325,5 @@ export const styles = () => {
     },
   });
 };
+
+export const styles = useHomeStyles;

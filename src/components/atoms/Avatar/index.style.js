@@ -12,14 +12,10 @@ export const avatarStyles = ({size, rounded, fit, flatStyle}) => {
       borderRadius: rounded ? 500 : 28,
       backgroundColor: '#009999' , //avatarColors.wrapperBg,
       position: 'relative',
-      ...(!flatStyle
-        ? {
-            shadowColor: avatarColors.shadowColor,
-            shadowOffset: {width: 12, height: 12},
-            shadowOpacity: 1,
-            shadowRadius: 20,
-          }
-        : {}),
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowOpacity: 0,
+      elevation: 0,
     },
     dp: {
       width: '100%',
@@ -39,14 +35,12 @@ export const avatarStyles = ({size, rounded, fit, flatStyle}) => {
       backgroundColor: avatarColors.statusIndicator,
     },
     initial: {
-      margin: 35,
-      width: '100%',
-      height: '100%',
-      resizeMode: fit,
-      alignItems:'center',
+      color: 'black',
+      fontSize: Math.max(14, size * 0.24),
+      fontWeight: '800',
+      lineHeight: Math.max(18, size * 0.3),
+      textAlign: 'center',
       borderRadius: rounded ? 500 : 28,
-      fontSize: 22,
-    color:"black",
     }
   });
 };

@@ -15,7 +15,7 @@ import { IdProofFormat } from "../../../utils";
 import Toast from '../../../components/atoms/Snackbar';
 
 
-const ResetPassword = ({navigation}) => {
+const ResetPassword = ({navigation, route}) => {
   const { verifyData = {}, updateResult, passError, isRequest, setMobilePayload, setResetPayload, isPassLoading } = usePassword();
   const {isIos, screenHeight} = useContext(DeviceContext);
   const [identityLable, setIdentityLable] = useState();
@@ -26,6 +26,7 @@ const ResetPassword = ({navigation}) => {
   const [formData, setFormData] = useState({
     phone: '',
   });
+  const resetEmail = route?.params?.email || '';
 
   const styles = resetPasswordStyles({screenHeight, isIos});
 
@@ -87,7 +88,7 @@ const ResetPassword = ({navigation}) => {
     setTimeout(()=> {
     if(updateResult) navigation.navigate('SignIn')
     }, 2000)
-  },[updateResult])
+  },[navigation, updateResult])
 
   return (
     <View style={styles.pageContainer}>
@@ -104,6 +105,7 @@ const ResetPassword = ({navigation}) => {
         {!verifyData?.success?(
           <Text style={styles.subTitle}>
           If you've forgotten your password, don't worry. Kindly furnish your registered mobile number, enabling us to show instructions for resetting your password.
+          {resetEmail ? ` Account: ${resetEmail}` : ''}
           </Text>
         ):(
           <Text style={styles.subTitle}>
@@ -121,14 +123,14 @@ const ResetPassword = ({navigation}) => {
       <View>
         <TextField
           value={IdProofFormat(identityNumber) || ""}
-          label="Identity Number"
+          label="Driving Licence/Voter ID"
           onChange={(val) => setIdentityNumber(val)}
           returnKeyType="go"
         /></View>
       <View>
         <TextField
           value={newPwd}
-          label="Password"
+          label="New Password"
           onChange={(val) => setNewPwd(val)}
           returnKeyType="go"
           type="password"

@@ -10,7 +10,8 @@ import {styles as newPasswordStyles} from './index.style';
 const NewPassword = ({navigation}) => {
   const {isIos, screenHeight} = useContext(DeviceContext);
   const [formData, setFormData] = useState({
-    password: '',
+    oldPassword: '',
+    newPassword: '',
     confirmPassword: '',
   });
 
@@ -45,9 +46,16 @@ const NewPassword = ({navigation}) => {
         gap={screenHeight * 0.02}
         containerStyles={styles.fieldsWrapper}>
         <TextField
-          value={formData.password}
-          label="Password"
-          onChange={value => handleFormChange('password', value)}
+          value={formData.oldPassword}
+          label="Old Password"
+          onChange={value => handleFormChange('oldPassword', value)}
+          returnKeyType="next"
+          type="password"
+        />
+        <TextField
+          value={formData.newPassword}
+          label="New Password"
+          onChange={value => handleFormChange('newPassword', value)}
           returnKeyType="next"
           type="password"
         />

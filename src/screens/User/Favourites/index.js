@@ -11,7 +11,6 @@ import { DeviceContext } from '../../../context/DeviceContext';
 import { useReward } from "../../../hooks/services/useReward";
 import { useFavourites } from "../../../hooks/services/useFavourites";
 import { useMail } from "../../../hooks/services/useMail";
-import CustomSwitch from '../../../components/switch';
 import OfferCard from '../../../components/organisms/OfferCard';
 import EvilIcon from 'react-native-vector-icons/EvilIcons';
 import { ModalContext } from '../../../context/ModalContext';
@@ -376,63 +375,52 @@ const Favourites = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.pageContainer}>
-      <View
-        style={{
-          width: '98%',
-          alignItems: 'flex-start',
-          paddingVertical: 10,
-          backgroundColor: '#00AEEF',
-          alignItems: 'center',
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          marginBottom: 5
-        }}>
-        <View
-          style={{
-            position: 'relative',
-            width: '70%',
-            height: 35,
-          }}>
+      <View style={styles.searchBand}>
+        <View style={styles.searchWrapper}>
           <EvilIcon
             name="search"
             size={25}
-            color="#A7A7A7"
-            style={{
-              position: 'absolute',
-              left: 7,
-              zIndex: 1,
-              top: 7,
-            }}
+            color={colors.fontMuted}
+            style={styles.searchIcon}
           />
           <TextInput
-            style={{
-              backgroundColor: colors.bgPrimary,
-              width: '100%',
-              height: '100%',
-              paddingVertical: 10,
-              borderRadius: 50,
-              paddingRight: 15,
-              paddingLeft: 35,
-              color: '#222'
-            }}
-            placeholderTextColor="#A7A7A7"
+            style={styles.searchInput}
+            placeholderTextColor={colors.fontMuted}
             placeholder="Search for brands"
             value={filterValue}
             onChange={e => setFilterValue(e.nativeEvent.text)}
           />
         </View>
       </View>
-      <View styles={styles.header}>
-        <CustomSwitch
-          selectionMode={option}
-          roundCorner={true}
-          option1={'Brands'}
-          option2={'Mails'}
-          onSelectSwitch={onSelectSwitch}
-          selectionColor={'#1890ff'}
-        />
+      <View style={styles.favouriteTabStrip}>
+        <View style={styles.favouriteTabBar}>
+          {[
+            {label: 'Brands', value: 1},
+            {label: 'Mails', value: 2},
+          ].map(tab => {
+            const isActive = option === tab.value;
+            return (
+              <TouchableOpacity
+                key={tab.value}
+                activeOpacity={0.82}
+                style={[
+                  styles.favouriteTabButton,
+                  isActive ? styles.favouriteTabButtonActive : null,
+                ]}
+                onPress={() => onSelectSwitch(tab.value)}>
+                <Text
+                  style={[
+                    styles.favouriteTabText,
+                    isActive ? styles.favouriteTabTextActive : null,
+                  ]}>
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
-      <View style={{ marginBottom: 20 }}>
+      <View style={styles.brandGridWrapper}>
         {option === 1 ? <>
           {/* {brandData?.length > 0 && <Grid
             columnsPerRow={3}
@@ -474,41 +462,30 @@ const Favourites = ({ navigation }) => {
               })} */}
 
           {brandData && <FlatList
-            ItemSeparatorComponent={
-              Platform.OS !== 'android' &&
-              (({ highlighted }) => (
-                <View
-                  style={[styles.separator, highlighted && { marginLeft: 0 }]}
-                />
-              ))
-            }
-            columnWrapperStyle={{ flex: 1, justifyContent: 'space-around', alignItems: 'center' }}
-            numColumns={3}
+            key="brand-grid-2"
+            columnWrapperStyle={styles.brandListRow}
+            contentContainerStyle={styles.brandListContent}
+            numColumns={2}
             horizontal={false}
             onEndReached={() => {
-              console.log("Page:", pageNum)
+              console.log('Page:', pageNum);
               setPageNum((prevPage) => prevPage + 1);
             }}
             onEndReachedThreshold={0.1}
             scrollEnabled={false}
-            onScrollEndDrag={() => console.log("end")}
-            data={filterValue !== "" ? brandData.filter((item) => {
+            data={filterValue !== '' ? brandData.filter((item) => {
               return item?.company_name
                 .toLowerCase()
                 .startsWith(filterValue?.toLowerCase());
             }) : brandData}
-            renderItem={({ item, i }) => (
+            keyExtractor={(item, index) => item?.uuid || `${index}`}
+            renderItem={({ item, index }) => (
 
               // <TouchableHighlight
               //   key={i}>
               <View
-                key={i}
-                style={{
-                  width: 120,
-                  height: 120,
-                  alignItems: 'center',
-                  marginBottom: 5,
-                }}>
+                key={item?.uuid || index}
+                style={styles.brandCardShell}>
                 {/* <BrandIconCard
                     key={item?.uuid}
                     isFavourite={true}
@@ -527,22 +504,22 @@ const Favourites = ({ navigation }) => {
                   </BrandIconCard> */}
                 <BrandIconCard
                   // isActive={selBrand.indexOf(item.uuid) !== -1 || item.is_highlight === 'true' ? true : false}
-                  key={i}
+                  key={item?.uuid || index}
                   item={item}
                   // rounded
                   isFavourite={true}
                   color={isDarkMode ? colors.bgPrimary : '#EEF8FF'}
+                  wrapperStyles={styles.brandCard}
                   // containerStyles={{
                   //   marginBottom: i + 1 < barndList?.length ? 20 : 0,
                   // }}
                   onFavouriteToggle={(e) => onFavouriteToggle(item?.uuid, 'brand')}
-                  onBrandSelect={(e) => onBrandSelect(e, item?.uuid,item.category_uuid)}
+                  onBrandSelect={(e) => onBrandSelect(e, item?.uuid, item.category_uuid)}
                   src={item?.logo_url}
-                  onActionPress={() => console.log('0000')}
                   showAddress={false}
                   showActionByDefault={true}
-                  size={120}>
-                </BrandIconCard>
+                  size={120}
+                />
               </View>
               // </TouchableHighlight>
             )}

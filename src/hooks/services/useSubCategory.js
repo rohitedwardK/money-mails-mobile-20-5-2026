@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState, useContext } from "react";
 import { baseUrl } from "../../connections";
 import { UserContext } from "../../context/UserContext";
@@ -11,14 +12,15 @@ export const useSubCategory = () => {
   const [subCatBrand,setSubCatBrand] = useState("");
 
   useEffect(() => {
+    if (!payload || !userDetails?.uuid || !userDetails?.token) {
+      return;
+    }
+
     setIsLoading(true);
 
       const headers = new Headers();
       headers.append("Content-Type", "application/json");
       headers.append("x-auth-token", userDetails?.token);
-
-      const params = JSON.stringify(payload);
-
 
       const requestOptions = {
         method: "GET",
@@ -27,7 +29,13 @@ export const useSubCategory = () => {
       };
       // setData("");
       setTimeout(async()=>{
-       await fetch(`${baseUrl}/sub_category/lists?brand_uuid=${subCatBrand}&${JSON.stringify(payload)}`, requestOptions)
+        const brandParam = Array.isArray(subCatBrand)
+          ? subCatBrand.filter(Boolean).join(',')
+          : subCatBrand || '';
+        const query = String(payload || '').replace(/^\?/, '');
+        const brandQuery = brandParam ? `brand_uuid=${brandParam}&` : '';
+
+       await fetch(`${baseUrl}/sub_category/lists?${brandQuery}${query}`, requestOptions)
         .then(async (response) => {
           const res = await response.text();
           if (response.status !== 200) {
@@ -47,7 +55,7 @@ export const useSubCategory = () => {
           setIsLoading(false);
         });
       },1000)
-  }, [payload]);
+  }, [payload, subCatBrand, userDetails?.token, userDetails?.uuid]);
 
   return {
     subCategoryList: data,
