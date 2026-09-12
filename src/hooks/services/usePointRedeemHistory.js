@@ -1,6 +1,6 @@
-import { useEffect, useState,useContext } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useEffect, useState,useContext } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 import {
   ToastAndroid,
   Platform,
@@ -17,15 +17,15 @@ export const usePointRedeemHistory = () => {
   useEffect(() => {
     if (payload) {
       setIsLoading(true);
-     
+
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
 
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
       fetch(`${baseUrl}/point/redeemed/history/list?limit=10&search=&user_uuid=${payload.user_uuid}&page=${payload.page}`, requestOptions)
         .then(async (response) => {
@@ -41,9 +41,9 @@ export const usePointRedeemHistory = () => {
             setError(false);
         })
         .catch((err) => {
-            setData(null)
+            setData(null);
           if (Platform.OS === 'android') {
-            ToastAndroid.show(err, ToastAndroid.SHORT)
+            ToastAndroid.show(err, ToastAndroid.SHORT);
           } else {
             AlertIOS.alert(err);
           }
@@ -59,6 +59,6 @@ export const usePointRedeemHistory = () => {
     data,
     isLoading,
     error,
-    setRedeemPayload
+    setRedeemPayload,
   };
 };

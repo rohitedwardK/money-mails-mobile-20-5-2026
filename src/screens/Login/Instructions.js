@@ -1,13 +1,13 @@
-import React,{useContext} from 'react'; 
+import React,{useContext} from 'react';
 import {Text, View, StyleSheet,Image} from 'react-native';
 import Button from '../../components/atoms/Button';
-import {DeviceContext} from '../../context/DeviceContext'
+import {DeviceContext} from '../../context/DeviceContext';
 
 const Instruction = ({navigation})=>{
     const {screenWidth} = useContext(DeviceContext);
     return (
         <View style={styles.container}>
-            
+
             <Image
              style={styles.img}
              source={require('../../assets/images/instruc.png')} />
@@ -23,7 +23,7 @@ const Instruction = ({navigation})=>{
             btnText="Back"
             size="large"
             onPress={()=>{
-                navigation.navigate('SignIn')
+                navigation.navigate('SignIn');
             }}
             overridingStyles={{
                 marginTop: 10,
@@ -34,44 +34,44 @@ const Instruction = ({navigation})=>{
             btnTextOverrideStyles={styles.signUpBtnText}
           />
         </View>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     container : {
         flex:1,
         alignItems : 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
     heading : {
         color : 'black',
         fontSize:24,
         fontWeight:'bold',
-        marginTop:20
+        marginTop:20,
     },
     subHeading:{
         color:'black',
         fontSize:18,
         fontWeight:'bold',
         marginTop:10,
-        marginBottom:10
+        marginBottom:10,
     },
     instructionContainer :{
-        margin:15
+        margin:15,
     },
     normalText :{
         color:'black',
-        marginBottom:5
+        marginBottom:5,
     },
     img : {
         width:100,
-        height:100
+        height:100,
     },
-    
+
       signUpBtnText: {
         fontSize: 14,
       },
-})
+});
 
 export default Instruction;
 

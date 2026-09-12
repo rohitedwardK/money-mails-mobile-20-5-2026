@@ -40,7 +40,7 @@ const OffersCarousal = ({data}) => {
   const baseOptions = {
     vertical: false,
     width: screenWidth,
-    height: 185,
+    height: 148,
   };
 
   return (

@@ -7,7 +7,7 @@ import { brandIconCardStyles } from './index.style';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import getColors from '../../../utils/colors';
 import { SlideInUp, AnimatedLayout, runOnJS } from 'react-native-reanimated';
-import { Tooltip } from "react-native-elements";
+import { Tooltip } from 'react-native-elements';
 
 const BrandIconCard = ({
   variant,
@@ -28,7 +28,7 @@ const BrandIconCard = ({
   disableSelect,
   children,
   item,
-  showAddress
+  showAddress,
 }) => {
   const [isFav, setIsFav] = useState(isFavourite);
   const [isSelected, setIsSelected] = useState(isActive);
@@ -140,17 +140,30 @@ const BrandIconCard = ({
                 <EntypoIcon name="shop" size={30} color={colors.fontMuted} />
               </View>
             )}
-            <View style={styles.storeFeatureBadge}>
-              <Text style={styles.storeFeatureBadgeText} numberOfLines={1}>
-                {item?.company_name || item?.name || 'Store'}
-              </Text>
-            </View>
-            <View style={styles.storeFeatureFooter}>
-              <EntypoIcon name="location-pin" size={12} color={colors.white} />
-              <Text style={styles.storeFeatureAddress} numberOfLines={1} ellipsizeMode="tail">
-                {locationText}
-              </Text>
-            </View>
+          </View>
+          <View style={styles.storeFeatureBadge}>
+            <Text style={styles.storeFeatureBadgeText} numberOfLines={1}>
+              {item?.company_name || item?.name || 'Store'}
+            </Text>
+          </View>
+          <View style={styles.storeFeatureFooter}>
+            <EntypoIcon name="location-pin" size={12} color={colors.fontMuted} />
+            <Text style={styles.storeFeatureAddress} numberOfLines={1} ellipsizeMode="tail">
+              {locationText}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.storeFeatureTag,
+              getPartnerTag(item).isTravel ? styles.storeFeatureTagTravel : null,
+            ]}>
+            <Text
+              style={[
+                styles.storeFeatureTagText,
+                getPartnerTag(item).isTravel ? styles.storeFeatureTagTextTravel : null,
+              ]}>
+              {getPartnerTag(item).label}
+            </Text>
           </View>
         </View>
       </GestureDetector>
@@ -277,15 +290,15 @@ const BrandIconCard = ({
               popover={
                 <View>
                   <Text style={{ color: '#fff' }}>
-                    {item?.address1 || ""},
-                    {item?.cities?.[0]?.name || ""},
-                    {item?.counties?.[0]?.name || ""},
-                    {item?.states?.[0]?.name || ""},
-                    {item?.countries?.[0]?.name || ""}
+                    {item?.address1 || ''},
+                    {item?.cities?.[0]?.name || ''},
+                    {item?.counties?.[0]?.name || ''},
+                    {item?.states?.[0]?.name || ''},
+                    {item?.countries?.[0]?.name || ''}
                   </Text>
                 </View>
               }
-              
+
               // popover={<View ><Text style={{ color: '#fff' }}>{item?.address1},{item?.cities[0]?.name},{item?.counties[0]?.name},{item?.states[0]?.name},{item?.countries[0]?.name}</Text></View>}
             >
               <View style={{ flexDirection: 'row' }}>
@@ -364,6 +377,23 @@ BrandIconCard.defaultProps = {
   onActionPress: false,
   enableLongPressAction: false,
   showActionByDefault: false,
+};
+
+const getPartnerTag = item => {
+  const category =
+    item?.categories?.[0]?.name ||
+    item?.category?.name ||
+    item?.category_name ||
+    item?.type ||
+    '';
+  const label = String(category || 'Travel').trim() || 'Travel';
+  const isTravel = /travel|holiday|kayak/i.test(`${label} ${item?.company_name || item?.name || ''}`);
+  const isFlight = /flight|air/i.test(`${label} ${item?.company_name || item?.name || ''}`);
+
+  return {
+    label: isFlight ? 'Flights' : isTravel ? 'Travel' : label,
+    isTravel: !isFlight,
+  };
 };
 
 const getFirstName = list => (Array.isArray(list) && list[0]?.name ? list[0].name : '');

@@ -8,13 +8,13 @@ import {
   Text,
   View,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Snackbar from 'react-native-snackbar';
 import {WebView} from 'react-native-webview';
 import Button from '../../../components/atoms/Button';
 import {UserContext} from '../../../context/UserContext';
 import {deleteAccount} from '../../../api/moneyMails';
 import {usePopUpAds} from '../../../hooks/services/usePopupads';
+import {clearAuthSession} from '../../../utils/authSession';
 import {
   PRIVACY_POLICY_URL,
   TERMS_CONDITIONS_URL,
@@ -136,12 +136,8 @@ export const DeleteAccountScreen = ({navigation}) => {
   const {userDetails, setUserDetails} = useContext(UserContext);
 
   const clearSession = async () => {
-    await AsyncStorage.removeItem('token');
-    await AsyncStorage.removeItem('auth');
-    await AsyncStorage.removeItem('user');
-    await AsyncStorage.clear();
+    await clearAuthSession();
     setUserDetails({});
-    navigation.navigate('LoginScreens', {screen: 'SignIn'});
   };
 
   const confirmDelete = () => {
@@ -201,7 +197,7 @@ export const PopupAdsScreen = () => {
   const {PopUpAddData, isLoading, setPopUpAds} = usePopUpAds();
 
   useEffect(() => {
-    if (userDetails?.uuid) setPopUpAds(`?user_uuid=${userDetails.uuid}`);
+    if (userDetails?.uuid) {setPopUpAds(`?user_uuid=${userDetails.uuid}`);}
   }, [setPopUpAds, userDetails?.uuid]);
 
   const ads = Array.isArray(PopUpAddData) ? PopUpAddData : PopUpAddData?.data || [];

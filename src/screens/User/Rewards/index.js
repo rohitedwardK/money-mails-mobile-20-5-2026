@@ -48,9 +48,9 @@ const Rewards = () => {
   const [category, setCategory] = useState(null);
   const { setRedeemPayload, data, setRedeemPayloads, datas } = usePointRedeem();
   const [modalVisible, setModalVisible] = useState(false);
-  const [pointRedeemData, setPointRedeemData] = useState({ point: 0, available: 0 })
+  const [pointRedeemData, setPointRedeemData] = useState({ point: 0, available: 0 });
   const [modalVisibles, setModalVisibles] = useState(false);
-  const [redeemsuccessMessage, setRedeemsuccessMessage] = useState("");
+  const [redeemsuccessMessage, setRedeemsuccessMessage] = useState('');
   const [userPoints, setUserPoints] = useState(0);
 
   useEffect(() => {
@@ -78,7 +78,7 @@ const Rewards = () => {
   }, [setPayload, userDetails?.uuid]);
 
   const onCategoryHandle = useCallback((item) => {
-    if (!item?.uuid || !userDetails?.uuid) return;
+    if (!item?.uuid || !userDetails?.uuid) {return;}
 
     SetPege(0);
     setPageNum(0);
@@ -90,19 +90,19 @@ const Rewards = () => {
   }, [SetPege, pageSize, setCatDetailsPayload, userDetails?.uuid]);
 
   useEffect(() => {
-    if (!categoryList?.length || category?.uuid || !userDetails?.uuid) return;
+    if (!categoryList?.length || category?.uuid || !userDetails?.uuid) {return;}
     onCategoryHandle(categoryList[0]);
   }, [category?.uuid, categoryList, onCategoryHandle, userDetails?.uuid]);
 
   const rewardsData = useCallback(() => {
-    if (!userDetails?.uuid) return;
+    if (!userDetails?.uuid) {return;}
     const headers = new Headers();
-    headers.append("Content-Type", "application/json");
-    headers.append("x-auth-token", userDetails?.token);
+    headers.append('Content-Type', 'application/json');
+    headers.append('x-auth-token', userDetails?.token);
     const requestOptions = {
-      method: "GET",
+      method: 'GET',
       headers: headers,
-      redirect: "follow",
+      redirect: 'follow',
     };
 
     fetch(`${baseUrl}/user/point/${userDetails.uuid}`, requestOptions)
@@ -116,8 +116,10 @@ const Rewards = () => {
       .then((result) => {
         setUserPoints(result?.data?.point);
       })
-      .catch((err) => {
-        console.log(err)
+      .catch(err => {
+        if (__DEV__) {
+          console.log(err);
+        }
       });
   }, [userDetails?.token, userDetails?.uuid]);
 
@@ -146,8 +148,8 @@ const Rewards = () => {
   );
 
   const filteredRewards = useMemo(() => {
-    if (!catDetails) return [];
-    if (!filterValue) return catDetails;
+    if (!catDetails) {return [];}
+    if (!filterValue) {return catDetails;}
 
     return catDetails.filter(item => {
       return item?.brand?.some(val =>
@@ -164,9 +166,9 @@ const Rewards = () => {
   useEffect(() => {
     if (data != null) {
       setModalVisible(true);
-      setPointRedeemData({ point: data?.redeemed_point, available: data?.available_point })
+      setPointRedeemData({ point: data?.redeemed_point, available: data?.available_point });
     }
-  }, [data])
+  }, [data]);
 
   const redeemed = () => {
     setRedeemPayloads({ user_uuid: userDetails?.uuid, point: rewards?.point });
@@ -178,9 +180,9 @@ const Rewards = () => {
     if (datas != null) {
       setModalVisible(false);
       setModalVisibles(true);
-      setRedeemsuccessMessage(datas?.message)
+      setRedeemsuccessMessage(datas?.message);
     }
-  }, [datas])
+  }, [datas]);
 
   return (
     <ScrollView style={styles.pageContainer} scrollToOverflowEnabled={true}>
@@ -234,7 +236,7 @@ const Rewards = () => {
               }}>
               <Pressable
                 style={[styless.button, styless.btnOk]}
-                onPress={() => { rewardsData(); setModalVisibles(!modalVisibles) }}>
+                onPress={() => { rewardsData(); setModalVisibles(!modalVisibles); }}>
                 <Text style={styless.textStyle}>Ok</Text>
               </Pressable>
             </View>
@@ -333,7 +335,7 @@ const Rewards = () => {
                       key={index}
                       item={cardItem}
                     />
-                )
+                );
               }}
                   />
                 ) : (
@@ -375,7 +377,7 @@ const styless = StyleSheet.create({
   },
   btnOk: {
     backgroundColor: '#00AEEF',
-    marginLeft: 5
+    marginLeft: 5,
   },
   btnCancel: {
     backgroundColor: 'orange',
@@ -394,7 +396,7 @@ const styless = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
-    color: '#222'
+    color: '#222',
   },
 });
 

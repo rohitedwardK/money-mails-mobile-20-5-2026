@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useContext, useEffect, useState } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useContext, useEffect, useState } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 import {
   ToastAndroid,
   Platform,
@@ -23,16 +23,16 @@ export const usePassword = () => {
   const onPassword = () => {
     setIsPassLoading(true);
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      if (userDetails?.token) headers.append("x-auth-token", userDetails.token);
+      headers.append('Content-Type', 'application/json');
+      if (userDetails?.token) {headers.append('x-auth-token', userDetails.token);}
 
       const params = JSON.stringify(payload);
 
       const requestOptions = {
-        method: "PUT",
+        method: 'PUT',
         headers: headers,
         body: params,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/user/consumer/update/password`, requestOptions)
@@ -52,7 +52,7 @@ export const usePassword = () => {
           setPassError(err);
           setIsPassLoading(false);
         });
-  }
+  };
 
   useEffect(() => {
     if(payload) {
@@ -63,16 +63,16 @@ export const usePassword = () => {
   const verifyMobile = () => {
     setIsPassLoading(true);
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      if (userDetails?.token) headers.append("x-auth-token", userDetails.token);
+      headers.append('Content-Type', 'application/json');
+      if (userDetails?.token) {headers.append('x-auth-token', userDetails.token);}
 
       const params = JSON.stringify(mobilePayload);
 
       const requestOptions = {
-        method: "POST",
+        method: 'POST',
         headers: headers,
         body: params,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/user/consumer/verify`, requestOptions)
@@ -89,16 +89,16 @@ export const usePassword = () => {
           setIsPassLoading(false);
         })
         .catch((err) => {
-          
+
           setPassError(err);
           setIsPassLoading(false);
           if (Platform.OS === 'android') {
-            ToastAndroid.show(err, ToastAndroid.SHORT)
+            ToastAndroid.show(err, ToastAndroid.SHORT);
           } else {
             AlertIOS.alert(err);
           }
         });
-  }
+  };
 
   useEffect(() => {
     if(mobilePayload) {
@@ -110,16 +110,16 @@ export const usePassword = () => {
     setIsPassLoading(true);
     setIsRequest(false);
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      if (userDetails?.token) headers.append("x-auth-token", userDetails.token);
+      headers.append('Content-Type', 'application/json');
+      if (userDetails?.token) {headers.append('x-auth-token', userDetails.token);}
 
       const params = JSON.stringify(resetPayload);
 
       const requestOptions = {
-        method: "PUT",
+        method: 'PUT',
         headers: headers,
         body: params,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/user/consumer/change/password`, requestOptions)
@@ -139,7 +139,7 @@ export const usePassword = () => {
         })
         .catch((err) => {
           if (Platform.OS === 'android') {
-            ToastAndroid.show(err, ToastAndroid.SHORT)
+            ToastAndroid.show(err, ToastAndroid.SHORT);
           } else {
             AlertIOS.alert(err);
           }
@@ -148,7 +148,7 @@ export const usePassword = () => {
           setUpdateResult(false);
           setIsRequest(true);
         });
-  }
+  };
 
   useEffect(() => {
     if(resetPayload) {
@@ -165,6 +165,6 @@ export const usePassword = () => {
     updateResult,
     setPayload,
     setMobilePayload,
-    setResetPayload
+    setResetPayload,
   };
 };

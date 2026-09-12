@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button, Snackbar } from 'react-native-paper';
 
-const Toast = ({message=''}) => {
+const Toast = ({message = ''}) => {
   const [visible, setVisible] = useState(true);
   const onDismissSnackBar = () => setVisible(false);
 

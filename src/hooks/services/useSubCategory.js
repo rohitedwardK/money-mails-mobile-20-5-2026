@@ -1,7 +1,7 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState, useContext } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+
+import { useEffect, useState, useContext } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 
 export const useSubCategory = () => {
   const { userDetails } = useContext(UserContext);
@@ -9,7 +9,7 @@ export const useSubCategory = () => {
   const [error, setError] = useState(false);
   const [data, setData] = useState(null);
   const [payload, setSubCatPayload] = useState(null);
-  const [subCatBrand,setSubCatBrand] = useState("");
+  const [subCatBrand,setSubCatBrand] = useState('');
 
   useEffect(() => {
     if (!payload || !userDetails?.uuid || !userDetails?.token) {
@@ -19,13 +19,13 @@ export const useSubCategory = () => {
     setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
 
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
       // setData("");
       setTimeout(async()=>{
@@ -54,7 +54,7 @@ export const useSubCategory = () => {
           setError(err);
           setIsLoading(false);
         });
-      },1000)
+      },1000);
   }, [payload, subCatBrand, userDetails?.token, userDetails?.uuid]);
 
   return {
@@ -62,7 +62,7 @@ export const useSubCategory = () => {
     isCatLoading: isLoading,
     catError: error,
     setSubCatPayload,
-    setSubCatBrand
+    setSubCatBrand,
 
   };
 };

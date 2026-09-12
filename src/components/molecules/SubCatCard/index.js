@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Animated, View, Vibration, TouchableOpacity } from 'react-native';
+import { Animated, View, Vibration, TouchableOpacity, Image } from 'react-native';
 import Button from '../../atoms/Button';
 import EntypoIcon from 'react-native-vector-icons/Entypo';
 import DirectionSvgIcon from '../../../assets/images/directionIcon.svg.js';
@@ -24,7 +24,7 @@ const SubCatCard = ({
   disableSelect,
   children,
   item,
-  activeCategory = false
+  activeCategory = false,
 }) => {
   const [isFav, setIsFav] = useState(isFavourite);
   const [isSelected, setIsSelected] = useState(activeCategory);

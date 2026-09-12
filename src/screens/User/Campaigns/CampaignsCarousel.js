@@ -34,11 +34,11 @@ const CampaignsCarousel = ({campaigns, onOpenCampaign}) => {
   }, [campaigns.length, canLoop]);
 
   const onMomentumScrollEnd = event => {
-    const width = event.nativeEvent.layoutMeasurement.width;
-    if (!width) {
+    const itemWidth = styles.compactCard.width + 12;
+    if (!itemWidth) {
       return;
     }
-    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / width);
+    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / itemWidth);
     setActiveIndex(Math.max(0, Math.min(nextIndex, campaigns.length - 1)));
   };
 
@@ -47,7 +47,7 @@ const CampaignsCarousel = ({campaigns, onOpenCampaign}) => {
       <FlatList
         ref={listRef}
         horizontal
-        pagingEnabled
+        pagingEnabled={false}
         data={campaigns}
         contentContainerStyle={styles.horizontalList}
         renderItem={({item}) => (
@@ -59,15 +59,18 @@ const CampaignsCarousel = ({campaigns, onOpenCampaign}) => {
         )}
         keyExtractor={(item, index) => getCampaignUuid(item) || `${index}`}
         showsHorizontalScrollIndicator={false}
+        snapToInterval={styles.compactCard.width + 12}
+        decelerationRate="fast"
+        disableIntervalMomentum
         onMomentumScrollEnd={onMomentumScrollEnd}
         getItemLayout={(_, index) => ({
-          length: styles.compactCard.width,
-          offset: styles.compactCard.width * index,
+          length: styles.compactCard.width + 12,
+          offset: (styles.compactCard.width + 12) * index,
           index,
         })}
         onScrollToIndexFailed={({index}) => {
           listRef.current?.scrollToOffset({
-            offset: styles.compactCard.width * index,
+            offset: (styles.compactCard.width + 12) * index,
             animated: true,
           });
         }}

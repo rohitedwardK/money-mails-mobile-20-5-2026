@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useContext } from "react";
-import { ScrollView, Text, View, StyleSheet, TouchableOpacity, BackHandler } from "react-native";
+import React, { useState, useEffect, useContext } from 'react';
+import { ScrollView, Text, View, StyleSheet, TouchableOpacity, BackHandler, Platform } from 'react-native';
 import { ProgressBar, RadioButton, TextInput, Snackbar } from 'react-native-paper';
 import DatePicker from 'react-native-date-picker';
-import moment from "moment";
-import { Dropdown, MultiSelect } from "react-native-element-dropdown";
-import { RACES, COUNTRYS, IDENTITYTYPES, LANGUAGES } from "../../../../constants";
+import moment from 'moment';
+import { Dropdown, MultiSelect } from 'react-native-element-dropdown';
+import { RACES, COUNTRYS, IDENTITYTYPES, LANGUAGES } from '../../../../constants';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import axios from "axios";
+import axios from 'axios';
 import { baseUrl } from '../../../../connections';
-import { UserContext } from "../../../../context/UserContext";
+import { UserContext } from '../../../../context/UserContext';
 import Toast from 'react-native-simple-toast';
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from '@react-navigation/native';
 
 
 const PersonalizationDetails = ({ navigation }) => {
@@ -26,7 +26,7 @@ const PersonalizationDetails = ({ navigation }) => {
     const [langOption, setLangOption] = useState([]);
     const [gender, setGender] = useState('male');
     const [race, setRace] = useState('');
-    const [raceOption, setRaceOption] = useState('')
+    const [raceOption, setRaceOption] = useState('');
     const [religion, setReligion] = useState('');
     const [religionOption, setReligionOption] = useState({});
 
@@ -53,16 +53,16 @@ const PersonalizationDetails = ({ navigation }) => {
 
     function calculateCompletion(obj) {
         const fieldsToCheck = [
-            "address1", "address2", "apartment_number", "city", "country", "county", "dob",
-            "email", "ethnicity", "firstName", "gender", "id_number", "id_proof",
-            "id_type", "languages", "lastName", "mobile", "pincode",
-            "profile_pic", "religion", "ssn", "state"
+            'address1', 'address2', 'apartment_number', 'city', 'country', 'county', 'dob',
+            'email', 'ethnicity', 'firstName', 'gender', 'id_number', 'id_proof',
+            'id_type', 'languages', 'lastName', 'mobile', 'pincode',
+            'profile_pic', 'religion', 'ssn', 'state',
         ];
 
         const totalKeys = fieldsToCheck.length;
         const filledKeys = fieldsToCheck.filter(key => {
             const value = obj[key];
-            return value !== null && value !== undefined && value !== "" &&
+            return value !== null && value !== undefined && value !== '' &&
                 (!Array.isArray(value) || value.length > 0); // Checking empty arrays
         }).length;
 
@@ -70,12 +70,12 @@ const PersonalizationDetails = ({ navigation }) => {
     }
 
     const getProfileData = () => {
-        if (!userDetails?.uuid) return; // Prevent API call if uuid is undefined
+        if (!userDetails?.uuid) {return;} // Prevent API call if uuid is undefined
 
         axios.get(`${baseUrl}/user/consumer/get/profile/${userDetails?.uuid}`, {
             headers: {
-                'x-auth-token': userDetails?.token
-            }
+                'x-auth-token': userDetails?.token,
+            },
         })
             .then((res) => {
                 setuserData(res?.data?.data); // Ensure `userDetails` is updated properly
@@ -86,7 +86,7 @@ const PersonalizationDetails = ({ navigation }) => {
 
                 setDate(new Date(res?.data?.data?.dob));
                 setLangOption(res?.data?.data?.languages);
-                setLang(res?.data?.data?.languages)
+                setLang(res?.data?.data?.languages);
             })
             .catch((err) => {
             });
@@ -98,7 +98,7 @@ const PersonalizationDetails = ({ navigation }) => {
 
     const [religionList, setReligionList] = useState([]);
 
-    console.log(moment(date).toISOString(), "res?.data?.data?.dob")
+    console.log(moment(date).toISOString(), 'res?.data?.data?.dob');
 
 
     useEffect(() => {
@@ -124,7 +124,7 @@ const PersonalizationDetails = ({ navigation }) => {
         };
 
         fetchData();
-    }, [])
+    }, []);
 
 
     const validateFields = () => {
@@ -136,7 +136,7 @@ const PersonalizationDetails = ({ navigation }) => {
         return null;
     };
     const isEmptyObject = (obj) =>
-        obj && typeof obj === "object" && !Array.isArray(obj) && Object.keys(obj).length === 0;
+        obj && typeof obj === 'object' && !Array.isArray(obj) && Object.keys(obj).length === 0;
 
 
     const handleNext = async () => {
@@ -148,33 +148,33 @@ const PersonalizationDetails = ({ navigation }) => {
         }
 
         let payload = {
-            'dob': isEmptyObject(date) ? moment(date, "DD-MM-YYYY").toISOString() : date,
+            'dob': isEmptyObject(date) ? moment(date, 'DD-MM-YYYY').toISOString() : date,
             'gender': gender,
             'ethnicity': race,
             'languages': lang,
-            'religion': religion
-        }
-        console.log(isEmptyObject(date), userDetails?.uuid, "payload")
-        let headers = { 'x-auth-token': userDetails?.token }
+            'religion': religion,
+        };
+        console.log(isEmptyObject(date), userDetails?.uuid, 'payload');
+        let headers = { 'x-auth-token': userDetails?.token };
         axios.put(`${baseUrl}/user/profile/personal/details/${userDetails?.uuid}`, payload, {
-            headers: headers
+            headers: headers,
         }).then((response) => {
-            Toast.show("Success!")
+            Toast.show('Success!');
             navigation.navigate('AddressDetails');
         }).catch((error) => {
-            alert("Something went wrong")
-        })
+            alert('Something went wrong');
+        });
 
-        // 
+        //
     };
 
     const returnArrayLang = (data) => {
-        const arrayReturn = []
+        const arrayReturn = [];
         data?.map((item) => {
             arrayReturn?.push('item');
-        })
+        });
         return arrayReturn;
-    }
+    };
 
     return (
         <ScrollView>
@@ -203,10 +203,10 @@ const PersonalizationDetails = ({ navigation }) => {
                     mode="outlined"
                     label="D.O.B"
                     textColor="#222"
-                    value={moment(date).format("DD-MM-YYYY")}
+                    value={moment(date).format('DD-MM-YYYY')}
                     placeholder="DD-MM-YYYY"
                     right={<TextInput.Icon icon="calendar-month" onPress={() => setOpen(true)} />}
-                    onKeyPress={() => { setOpen(true) }}
+                    onKeyPress={() => { setOpen(true); }}
                 />
                 <DatePicker
                     modal
@@ -215,14 +215,14 @@ const PersonalizationDetails = ({ navigation }) => {
                     date={date}
                     maximumDate={new Date()}
                     onConfirm={(datte) => {
-                        setOpen(false)
+                        setOpen(false);
                         // handleFormChange('dob',moment(date).format("YYYY-MM-DD"))
                         // setDate(moment(datte).format("YYYY-MM-DD"))
-                        setDate(datte)
+                        setDate(datte);
                     }}
                     onCancel={() => {
                         // handleFormChange('dob','')
-                        setOpen(false)
+                        setOpen(false);
                     }}
                 />
             </View>
@@ -232,9 +232,9 @@ const PersonalizationDetails = ({ navigation }) => {
                 marginLeft: 20,
                 fontSize: 16,
                 fontWeight: '600',
-                color: '#222'
+                color: '#222',
             }}>Gender</Text>
-            {Platform.OS === 'ios' && <RadioButton.Group onValueChange={newValue => { setGender(newValue) }} value={gender}>
+            {Platform.OS === 'ios' && <RadioButton.Group onValueChange={newValue => { setGender(newValue); }} value={gender}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', margin: 20, marginLeft: 40, marginRight: 40 }}>
                     <View style={{ flexDirection: 'row' }}>
                         <View style={{
@@ -244,7 +244,7 @@ const PersonalizationDetails = ({ navigation }) => {
                             borderWidth: 1,
                             borderRadius: 50,
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
                         }}>
                             <View style={{
                                 backgroundColor: (gender == 'male') ? '#4C987E' : 'white',
@@ -267,7 +267,7 @@ const PersonalizationDetails = ({ navigation }) => {
                             borderWidth: 1,
                             borderRadius: 50,
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
                         }}>
                             <View style={{
                                 backgroundColor: (gender == 'female') ? '#4C987E' : 'white',
@@ -284,7 +284,7 @@ const PersonalizationDetails = ({ navigation }) => {
                     </View>
                 </View>
             </RadioButton.Group>}
-            {Platform.OS === 'android' && <RadioButton.Group onValueChange={newValue => { setGender(newValue) }} value={gender}>
+            {Platform.OS === 'android' && <RadioButton.Group onValueChange={newValue => { setGender(newValue); }} value={gender}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', margin: 20 }}>
                     <View style={{ flexDirection: 'row' }}>
                         <RadioButton value="male" />
@@ -302,7 +302,7 @@ const PersonalizationDetails = ({ navigation }) => {
                 marginLeft: 20,
                 fontSize: 16,
                 fontWeight: '600',
-                color: '#222'
+                color: '#222',
             }}>Race / Ethincity</Text>
 
             <View style={{ margin: 20 }}>
@@ -346,7 +346,7 @@ const PersonalizationDetails = ({ navigation }) => {
                         marginBottom: 10,
                         fontSize: 16,
                         fontWeight: '600',
-                        color: '#222'
+                        color: '#222',
                     }}>Religion</Text>
 
                     <Dropdown
@@ -389,7 +389,7 @@ const PersonalizationDetails = ({ navigation }) => {
                         marginBottom: 10,
                         fontSize: 16,
                         fontWeight: '600',
-                        color: '#222'
+                        color: '#222',
                     }}>Languages</Text>
                     <MultiSelect
                         dropdownPosition={'top'}
@@ -436,22 +436,22 @@ const PersonalizationDetails = ({ navigation }) => {
                 </View>
             </View>
         </ScrollView>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
     placeholderStyle: {
         fontSize: 16,
-        color: 'black'
+        color: 'black',
     },
     selectedTextStyle: {
         fontSize: 16,
-        color: 'black'
+        color: 'black',
     },
     inputSearchStyle: {
         color: 'black',
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingHorizontal: 8,
     },
-})
+});
 
 
 export default PersonalizationDetails;

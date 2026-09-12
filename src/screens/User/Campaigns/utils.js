@@ -1,3 +1,6 @@
+import {Linking} from 'react-native';
+import {isAllowedPaymentUrl, isAllowedMailHtmlUrl} from '../../../utils/urlSecurity';
+
 export const CAMPAIGN_STATUS = {
   AVAILABLE: 'AVAILABLE',
   RESERVED: 'RESERVED',
@@ -162,6 +165,127 @@ export const formatDateTime = value => {
   });
 };
 
+export const formatEventDate = value => {
+  if (!value) {
+    return '';
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+};
+
+export const formatEventDateRange = (campaign = {}) => {
+  const start =
+    campaign?.event_date ||
+    campaign?.event_at ||
+    campaign?.starts_at ||
+    campaign?.start_date;
+  const end = campaign?.ends_at || campaign?.end_date || campaign?.valid_until;
+
+  const startLabel = formatEventDate(start);
+  const endLabel = formatEventDate(end);
+
+  if (startLabel && endLabel && startLabel !== endLabel) {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    if (
+      startDate.getMonth() === endDate.getMonth() &&
+      startDate.getFullYear() === endDate.getFullYear()
+    ) {
+      return `${startDate.toLocaleDateString(undefined, {month: 'short', day: 'numeric'})} – ${endDate.getDate()}, ${endDate.getFullYear()}`;
+    }
+    return `${startLabel} – ${endLabel}`;
+  }
+
+  return startLabel || endLabel || 'Date TBD';
+};
+
+export const getCampaignLocation = (campaign = {}) => {
+  const city =
+    campaign?.city ||
+    campaign?.city_name ||
+    campaign?.location_city ||
+    campaign?.venue_city;
+  const state =
+    campaign?.state ||
+    campaign?.state_name ||
+    campaign?.location_state ||
+    campaign?.venue_state;
+  const venue = campaign?.venue || campaign?.venue_name || campaign?.location;
+  const location = campaign?.location_name || campaign?.address;
+
+  if (city && state) {
+    return `${city}, ${state}`;
+  }
+  if (location) {
+    return String(location);
+  }
+  if (venue) {
+    return String(venue);
+  }
+  if (city) {
+    return String(city);
+  }
+  return 'Location TBD';
+};
+
+export const getAvailabilityLeftText = (campaign = {}) => {
+  const count = String(getAvailabilityCount(campaign));
+  if (count.includes('/')) {
+    return `${count.replace('/', ' of ')} tickets left`;
+  }
+  return `${count} tickets left`;
+};
+
+export const getTicketTypeLabel = (campaign = {}) =>
+  campaign?.ticket_type ||
+  campaign?.ticket_name ||
+  campaign?.admission_type ||
+  'General Admission';
+
+export const getCampaignFeatures = (campaign = {}) => {
+  if (Array.isArray(campaign?.features) && campaign.features.length > 0) {
+    return campaign.features.map(item =>
+      typeof item === 'string'
+        ? {icon: 'ellipse-outline', label: item}
+        : {
+            icon: item?.icon || 'ellipse-outline',
+            label: item?.label || item?.name || item?.title || 'Feature',
+          },
+    );
+  }
+
+  const defaults = [];
+  const days = campaign?.event_days || campaign?.duration_days;
+  if (days) {
+    defaults.push({icon: 'calendar-outline', label: `${days}-Day Access`});
+  } else {
+    defaults.push({icon: 'calendar-outline', label: 'Multi-day access'});
+  }
+
+  defaults.push(
+    {icon: 'musical-notes-outline', label: 'Multiple stages'},
+    {icon: 'people-outline', label: '18+ event'},
+    {icon: 'lock-closed-outline', label: 'Non-refundable'},
+  );
+
+  return defaults;
+};
+
+export const filterCampaignsByStatus = (campaigns = [], filter = 'ALL') => {
+  if (!Array.isArray(campaigns) || filter === 'ALL') {
+    return campaigns;
+  }
+
+  return campaigns.filter(campaign => getCampaignStatus(campaign) === filter);
+};
+
 export const getPaymentUrl = (payload = {}) =>
   payload.payment_url ||
   payload.checkout_url ||
@@ -193,3 +317,11 @@ export const getDownloadUrl = payload =>
   payload?.data?.ticket_pdf_url ||
   payload?.data?.download_url ||
   payload?.data?.url;
+
+export const openPaymentUrl = async url => {
+  if (!isAllowedPaymentUrl(url) && !isAllowedMailHtmlUrl(url)) {
+    throw new Error('URL is not allowed.');
+  }
+
+  await Linking.openURL(url);
+};

@@ -32,7 +32,7 @@ export const subCatCardStyles = ({
       borderRadius: rounded ? 500 : 9,
       paddingHorizontal: rounded ? 0 : 19,
       paddingVertical: rounded ? 0 : 32,
-      backgroundColor: color || themecolors?.bgPrimary,
+      backgroundColor: color || colors.bgPrimary,
       borderWidth: 0,
       transform: [{scale: isSelected ? 0.9 : 1}],
     },

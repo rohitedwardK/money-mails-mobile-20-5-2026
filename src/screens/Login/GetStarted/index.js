@@ -6,7 +6,7 @@ import BrandLogo from '../../../assets/images/brandLogo.js';
 import GetStartedIllustration from '../../../assets/images/getStartedIllustration.js';
 import {DeviceContext} from '../../../context/DeviceContext';
 import {styles as getStartedStyles} from './index.style';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {getAuthToken} from '../../../utils/secureStorage';
 
 
 
@@ -15,10 +15,10 @@ const GetStarted = ({navigation}) => {
   const [auth, setAuth] = useState(false);
   const [loading, setLoading] = useState(true);
   const styles = getStartedStyles();
-  
+
 
   const checkAuthentication = async () => {
-    const userToken = await AsyncStorage.getItem('token');
+    const userToken = await getAuthToken();
     if (userToken) {
       setAuth(true);
     }
@@ -78,7 +78,7 @@ const GetStarted = ({navigation}) => {
       />
       <Button
       btnTextOverrideStyles={{
-        color: '#0E6655'
+        color: '#0E6655',
       }}
         btnText="Sign Up"
         type="link"
@@ -86,10 +86,10 @@ const GetStarted = ({navigation}) => {
         onPress={() => navigation.navigate('SignUp')}
       />
     </View>
-     
+
   );
 
- 
+
 };
 
 export default GetStarted;

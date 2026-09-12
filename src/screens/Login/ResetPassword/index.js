@@ -1,160 +1,82 @@
-import React, {useContext, useState, useEffect} from 'react';
-import {View, Text,
-  ToastAndroid,
-  Platform,
-  AlertIOS,
-} from 'react-native';
-import EntypoIcon from 'react-native-vector-icons/Entypo';
+import React, {useContext} from 'react';
+import {KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
 import Button from '../../../components/atoms/Button';
-import TextField from '../../../components/atoms/TextField';
-import {DeviceContext} from '../../../context/DeviceContext';
-import {styles as resetPasswordStyles} from './index.style';
-import { usePassword } from "../../../hooks/services/usePassword";
-import { IDENTITYTYPE } from "../../../constants";
-import { IdProofFormat } from "../../../utils";
-import Toast from '../../../components/atoms/Snackbar';
-
+import {UserContext} from '../../../context/UserContext';
+import {clearAuthSession} from '../../../utils/secureStorage';
+import {usePasswordRecovery} from '../../../hooks/usePasswordRecovery';
 
 const ResetPassword = ({navigation, route}) => {
-  const { verifyData = {}, updateResult, passError, isRequest, setMobilePayload, setResetPayload, isPassLoading } = usePassword();
-  const {isIos, screenHeight} = useContext(DeviceContext);
-  const [identityLable, setIdentityLable] = useState();
-  const [identityNumber, setIdentityNumber] = useState("");
-  const [mobile, setMobile] = useState({});
-  const [newPwd, setNewPwd] = useState("");
-  const [confirmPwd, setConfirmPwd] = useState("");
-  const [formData, setFormData] = useState({
-    phone: '',
-  });
-  const resetEmail = route?.params?.email || '';
-
-  const styles = resetPasswordStyles({screenHeight, isIos});
-
-  useEffect(()=>{
-    if(verifyData?.data) {
-      const lable = IDENTITYTYPE.find(item => item.id === verifyData?.data);
-      setIdentityLable(lable?.title);
+  const flow = usePasswordRecovery(route?.params?.email || '');
+  const {setUserDetails, setPostAuthScreen, setPendingGuestRoute} = useContext(UserContext);
+  const login = async () => {
+    try {
+      await clearAuthSession();
+      setUserDetails({});
+      setPostAuthScreen(null);
+      setPendingGuestRoute(null);
+      navigation.replace('EmailOtp', {mode: 'login', email: flow.email, passwordLogin: true});
+    } catch (_) {
+      flow.setMessage('Your password was updated. Session cleanup failed; please try Login again.');
     }
-    
-  },[verifyData])
-
-  const handleFormChange = (fieldName, value) => {
-    setFormData(prevState => ({
-      ...prevState,
-      [fieldName]: value,
-    }));
   };
-
-  const onSubmitHandler = () => {
-    if (mobile?.value === "") return;
-    const payload = {
-      mobile: mobile.code + mobile.value
-    }
-    setMobilePayload(payload);
-  }
-
-  const submitHandler = () => {
-    if (newPwd === "" || confirmPwd === "") {
-      if (Platform.OS === 'android') {
-        ToastAndroid.show('New Password and Confirm Password is Required.', ToastAndroid.SHORT)
-      } else {
-        AlertIOS.alert('New Password and Confirm Password is Required.');
-      }
-    };
-    if( newPwd !== confirmPwd) {
-      if (Platform.OS === 'android') {
-        ToastAndroid.show('New Password and Confirm Password Should be Same.', ToastAndroid.SHORT)
-      } else {
-        AlertIOS.alert('New Password and Confirm Password Should be Same.');
-      }
-    };
-    if(identityNumber === "") {
-      if (Platform.OS === 'android') {
-        ToastAndroid.show(`${identityLable} is Required.`, ToastAndroid.SHORT)
-      } else {
-        AlertIOS.alert(`${identityLable} is Required.`);
-      }
-    };
-    const payload = {
-      mobile : mobile.code + mobile.value,
-      password : newPwd,
-      id_type : verifyData?.data,
-      id_number : identityNumber.replace(/-/g, '')
-    }
-    setResetPayload(payload);
-  }
-
-  useEffect(()=>{
-    setTimeout(()=> {
-    if(updateResult) navigation.navigate('SignIn')
-    }, 2000)
-  },[navigation, updateResult])
-
   return (
-    <View style={styles.pageContainer}>
-      <Button
-        btnText="Back"
-        startIcon={<EntypoIcon name="chevron-small-left" size={30} />}
-        variant="secondary"
-        type="text"
-        onPress={() => navigation.goBack(null)}
-        overridingStyles={styles.backButton}
-      />
-      <View style={styles.header}>
-        <Text style={styles.pageTitle}>Reset Password</Text>
-        {!verifyData?.success?(
-          <Text style={styles.subTitle}>
-          If you've forgotten your password, don't worry. Kindly furnish your registered mobile number, enabling us to show instructions for resetting your password.
-          {resetEmail ? ` Account: ${resetEmail}` : ''}
-          </Text>
-        ):(
-          <Text style={styles.subTitle}>
-            To begin the password reset process, please furnish your driving license and proceed to generate a new password, confirming it once more to guarantee precision.
+    <KeyboardAvoidingView style={styles.wrapper} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.page}>
+        <Button btnText="Back" variant="secondary" disabled={flow.busy} onPress={() => navigation.goBack()} />
+        <Text style={styles.title}>{flow.step === 'success' ? 'Password updated' : 'Recover your password'}</Text>
+        <Text style={styles.copy}>
+          {flow.step === 'email' ? 'Enter your registered email to request a recovery code.'
+            : flow.step === 'code' ? 'Enter the 6-digit code from your email. It expires in 10 minutes.'
+            : flow.step === 'password' ? 'Choose a new password with 8 to 72 characters.'
+            : 'Your password has been changed. Log in with your new password.'}
         </Text>
+        {!!flow.message && <Text accessibilityLiveRegion="polite" style={styles.message}>{flow.message}</Text>}
+        {flow.step === 'email' && (
+          <TextInput accessibilityLabel="Email address" style={styles.field} value={flow.email}
+            onChangeText={flow.setEmail} editable={!flow.busy} autoCapitalize="none" autoCorrect={false}
+            keyboardType="email-address" autoComplete="email" placeholder="Email address" placeholderTextColor="#64748B" />
         )}
-      </View>
-      {!verifyData?.success ? (<TextField
-        value={mobile?.value || ""}
-        label="Phone Number"
-        onChange={(val) => setMobile(val)}
-        returnKeyType="go"
-        type="phone"
-      />):(<>
-      <View>
-        <TextField
-          value={IdProofFormat(identityNumber) || ""}
-          label="Driving Licence/Voter ID"
-          onChange={(val) => setIdentityNumber(val)}
-          returnKeyType="go"
-        /></View>
-      <View>
-        <TextField
-          value={newPwd}
-          label="New Password"
-          onChange={(val) => setNewPwd(val)}
-          returnKeyType="go"
-          type="password"
-        /></View>
-        <View>
-        <TextField
-          value={confirmPwd}
-          label="Confirm Password"
-          onChange={(val) => setConfirmPwd(val)}
-          returnKeyType="go"
-          type="password"
-        /></View>
-      </>)}
-      <Button
-        btnText={verifyData?.success ? "Submit" : "Send Instructions"}
-        size="large"
-        variant="primary"
-        overridingStyles={styles.sendBtn}
-        btnTextOverrideStyles={styles.sendBtnText}
-        onPress={verifyData?.success ? submitHandler : onSubmitHandler}
-      />
-      {updateResult && <Toast message={updateResult ? 'Your password was reset, Please Login again' : passError} isOpen={true} />}
-    </View>
+        {flow.step === 'code' && (
+          <TextInput accessibilityLabel="Recovery code" style={styles.field} value={flow.otp}
+            onChangeText={value => flow.setOtp(value.replace(/[^0-9]/g, ''))} editable={!flow.busy}
+            keyboardType="number-pad" maxLength={6} autoComplete="one-time-code"
+            placeholder="6-digit code" placeholderTextColor="#64748B" />
+        )}
+        {flow.step === 'password' && (
+          <View>
+            <TextInput accessibilityLabel="New password" style={styles.field} value={flow.password}
+              onChangeText={flow.setPassword} editable={!flow.busy} secureTextEntry autoCapitalize="none"
+              autoCorrect={false} autoComplete="new-password" maxLength={72}
+              placeholder="New password" placeholderTextColor="#64748B" />
+            <TextInput accessibilityLabel="Confirm password" style={styles.field} value={flow.confirmPassword}
+              onChangeText={flow.setConfirmPassword} editable={!flow.busy} secureTextEntry autoCapitalize="none"
+              autoCorrect={false} maxLength={72} placeholder="Confirm password" placeholderTextColor="#64748B" />
+          </View>
+        )}
+        {flow.step === 'success' ? <Button btnText="Login" variant="primary" onPress={login} /> : (
+          <Button btnText={flow.busy ? 'Please wait...' : flow.step === 'email' ? 'Send code'
+            : flow.step === 'code' ? 'Verify code' : 'Update password'} variant="primary"
+            disabled={flow.busy || (flow.step === 'email' && flow.retryIn > 0)}
+            onPress={flow.step === 'email' ? flow.requestCode : flow.step === 'code' ? flow.verifyCode : flow.updatePassword} />
+        )}
+        {flow.step === 'code' && (
+          <Button btnText={flow.retryIn > 0 ? 'Resend in ' + flow.retryIn + 's' : 'Resend code'}
+            variant="secondary" disabled={flow.busy || flow.retryIn > 0} onPress={flow.requestCode} />
+        )}
+        {['code', 'password'].includes(flow.step) && (
+          <Button btnText="Start again" variant="secondary" disabled={flow.busy} onPress={flow.restart} />
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
-
+const styles = StyleSheet.create({
+  wrapper: {flex: 1, backgroundColor: '#FFFFFF'},
+  page: {flexGrow: 1, justifyContent: 'center', padding: 24},
+  title: {fontSize: 24, fontWeight: '700', color: '#17212B', marginVertical: 16},
+  copy: {fontSize: 15, lineHeight: 22, color: '#475569', marginBottom: 20},
+  field: {minHeight: 50, borderWidth: 1, borderColor: '#CBD5E1', borderRadius: 8,
+    paddingHorizontal: 12, color: '#17212B', marginBottom: 16},
+  message: {fontSize: 14, color: '#475569', marginBottom: 16},
+});
 export default ResetPassword;

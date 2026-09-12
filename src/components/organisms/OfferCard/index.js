@@ -134,7 +134,7 @@ const OfferCard = ({ variant, onTap, size, maxSize, isRedeemed, containerStyles,
     <TouchableOpacity style={[styles.container, containerStyles]} onPress={onTap}>
       <View style={styles.wrapper}>
         <View style={styles.cardHeaderWrapper}>
-          <View>{item?.type === 'paid' ? <Icon name="crown" size={30} className={`fa-2x fa-regular`} color="#FFB833" light /> : <Icon name="chess-queen" size={30} className={`fa-2x fa-regular`} color="#54ac34" light />}</View>
+          <View>{item?.type === 'paid' ? <Icon name="crown" size={30} className={'fa-2x fa-regular'} color="#FFB833" light /> : <Icon name="chess-queen" size={30} className={'fa-2x fa-regular'} color="#54ac34" light />}</View>
           <View>
             <TouchableOpacity onPress={onFavClick}>
               {isFav ?

@@ -1,31 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { WebView } from 'react-native-webview';
-import CookieManager from "@react-native-cookies/cookies";
+import CookieManager from '@react-native-cookies/cookies';
 import { ScrollView, RefreshControl } from 'react-native';
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLogin } from '../../../hooks/services/useLogin';
 
 const Bingo = ()=>{
     const { data, isLoading, error, message, setPayload } = useLogin();
-    const webViewRef = useRef()
+    const webViewRef = useRef();
     const [bingoData, setBingoData] = useState('');
 
     // useEffect(() => {
     //     if (data) {
     //     }
-    //   }, [data]); 
+    //   }, [data]);
 
     const [refreshing, setRefreshing] = useState(false);
     const [refresherEnabled, setEnableRefresher] = useState(true);
 
     const handleScroll = (event) =>  {
-        const yOffset = Number(event.nativeEvent.contentOffset.y)
+        const yOffset = Number(event.nativeEvent.contentOffset.y);
         if (yOffset === 0){
-          setEnableRefresher(true)
+          setEnableRefresher(true);
         }else{
-          setEnableRefresher(false)
+          setEnableRefresher(false);
         }
-      }
+      };
 
     const dataLoad = async()=>{
       let data = JSON.parse(await AsyncStorage.getItem('user'));
@@ -33,29 +33,29 @@ const Bingo = ()=>{
       if(Object.keys(data.bingo).length){
        setBingoData(`dInfoUserId=${data.dInfoUserId}; dInfoUserType=${data.dInfoUserType}; dInfoUserEmail=${data.dInfoUserEmail}`);
       }else{
-        setBingoData(`dInfoUserId=; dInfoUserType=; dInfoUserEmail=`);
+        setBingoData('dInfoUserId=; dInfoUserType=; dInfoUserEmail=');
       }
-      
-    }
+
+    };
 
     useEffect(()=>{
         dataLoad();
-    },[])
-    
+    },[]);
+
 
 
     return (
-        <ScrollView 
+        <ScrollView
         contentContainerStyle={{flex: 1}}
         refreshControl={
-          <RefreshControl 
+          <RefreshControl
             refreshing={refreshing}
             enabled={refresherEnabled}
-            onRefresh={()=>{webViewRef.current.reload()}}
+            onRefresh={()=>{webViewRef.current.reload();}}
           />
         }>
        {
-        bingoData ?(
+        bingoData ? (
           <WebView
           style={{marginTop : 25}}
           source={{
@@ -80,10 +80,10 @@ const Bingo = ()=>{
           cacheEnabled
           onScroll={handleScroll}
         />
-        ):null
+        ) : null
        }
       </ScrollView>
-    )
-}
+    );
+};
 
-export default Bingo; 
+export default Bingo;

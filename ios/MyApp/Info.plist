@@ -25,7 +25,9 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<!-- Do not enable deep links without a host/path allowlist in Navigation linking config. -->
 				<string>com.googleusercontent.apps.852842205421-2b3hnonskge489dgh0plf2ndgvka5uo9</string>
+				<string>moneymails</string>
 			</array>
 		</dict>
 	</array>
@@ -41,8 +43,10 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<key>NSCameraUsageDescription</key>
+	<string>MoneyMails uses the camera to capture verification documents.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>MoneyMails uses your photo library to select profile and verification images.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

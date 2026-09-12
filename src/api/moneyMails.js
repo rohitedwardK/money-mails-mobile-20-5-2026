@@ -1,4 +1,5 @@
 import {apiDelete, apiGet, apiPost, apiPut} from './client';
+import {isAllowedMailHtmlUrl} from '../utils/urlSecurity';
 
 export const fetchCategories = params => apiGet('/category/list', params);
 
@@ -20,18 +21,23 @@ export const createCounty = (stateUuid, countyName) =>
   apiPost('/county', {
     state_uuid: stateUuid,
     name: countyName,
-  }, {auth: false});
+  });
 
 export const createCity = (countyUuid, cityName) =>
   apiPost('/city', {
     county_uuid: countyUuid,
     name: cityName,
-  }, {auth: false});
+  });
 
 export const fetchMails = params => apiGet('/mail/list', params);
 
-export const fetchMailHtml = htmlUrl =>
-  apiPost('/mail/read/html/file', {html_url: htmlUrl});
+export const fetchMailHtml = htmlUrl => {
+  if (!isAllowedMailHtmlUrl(htmlUrl)) {
+    return Promise.reject(new Error('Mail content URL is not allowed.'));
+  }
+
+  return apiPost('/mail/read/html/file', {html_url: htmlUrl});
+};
 
 export const updateMailFavourite = payload =>
   apiPut('/mail/update/favourite', payload);
@@ -97,13 +103,13 @@ export const updateNotificationsSeen = payload =>
 export const uploadUserFile = formData =>
   apiPost('/user/upload/file', formData, {isFormData: true});
 
-export const fetchActiveCampaigns = (params = {}) =>
-  apiGet('/campaigns/active', params);
+export const fetchActiveCampaigns = (params = {}, options) =>
+  apiGet('/campaigns/active', params, options);
 
-export const fetchCampaigns = () => apiGet('/campaigns');
+export const fetchCampaigns = options => apiGet('/campaigns', null, options);
 
-export const fetchCampaignDetail = campaignUuid =>
-  apiGet(`/campaigns/${campaignUuid}`);
+export const fetchCampaignDetail = (campaignUuid, options) =>
+  apiGet(`/campaigns/${campaignUuid}`, null, options);
 
 export const reserveCampaignTicket = campaignUuid =>
   apiPost(`/campaigns/${campaignUuid}/reserve`);
@@ -111,8 +117,8 @@ export const reserveCampaignTicket = campaignUuid =>
 export const initCampaignPayment = campaignUuid =>
   apiPost(`/campaigns/${campaignUuid}/payment-init`);
 
-export const fetchUserCampaignTickets = (params = {}) =>
-  apiGet('/campaigns/user/tickets', params);
+export const fetchUserCampaignTickets = (params = {}, options) =>
+  apiGet('/campaigns/user/tickets', params, options);
 
 export const sendCampaignTicketEmail = ticketUuid =>
   apiPost(`/campaigns/user/tickets/${ticketUuid}/send-email`);

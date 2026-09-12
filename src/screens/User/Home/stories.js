@@ -4,9 +4,9 @@ import LinearGradient from 'react-native-linear-gradient';
 import { UserContext } from '../../../context/UserContext';
 import axios from 'axios';
 import { baseUrl } from '../../../connections';
- 
+
 const { width, height } = Dimensions.get('window');
- 
+
 const sampleStories = [
   {
     id: '1',
@@ -32,14 +32,14 @@ const sampleStories = [
     id: '5',
     image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e',
     viewed: false,
-  }
+  },
 ];
- 
+
 export default function StoriesScreen() {
   const [stories, setstories] = useState([]);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
- 
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
   const animationRef = useRef(null);
@@ -50,11 +50,11 @@ export default function StoriesScreen() {
 
     axios.get(`${baseUrl}/popup/list?user_uuid=${userDetails?.uuid}`, {
       headers: {
-        "x-auth-token": userDetails?.token
-      }
+        'x-auth-token': userDetails?.token,
+      },
     })
       .then((res) => {
-        const data = []
+        const data = [];
         res?.data?.data?.map((item) => {
           data?.push(
             {
@@ -64,48 +64,48 @@ export default function StoriesScreen() {
               image: item?.image,
               viewed: item?.seen,
             }
-          )
-        })
+          );
+        });
         setstories(data);
       })
-      .catch((err) => {
-        console.log(err, "errr")
-      })
+      .catch(err => {
+        if (__DEV__) {
+          console.log(err, 'errr');
+        }
+      });
   }, [userDetails?.token, userDetails?.uuid]);
   useEffect(() => {
     getListStories();
-  }, [getListStories])
- 
+  }, [getListStories]);
+
   const startStoryAnimation = (index) => {
     if (index >= stories?.length || index < 0) {
       setIsPlaying(false);
       return;
     }
- 
+
     setCurrentStoryIndex(index);
     progressAnim.setValue(0);
     fadeAnim.setValue(1);
- 
+
     animationRef.current = Animated.timing(progressAnim, {
       toValue: 1,
       duration: 5000,
       useNativeDriver: false,
     });
- 
+
     animationRef.current.start(({ finished }) => {
       if (finished) {
         startStoryAnimation(index + 1);
       }
     });
   };
- 
-  const handlePlayPress = () => {
-    {console.log(stories,  "ewewrewrewrwqerqwer")}
 
+  const handlePlayPress = () => {
     setIsPlaying(true);
     startStoryAnimation(0);
   };
- 
+
   const handleClose = () => {
     setIsPlaying(false);
     if (animationRef.current) {
@@ -114,7 +114,7 @@ export default function StoriesScreen() {
     fadeAnim.setValue(0);
     progressAnim.setValue(0);
   };
- 
+
   const handlePrevious = () => {
     if (animationRef.current) {
       animationRef.current.stop();
@@ -122,7 +122,7 @@ export default function StoriesScreen() {
     const newIndex = Math.max(0, currentStoryIndex - 1);
     startStoryAnimation(newIndex);
   };
- 
+
   const handleNext = () => {
     if (animationRef.current) {
       animationRef.current.stop();
@@ -131,12 +131,12 @@ export default function StoriesScreen() {
     startStoryAnimation(newIndex);
   };
 
-  
- 
+
+
   const renderStoryModal = () => {
 
-    if (!isPlaying || currentStoryIndex >= stories.length) return null;
- 
+    if (!isPlaying || currentStoryIndex >= stories.length) {return null;}
+
     const currentStory = stories[currentStoryIndex];
 
 
@@ -178,7 +178,7 @@ export default function StoriesScreen() {
         <Pressable style={styles.closeButton} onPress={handleClose}>
           <Text style={styles.closeButtonText}>×</Text>
         </Pressable>
-       
+
         {/* Navigation Buttons */}
         {/* <Pressable
           style={[styles.navButton, styles.prevButton]}
@@ -194,7 +194,7 @@ export default function StoriesScreen() {
         >
           <Text style={styles.navButtonText}>▶</Text>
         </Pressable> */}
- 
+
         <View style={styles.content}>
           <Image source={{ uri: currentStory.image }} style={styles.image} />
         </View>
@@ -212,23 +212,23 @@ export default function StoriesScreen() {
 }
 
 
-  return (                            
+  return (
     <View style={styles.container}>
       {/* !isPlaying && */}
       { stories?.length > 0 && (
         <Pressable  >
            <StoryCircle onPress={handlePlayPress}/>
         </Pressable>
-        )} 
+        )}
       {renderStoryModal()}
     </View>
   );
 }
- 
+
 const styles = StyleSheet.create({
   container: {
- 
-    zIndex:999
+
+    zIndex:999,
   },
   playButton: {
     width: 200,
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     width: width,
     height: height,
     backgroundColor: 'rgba(0,0,0,0.9)',
-   
+
   },
   gradient: {
     position: 'absolute',
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
 
      borderRadius: 12,
   },
- 
+
   navButton: {
     position: 'absolute',
     top: '50%',
@@ -344,5 +344,5 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-  }
+  },
 });

@@ -6,11 +6,11 @@ import { WebView } from 'react-native-webview';
 import Grid from '../../../components/atoms/Grid';
 import BrandIconCard from '../../../components/molecules/BrandIconCard';
 import getColors from '../../../utils/colors';
-import { UserContext } from "../../../context/UserContext";
+import { UserContext } from '../../../context/UserContext';
 import { DeviceContext } from '../../../context/DeviceContext';
-import { useReward } from "../../../hooks/services/useReward";
-import { useFavourites } from "../../../hooks/services/useFavourites";
-import { useMail } from "../../../hooks/services/useMail";
+import { useReward } from '../../../hooks/services/useReward';
+import { useFavourites } from '../../../hooks/services/useFavourites';
+import { useMail } from '../../../hooks/services/useMail';
 import OfferCard from '../../../components/organisms/OfferCard';
 import EvilIcon from 'react-native-vector-icons/EvilIcons';
 import { ModalContext } from '../../../context/ModalContext';
@@ -20,7 +20,7 @@ import RedeemModalContent from '../Home/RedeemModalContent';
 import { styles as homeScreenStyles } from '../Home/index.style';
 import Toast from 'react-native-simple-toast';
 import YouTubePlayer from '../Youtube';
-import Pdf from 'react-native-pdf';
+import MailDetailModal from '../../../components/organisms/MailDetailModal';
 
 const Favourites = ({ navigation }) => {
   const [pageNum, setPageNum] = useState(0);
@@ -29,7 +29,7 @@ const Favourites = ({ navigation }) => {
   const styles = rewardsScreenStyles();
   const stylesTimer = homeScreenStyles();
   const { userDetails } = useContext(UserContext);
-  const { screenWidth } = useContext(DeviceContext);
+  const { screenWidth, screenHeight } = useContext(DeviceContext);
   const [option, setOption] = useState(1);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { brandData = [], mailData = [], isLoading, setFavPayload, setUpdateBrandFav, setUpdateMailFav } = useFavourites();
@@ -47,7 +47,7 @@ const Favourites = ({ navigation }) => {
   const [seconds, setSeconds] = useState(0);
   const { setModalDetails } = useContext(ModalContext);
 
-  const { themeColors: colors, rewardsScreenColors, offerCardColors } = getColors();
+  const { themeColors: colors, rewardsScreenColors } = getColors();
 
   useFocusEffect(
     useCallback(() => {
@@ -57,33 +57,33 @@ const Favourites = ({ navigation }) => {
 
   const onSelectSwitch = index => {
     setPageNum(0);
-    setOption(index)
+    setOption(index);
   };
 
   const onFavouriteToggle = (uuid, type = '') => {
     type === 'brand' ? setUpdateBrandFav({
       user_uuid: userDetails?.uuid,
-      brand_uuid: uuid
+      brand_uuid: uuid,
     }) : setUpdateMailFav({
       user_uuid: userDetails?.uuid,
-      mail_uuid: uuid
-    })
-  }
+      mail_uuid: uuid,
+    });
+  };
 
 
   const onBrandSelect = (e, brand_uuid, category_uuid) => {
     // setActiveBrand(e ? brand_uuid : '');
-    navigation.navigate('Home', { brand_uuid: brand_uuid, category_uuid: { uuid: category_uuid[0] } })
-  }
+    navigation.navigate('Home', { brand_uuid: brand_uuid, category_uuid: { uuid: category_uuid[0] } });
+  };
 
 
   useEffect(() => {
     if (seconds == 0) {
       Toast.show(redeemSuccessMessage, Toast.LONG, {
         backgroundColor: '#45B39D',
-      })
+      });
     }
-  }, [seconds])
+  }, [seconds]);
 
   const { start, stop, setTimer } = useInterval(count => {
 
@@ -122,95 +122,16 @@ const Favourites = ({ navigation }) => {
     }
   });
 
-  const getOfferDetailsContent = () => (
-    <>
-      <View style={{ backgroundColor: "#FFFFFF", flex: 1, minWidth: screenWidth - 10 }}>
-
-        <View>
-          <View style={styles.timerContainer}>
-            {/* <Text style={styles.secondsCounter}>{18 - seconds}</Text> */}
-            {seconds > 0 && <View style={{ alignItems: 'center' }}><Text style={{ fontSize: 18 }}>Please Wait...</Text></View>}
-            {seconds == 0 && <View style={{ width: 40, justifyContent: 'flex-start' }}><TouchableOpacity onPress={closeAdd} style={{
-              backgroundColor: '#45B39D',
-              borderRadius: 10,
-              padding: 10,
-              // maxWidth: 'auto',
-              // marginLeft: 'auto',
-            }}>
-              <EntypoIcon
-                name="chevron-left"
-                size={22}
-                style={styles.favIcon}
-              />
-            </TouchableOpacity></View>
-            }
-          </View>
-          <View style={{ alignItems: 'center' }}>
-            <Text style={{ color: '#fff', fontSize: 18, padding: 5 }}>{offerCard?.message}</Text>
-          </View>
-          {(offerCard?.mime_type === 'text/html' && offerCard?.image_url) && <View style={{ flex: 1 }}><WebView
-            source={{
-              html: mailHTML
-              // uri: `${offerCard?.image_url}`,
-            }}
-            style={{
-              flex: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
-              minWidth: screenWidth - 10,
-              minHeight: '40%'
-            }}
-          /></View>}
-          {(offerCard?.mime_type === 'image/png' || offerCard?.mime_type === 'image/jpeg') && <View style={{ alignItems: 'center' }}>
-            <Image
-              resizeMode="contain"
-              style={{ width: 200, height: 200 }}
-              source={{ uri: `${offerCard?.image_url}` }}
-            />
-          </View>}
-
-          {(offerCard?.mime_type === 'application/pdf') && <Pdf
-            source={{
-              uri: offerCard?.image_url,
-              cache: true
-            }}
-            trustAllCerts={false}
-            onLoadComplete={(numberOfPages) => {
-            }}
-            onError={(error) => {
-              console.log(error);
-            }}
-            style={{
-              flex: 1,
-              width: Dimensions.get('window').width,
-              height: Dimensions.get('window').height,
-            }}
-          />
-          }
-
-          {(offerCard?.mime_type === '' && offerCard?.video_url) && <View style={{ flex: 1 }}>
-            <WebView
-              javaScriptEnabled={true}
-              domStorageEnabled={true}
-              scrollEnabled={false}
-              source={{
-                uri: `${offerCard?.video_url}?controls=0&showinfo=0&wmode=transparent&rel=0&mode=opaque`,
-              }}
-              style={{
-                flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
-                minWidth: screenWidth - 10,
-                minHeight: '40%'
-              }}
-              onError={(err) => {
-                alert(err);
-              }}
-            />
-          </View>}
-        </View>
-      </View>
-    </>
+  const renderOfferDetailModal = (withTimer = false) => (
+    <MailDetailModal
+      offerCard={offerCard}
+      mailHTML={mailHTML}
+      screenWidth={screenWidth}
+      screenHeight={screenHeight}
+      onClose={closeAdd}
+      seconds={withTimer ? seconds : 0}
+      renderVideo={url => <YouTubePlayer videoUrl={url} />}
+    />
   );
 
   const closeAdd = () => {
@@ -218,105 +139,8 @@ const Favourites = ({ navigation }) => {
     setIsOfferClicked(false);
     setTimer(0);
     stop();
-    setModalDetails({})
-  }
-
-  const getOfferDetailsContentWithoutTimer = () => (
-    <>
-      <View style={{ backgroundColor: "#FFFFFF", flex: 1, minWidth: screenWidth - 10 }}>
-
-        <View>
-          <View style={styles.timerContainer}>
-            <View style={{ width: 40, justifyContent: 'flex-start' }}>
-              <TouchableOpacity onPress={closeAdd} style={{
-                backgroundColor: '#45B39D',
-                borderRadius: 10,
-                padding: 10,
-                width: 40
-                // maxWidth: 'auto',
-                // marginLeft: 'auto',
-              }}>
-                <EntypoIcon
-                  name="chevron-left"
-                  size={22}
-                  style={styles.favIcon}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View style={{ alignItems: 'center' }}>
-            <Text style={{ color: '#000000', fontSize: 18, padding: 5 }}>{offerCard?.message}</Text>
-          </View>
-
-          {(offerCard?.mime_type === 'text/html' && offerCard?.image_url) && <View style={{ flex: 1 }}><WebView
-            source={{
-              // uri: `${offerCard?.image_url}`,
-              html: mailHTML
-            }}
-            style={{
-              flex: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
-              minWidth: screenWidth - 10,
-              minHeight: '40%'
-            }}
-          /></View>}
-          {(offerCard?.mime_type === 'image/png' || offerCard?.mime_type === 'image/jpeg') && <View style={{ alignItems: 'center' }}><Image
-            resizeMode="contain"
-            style={{ width: 200, height: 200 }}
-            source={{ uri: `${offerCard?.image_url}` }}
-          />
-          </View>}
-
-
-          {(offerCard?.mime_type === 'application/pdf') && <Pdf
-            source={{
-              uri: offerCard?.image_url,
-              cache: true
-            }}
-            trustAllCerts={false}
-            onLoadComplete={(numberOfPages) => {
-              console.log(`Number of pages: ${numberOfPages}`);
-            }}
-            onError={(error) => {
-              console.log(error);
-            }}
-            style={{
-              flex: 1,
-              width: Dimensions.get('window').width,
-              height: Dimensions.get('window').height,
-            }}
-          />
-          }
-
-          {(offerCard?.mime_type === '' && offerCard?.video_url) && <View style={{ flex: 1 }}>
-
-            {/* <WebView
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          scrollEnabled={false}
-          source={{
-            // uri: `https://www.youtube.com/embed/${getYouTubeVideoId(offerCard?.video_url)}?rel=0&autoplay=0&showinfo=0&controls=0`
-            uri: `${offerCard?.video_url}?controls=0&showinfo=0&wmode=transparent&rel=0&mode=opaque`,
-          }}
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            minWidth: screenWidth - 10,
-            minHeight: '40%'
-          }}
-          onError={(err) => {
-            alert(err);
-          }}
-        /> */}
-            <YouTubePlayer videoUrl={`${offerCard.video_url}`} />
-          </View>}
-
-        </View>
-      </View>
-    </>
-  );
+    setModalDetails({});
+  };
 
   useEffect(() => {
     if (isOfferClicked) {
@@ -329,7 +153,7 @@ const Favourites = ({ navigation }) => {
       setModalDetails({
         modalType: 'blurView',
         isOpen: true,
-        modalContent: (offerCard?.type == 'paid' && offerCard?.is_seen == 'false') ? getOfferDetailsContent() : getOfferDetailsContentWithoutTimer(),
+        modalContent: (offerCard?.type == 'paid' && offerCard?.is_seen == 'false') ? renderOfferDetailModal(true) : renderOfferDetailModal(false),
         modalStyles: {
           containerStyles: {
             alignItems: 'center',
@@ -341,7 +165,7 @@ const Favourites = ({ navigation }) => {
         actions: [],
       });
     }
-  }, [seconds, isOfferClicked]);
+  }, [seconds, isOfferClicked, mailHTML, offerCard]);
 
   const onOfferCardClick = (index, item) => {
     if (!redeemedOfferIndexes.includes(index)) {
@@ -350,12 +174,12 @@ const Favourites = ({ navigation }) => {
       setOfferCard(item);
       if (item?.mime_type === 'text/html') {
         const url = item?.image_url?.split('/');
-        setMailURL({ html_url: url.slice(-1)[0] })
+        setMailURL({ html_url: url.slice(-1)[0] });
       }
       if (item?.type == 'paid' && item?.is_seen == 'false') {
         setUpdateMailRedeem({
           user_uuid: userDetails?.uuid,
-          mail_uuid: item?.uuid
+          mail_uuid: item?.uuid,
         });
       }
 
@@ -367,7 +191,7 @@ const Favourites = ({ navigation }) => {
       setOfferCard(item);
       if (item?.mime_type === 'text/html') {
         const url = item?.image_url?.split('/');
-        setMailURL({ html_url: url.slice(-1)[0] })
+        setMailURL({ html_url: url.slice(-1)[0] });
       }
 
     }
@@ -526,38 +350,39 @@ const Favourites = ({ navigation }) => {
           />}
           {/* </Grid>} */}
         </> : <>
-          {mailData?.length > 0 && <View style={{
-            display: 'flex',
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            paddingVertical: 30,
-            paddingHorizontal: 10,
-            justifyContent: 'space-around',
-          }}>
-            {mailData && mailData
-              .filter((item, i) => {
-                if (!filterValue) {
-                  return true;
-                }
-                return item?.brand.some((val) => val.company_name.toLowerCase().startsWith(filterValue?.toLowerCase()));
-              })
-              .map((item, i) => {
-                let j = i % 4;
-                return (<OfferCard
-                  containerStyles={{
-                    marginBottom: 20,
-                    backgroundColor: offerCardColors[j]
-                  }}
-                  item={item}
-                  isFavourite={true}
-                  isRedeemed={item?.is_seen === 'true' ? true : false}
-                  onTap={() => onOfferCardClick(i, item)}
-                  onFavouriteToggle={(e) => onFavouriteToggle(item?.uuid)}
-                  key={item?.uuid}
-                />
-                );
-              })}
-          </View>}
+          {mailData?.length > 0 ? (
+            <View style={styles.mailList}>
+              {mailData
+                .filter(item => {
+                  if (!filterValue) {
+                    return true;
+                  }
+                  return item?.brand?.some(val =>
+                    val.company_name
+                      ?.toLowerCase()
+                      .includes(filterValue?.toLowerCase()),
+                  );
+                })
+                .map((item, i) => (
+                  <OfferCard
+                    key={item?.uuid || String(i)}
+                    variant="feed"
+                    item={item}
+                    isFavourite
+                    isRedeemed={item?.is_seen === 'true'}
+                    onTap={() => onOfferCardClick(i, item)}
+                    onFavouriteToggle={() => onFavouriteToggle(item?.uuid)}
+                  />
+                ))}
+            </View>
+          ) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyTitle}>No saved mails</Text>
+              <Text style={styles.emptySubtitle}>
+                Favourite offers to find them here quickly.
+              </Text>
+            </View>
+          )}
         </>}
       </View>
     </ScrollView>

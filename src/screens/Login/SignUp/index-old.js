@@ -8,15 +8,15 @@ import { signupScreenStyles } from './index.style';
 import TextField from '../../../components/atoms/TextField';
 import Button from '../../../components/atoms/Button';
 import StatusBar from '../../../components/atoms/StatusBar';
-import { COUNTRY, RACE, IDENTITYTYPE } from "../../../constants";
-import { useStateData } from "../../../hooks/services/useStateData";
-import { useCountyData } from "../../../hooks/services/useCountyData";
-import { useCityData } from "../../../hooks/services/useCityData";
+import { COUNTRY, RACE, IDENTITYTYPE } from '../../../constants';
+import { useStateData } from '../../../hooks/services/useStateData';
+import { useCountyData } from '../../../hooks/services/useCountyData';
+import { useCityData } from '../../../hooks/services/useCityData';
 import { usePincodeData } from '../../../hooks/services/usePincode';
 import { useLandmarkData } from '../../../hooks/services/useLandmark';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 import DatePicker from 'react-native-date-picker';
-import { useSignUp } from "../../../hooks/services/useSignUp";
+import { useSignUp } from '../../../hooks/services/useSignUp';
 import { RadioButton } from 'react-native-paper';
 import Toast from '../../../components/atoms/Snackbar';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
@@ -35,7 +35,7 @@ const SignUp = ({ navigation }) => {
   const [selCity, setSelCity] = useState([]);
   const [selCounty, setSelCounty] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [date, setDate] = useState(new Date())
+  const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState();
   const [checked, setChecked] = useState('male');
   const [idProof, setIdProof] = useState('');
@@ -43,7 +43,7 @@ const SignUp = ({ navigation }) => {
   const { themeColors } = getColors();
   const [cntry, setCntry] = useState('CO-42A82D09');
   const [stet, setStet] = useState('');
-  const [cnty, setCnty] = useState('')
+  const [cnty, setCnty] = useState('');
   const [cty, setCty] =  useState('');
   const [userDetails, setUserDetails] = useState({
     firstName: {
@@ -76,7 +76,7 @@ const SignUp = ({ navigation }) => {
 
   const dropDownList = ['country', 'state', 'city', 'county', 'gender', 'ethnicity', 'id_type', 'id_proof_file_name'];
   const optionalFields = ['ssn', 'address2', 'apartmentNo'];
-  const countryRef = useRef(null)
+  const countryRef = useRef(null);
 
   const handleFormChange = (fieldName, value) => {
     setUserDetails(prevState => ({
@@ -89,10 +89,10 @@ const SignUp = ({ navigation }) => {
     if(fieldName == 'zip'){
       let valid = false;
       let numbers = '0123456789';
-    
-      for (var i=0; i < value.length; i++) {
+
+      for (var i = 0; i < value.length; i++) {
           if(numbers.indexOf(value[i]) > -1 ) {
-              valid=true;
+              valid = true;
           }
           else {
             valid = false;
@@ -107,7 +107,7 @@ const SignUp = ({ navigation }) => {
           }
       }
       if(valid == true){
-        value = value.replace(/\s/g, "").slice(0,5);
+        value = value.replace(/\s/g, '').slice(0,5);
         setUserDetails(prevState => ({
           ...prevState,
           [fieldName]: {
@@ -120,10 +120,10 @@ const SignUp = ({ navigation }) => {
     if(fieldName == 'ssn'){
       let valid = false;
       let numbers = '0123456789';
-    
-      for (var i=0; i < value.length; i++) {
+
+      for (var i = 0; i < value.length; i++) {
           if(numbers.indexOf(value[i]) > -1 ) {
-              valid=true;
+              valid = true;
           }
           else {
             valid = false;
@@ -153,17 +153,17 @@ const SignUp = ({ navigation }) => {
   // get state list
   useEffect(() => {
     setStateData('CO-42A82D09');
-  }, [])
+  }, []);
 
   // get county list
   useEffect(() => {
-    if (userDetails?.state !== '') setCountyData(userDetails?.state?.value);
-  }, [userDetails?.state])
+    if (userDetails?.state !== '') {setCountyData(userDetails?.state?.value);}
+  }, [userDetails?.state]);
 
   // get city list
   useEffect(() => {
-    if (userDetails?.county !== '') setCityData(userDetails?.county?.value);
-  }, [userDetails?.county])
+    if (userDetails?.county !== '') {setCityData(userDetails?.county?.value);}
+  }, [userDetails?.county]);
 
   const handleChoosePhoto = async (id) => {
     const options = {
@@ -174,7 +174,7 @@ const SignUp = ({ navigation }) => {
       maxHeight: 300,
       videoQuality: 'low',
       noData: true,
-      fileSize: 1
+      fileSize: 1,
    };
     const result = await launchImageLibrary(options);
     const base64 = `data:${result?.assets[0].type};base64`;
@@ -187,15 +187,15 @@ const SignUp = ({ navigation }) => {
     selectedBackgroundColor: '#ccc',
     borderColor: '#D3DFEF',
     borderWidth: 1,
-    width: '100%'
-  }
+    width: '100%',
+  };
 
   handleDropdownChange = (fieldName, val) => {
-    if (!val) return;
-    if (fieldName === 'country') setSelCountry(val);
-    if (fieldName === 'state') setSelState(val);
-    if (fieldName === 'county') setSelCounty(val);
-    if (fieldName === 'city') setSelCity(val);
+    if (!val) {return;}
+    if (fieldName === 'country') {setSelCountry(val);}
+    if (fieldName === 'state') {setSelState(val);}
+    if (fieldName === 'county') {setSelCounty(val);}
+    if (fieldName === 'city') {setSelCity(val);}
     const value = val?.id;
 
     setUserDetails(prevState => ({
@@ -208,11 +208,11 @@ const SignUp = ({ navigation }) => {
 
     if (fieldName === 'state'){
       // setStet(val?.id)
-      alert("State Name : ",JSON.stringify(val));
-      
-    } 
+      alert('State Name : ',JSON.stringify(val));
 
-  }
+    }
+
+  };
 
   const onSubmitHandler = () => {
     // const payload = { ... };
@@ -243,33 +243,33 @@ const SignUp = ({ navigation }) => {
       id_type: userDetails?.id_type?.value,
       id_number: userDetails.id_number?.value.replace(/-/g, ''),
       pincode: userDetails?.zip?.value.replace(/-/g, ''),
-      id_proof_file_name: `${idProof},${userDetails.id_proof_file_name?.value}`
+      id_proof_file_name: `${idProof},${userDetails.id_proof_file_name?.value}`,
     });
-  }
+  };
 
   useEffect(() => {
     if (data && !error) {
       // navigation.navigate('SignIn');
-      navigation.navigate('Instruction')
+      navigation.navigate('Instruction');
     }
     // setIsSignUp(false);
   }, [data, error]);
 
   const onFocusHandler = (item) => {
     if (item === 'dob') {
-      setOpen(true)
+      setOpen(true);
     }
-  }
+  };
 
   const onBlurHandler = (item) => {
     if (item === 'dob') {
       setOpen(false);
-      handleFormChange(item, moment(date).format('DD-MM-YYYY'))
+      handleFormChange(item, moment(date).format('DD-MM-YYYY'));
     }
     Keyboard.dismiss();
-  }
+  };
 
- 
+
 
   return (
     <View style={{ flex: 1 }}>
@@ -320,7 +320,7 @@ const SignUp = ({ navigation }) => {
                         dataSet={RACE}
                         containerStyle={{ flexGrow: 1, flexShrink: 1 }}
                         textInputProps={{
-                          placeholder: `${userDetails[item].label}*`
+                          placeholder: `${userDetails[item].label}*`,
                         }}
                         inputContainerStyle={{
                           marginTop: 25,
@@ -342,7 +342,7 @@ const SignUp = ({ navigation }) => {
                         dataSet={COUNTRY}
                         containerStyle={{ flexGrow: 1, flexShrink: 1 }}
                         textInputProps={{
-                          placeholder: `${userDetails[item].label}*`
+                          placeholder: `${userDetails[item].label}*`,
                         }}
                         inputContainerStyle={{
                           marginTop: 25,
@@ -363,10 +363,10 @@ const SignUp = ({ navigation }) => {
                         dataSet={stateData}
                         containerStyle={{ flexGrow: 1, flexShrink: 1,flex:1}}
                         textInputProps={{
-                          placeholder: `${userDetails[item].label}*`
+                          placeholder: `${userDetails[item].label}*`,
                         }}
-                        
-              
+
+
                         inputContainerStyle={{
                           marginTop: 5,
                           backgroundColor: '#fff',
@@ -375,7 +375,7 @@ const SignUp = ({ navigation }) => {
                           borderRadius: 5,
                         }}
                       />
-                     
+
                     }
                     {item === 'county' &&
                       <AutocompleteDropdown
@@ -387,7 +387,7 @@ const SignUp = ({ navigation }) => {
                         dataSet={countyData}
                         containerStyle={{ flexGrow: 1, flexShrink: 1 }}
                         textInputProps={{
-                          placeholder: `${userDetails[item].label}*`
+                          placeholder: `${userDetails[item].label}*`,
                         }}
                         inputContainerStyle={{
                           marginTop: 5,
@@ -409,7 +409,7 @@ const SignUp = ({ navigation }) => {
                         dataSet={cityData}
                         containerStyle={{ flexGrow: 1, flexShrink: 1 }}
                         textInputProps={{
-                          placeholder: `${userDetails[item].label}*`
+                          placeholder: `${userDetails[item].label}*`,
                         }}
                         inputContainerStyle={{
                           marginTop: 5,
@@ -432,7 +432,7 @@ const SignUp = ({ navigation }) => {
                         dataSet={IDENTITYTYPE}
                         containerStyle={{ flexGrow: 1, flexShrink: 1 }}
                         textInputProps={{
-                          placeholder: `${userDetails[item].label}*`
+                          placeholder: `${userDetails[item].label}*`,
                         }}
                         inputContainerStyle={{
                           marginTop: 25,
@@ -461,14 +461,14 @@ const SignUp = ({ navigation }) => {
                         <Text>Female</Text>
                       </View>
                     </View>}
-                    {(dropDownList.indexOf(item) === -1 && item !='dob') && <TextField
+                    {(dropDownList.indexOf(item) === -1 && item != 'dob') && <TextField
                       style={{
                         width: 300,
                       }}
                       isOutLined
                       value={item === 'phone' ? userDetails[item].value?.value : userDetails[item].value}
                       label={`${userDetails[item].label} ${optionalFields.includes(item) ? '' : '*'}`}
-                      onChange={value => {handleFormChange(item, value)}}
+                      onChange={value => {handleFormChange(item, value);}}
                       onFocus={() => item === 'dob' ? onFocusHandler(item) : ''}
                       onBlur={() => item === 'dob' ? onBlurHandler(item) : ''}
                       returnKeyType={
@@ -479,7 +479,7 @@ const SignUp = ({ navigation }) => {
                       type={userDetails[item].type || 'text'}
                       {...(userDetails[item].textFieldProps || {})}
                     />}
-                    {(dropDownList.indexOf(item) === -1 && item ==='dob') &&
+                    {(dropDownList.indexOf(item) === -1 && item === 'dob') &&
                       <View style={styles.detailsItemCalender} key={14}>
                       <TextField
                         style={{
@@ -488,7 +488,7 @@ const SignUp = ({ navigation }) => {
                         isOutLined
                         value={item === 'phone' ? userDetails[item].value?.value : userDetails[item].value}
                         label={`${userDetails[item].label} ${optionalFields.includes(item) ? '' : '*'}`}
-                        onChange={value => {handleFormChange(item, value)}}
+                        onChange={value => {handleFormChange(item, value);}}
                         onFocus={() => item === 'dob' ? onFocusHandler(item) : ''}
                         onBlur={() => item === 'dob' ? onBlurHandler(item) : ''}
                         returnKeyType={
@@ -498,7 +498,7 @@ const SignUp = ({ navigation }) => {
                         }
                         type={userDetails[item].type || 'text'}
                         {...(userDetails[item].textFieldProps || {})}
-                        
+
                       />
                         <FontAwesomeIcon
                           name={'calendar'}
@@ -507,7 +507,7 @@ const SignUp = ({ navigation }) => {
                           style={{
                             marginRight: 15,
                             alignSelf: 'flex-end',
-                            marginTop : -20
+                            marginTop : -20,
                           }}
                         />
                       </View>
@@ -523,12 +523,12 @@ const SignUp = ({ navigation }) => {
                   date={date}
                   maximumDate={new Date()}
                   onConfirm={(date) => {
-                    setOpen(false)
-                    setDate(date)
-                    handleFormChange('dob', moment(date).format('DD-MM-YYYY'))
+                    setOpen(false);
+                    setDate(date);
+                    handleFormChange('dob', moment(date).format('DD-MM-YYYY'));
                   }}
                   onCancel={() => {
-                    setOpen(false)
+                    setOpen(false);
                   }}
                 />
               </>
@@ -548,7 +548,7 @@ const SignUp = ({ navigation }) => {
                   onPress={() => handleChoosePhoto('id_proof_file_name')}
                 />
               </View>
-              {idProof !== '' && <Image style={{width: 100, height: 50, resizeMode: 'cover'}} source={{uri: `${idProof},${userDetails['id_proof_file_name']?.value}`}} />}
+              {idProof !== '' && <Image style={{width: 100, height: 50, resizeMode: 'cover'}} source={{uri: `${idProof},${userDetails.id_proof_file_name?.value}`}} />}
             </Grid>
           </Grid>
           <Button

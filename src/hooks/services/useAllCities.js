@@ -14,7 +14,7 @@ export const useAllCities = () => {
     })
       .then(async response => {
         const body = await response.text();
-        if (!response.ok) throw new Error(body || 'Unable to load cities.');
+        if (!response.ok) {throw new Error(body || 'Unable to load cities.');}
         return JSON.parse(body);
       })
       .then(result => {
@@ -22,10 +22,10 @@ export const useAllCities = () => {
         setError(null);
       })
       .catch(fetchError => {
-        if (fetchError?.name !== 'AbortError') setError(fetchError);
+        if (fetchError?.name !== 'AbortError') {setError(fetchError);}
       })
       .finally(() => {
-        if (!controller.signal.aborted) setIsLoading(false);
+        if (!controller.signal.aborted) {setIsLoading(false);}
       });
 
     return () => controller.abort();

@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useEffect, useState } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 
 export const useCity = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,14 +13,14 @@ export const useCity = () => {
     setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
+      headers.append('Content-Type', 'application/json');
 
       const params = JSON.stringify(payload);
 
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/setting/city?${payload}`, requestOptions)

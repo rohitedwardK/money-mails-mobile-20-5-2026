@@ -154,7 +154,11 @@ export const useHomeQueries = ({
         seen: seen || '',
         ...(userLng != null ? {user_lng: userLng, user_lat: userLat} : {}),
       }),
-    enabled: !!subCatActive && !!selCategory && !subCategoryQuery.isLoading,
+    enabled:
+      !!subCatActive &&
+      subCatActive !== DO_YOU_KNOW_TAB_UUID &&
+      !!selCategory &&
+      !subCategoryQuery.isLoading,
     refetchInterval: 10000,
   });
 

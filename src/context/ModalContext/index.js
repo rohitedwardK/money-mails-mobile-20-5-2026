@@ -2,13 +2,13 @@ import React, {createContext, useContext, useState} from 'react';
 import {BlurView} from '@react-native-community/blur';
 import Dialog from '../../components/organisms/Dialog';
 import {Provider} from 'react-native-paper';
-import {modalContextStyles} from './index.style';
+import {useModalContextStyles} from './index.style';
 import {View} from 'react-native';
 import {DeviceContext} from '../DeviceContext';
 
 const TransparentContainer = ({modalDetails}) => {
   const {isAndroid} = useContext(DeviceContext);
-  const styles = modalContextStyles({isAndroid});
+  const styles = useModalContextStyles({isAndroid});
 
   if (!modalDetails?.isOpen) {
     return null;

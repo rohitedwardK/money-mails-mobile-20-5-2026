@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { baseUrl } from "../../connections";
+import { useEffect, useState } from 'react';
+import { baseUrl } from '../../connections';
 
 export const useCityData = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,14 +13,14 @@ export const useCityData = () => {
     setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
+      headers.append('Content-Type', 'application/json');
 
       const params = JSON.stringify(payload);
 
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/city/list/by/county/${payload}`, requestOptions)
@@ -38,11 +38,11 @@ export const useCityData = () => {
             item.label = val.name;
             return item;
           });
-          if(cityData.length != ""){
+          if(cityData.length != ''){
             cityData[cityData.length] = {
-              value : "other",
-              label : "Other"
-            }
+              value : 'other',
+              label : 'Other',
+            };
           }
           setData(cityData);
           setError(false);

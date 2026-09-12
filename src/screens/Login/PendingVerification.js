@@ -1,13 +1,13 @@
-import React,{useContext} from 'react'; 
+import React,{useContext} from 'react';
 import {Text, View, StyleSheet,Image} from 'react-native';
 import Button from '../../components/atoms/Button';
-import {DeviceContext} from '../../context/DeviceContext'
+import {DeviceContext} from '../../context/DeviceContext';
 
 const PendingVerification = ({navigation})=>{
     const {screenWidth} = useContext(DeviceContext);
     return (
         <View style={styles.container}>
-            
+
             <Image
              source={require('../../assets/images/brand.png')} />
             <Text style={styles.heading}>Pending Verification</Text>
@@ -21,7 +21,7 @@ const PendingVerification = ({navigation})=>{
             btnText="Back"
             size="large"
             onPress={()=>{
-                navigation.navigate('SignIn')
+                navigation.navigate('SignIn');
             }}
             overridingStyles={{
                 marginTop: 10,
@@ -32,20 +32,20 @@ const PendingVerification = ({navigation})=>{
             btnTextOverrideStyles={styles.signUpBtnText}
           />
         </View>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     container : {
         flex:1,
         alignItems : 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
     heading : {
         color : 'black',
         fontSize:24,
         fontWeight:'bold',
-        marginTop:20
+        marginTop:20,
     },
     subHeading:{
         color:'black',
@@ -53,24 +53,24 @@ const styles = StyleSheet.create({
         fontWeight:'bold',
         marginTop:10,
         marginBottom:10,
-        textAlign:'center'
+        textAlign:'center',
     },
     instructionContainer :{
-        margin:15
+        margin:15,
     },
     normalText :{
         color:'black',
-        marginBottom:5
+        marginBottom:5,
     },
     img : {
         width:250,
-        height:250
+        height:250,
     },
-    
+
       signUpBtnText: {
         fontSize: 14,
       },
-})
+});
 
 export default PendingVerification;
 

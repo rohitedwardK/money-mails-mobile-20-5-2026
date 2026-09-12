@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from 'react';
 import {
     ScrollView,
     Text, View,
@@ -6,18 +6,19 @@ import {
     TextInput,
     Image,
     TouchableOpacity,
-    BackHandler
-} from "react-native";
+    BackHandler,
+} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Enctypo from 'react-native-vector-icons/Entypo'
-import { Dropdown } from "react-native-element-dropdown";
-import { RACES, COUNTRYS, IDENTITYTYPES } from "../../../../constants";
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { baseUrl } from "../../../../connections";
-import { UserContext } from "../../../../context/UserContext";
-import axios from "axios";
+import Enctypo from 'react-native-vector-icons/Entypo';
+import { Dropdown } from 'react-native-element-dropdown';
+import { IDENTITYTYPES } from '../../../../constants';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { UserContext } from '../../../../context/UserContext';
 import Toast from 'react-native-simple-toast';
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from '@react-navigation/native';
+import SecureScreen from '../../../../components/atoms/SecureScreen';
+import { fetchUserProfile, uploadUserFile } from '../../../../api/moneyMails';
+import { apiPut } from '../../../../api/client';
 
 const VerificationInformation = ({ navigation }) => {
     const { userDetails } = useContext(UserContext);
@@ -27,15 +28,11 @@ const VerificationInformation = ({ navigation }) => {
     const [zelle_id, onChangeZelleId] = useState('');
     const [ssn, onChangeSSN] = useState(userDetails?.ssn);
     const [id_type, setIdType] = useState('');
-    const [id_number, setIdNumber] = useState('')
+    const [id_number, setIdNumber] = useState('');
 
     const [isFocus, setIsFocus] = useState(false);
     const [isFocusRace, setIsFocusRce] = useState(false);
 
-    const [userData, setuserData] = useState({});
-
-
-    //Backhandler
     useFocusEffect(
         React.useCallback(() => {
             const backAction = () => {
@@ -52,130 +49,123 @@ const VerificationInformation = ({ navigation }) => {
         }, [navigation])
     );
 
+    const getProfileData = async () => {
+        if (!userDetails?.uuid) {
+            return;
+        }
 
-
-    const getProfileData = () => {
-        if (!userDetails?.uuid) return; // Prevent API call if uuid is undefined
-
-        axios.get(`${baseUrl}/user/consumer/get/profile/${userDetails?.uuid}`, {
-            headers: {
-                'x-auth-token': userDetails?.token
-            }
-        })
-            .then((res) => {
-                setuserData(res?.data?.data); // Ensure `userDetails` is updated properly
-                setIdProof(res?.data?.data?.id_proof);
-                setProfilePic(res?.data?.data?.profile_pic);
-                onChangeZelleId(res?.data?.data?.zelle_id);
-                onChangeSSN(res?.data?.data?.ssn);
-                setIdType(res?.data?.data?.id_type)
-                setIdNumber(res?.data?.data?.id_number)
-            })
-            .catch((err) => {
-            });
+        try {
+            const response = await fetchUserProfile(userDetails.uuid, userDetails.token);
+            const profile = response?.data || response;
+            setIdProof(profile?.id_proof || '');
+            setProfilePic(profile?.profile_pic || '');
+            onChangeZelleId(profile?.zelle_id || '');
+            onChangeSSN(profile?.ssn || '');
+            setIdType(profile?.id_type || '');
+            setIdNumber(profile?.id_number || '');
+        } catch (_error) {
+            Toast.show('Unable to load verification details.');
+        }
     };
 
     useEffect(() => {
         getProfileData();
-    }, []); // Depend on uuid to prevent unnecessary calls
-
-
+    }, []);
 
     const uploadImage = async (imageUri, type, name, field) => {
         try {
             const formData = new FormData();
             formData.append('file', {
                 uri: imageUri,
-                type: type, // adjust the file type based on your requirement
+                type: type,
                 name: name,
             });
 
-            const response = await axios.post(`${baseUrl}/user/upload/file`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            const response = await uploadUserFile(formData);
+            const filename =
+                response?.data?.image?.filename ||
+                response?.image?.filename ||
+                response?.filename ||
+                '';
 
-            if (response.data.success === true) {
+            if (filename) {
                 if (field === 'profile') {
-                    setProfilePic(response.data.image.filename)
+                    setProfilePic(filename);
                 }
                 if (field === 'idProof') {
-                    setIdProof(response.data.image.filename)
+                    setIdProof(filename);
                 }
             }
         } catch (error) {
-            console.error('Upload failed:', error);
+            if (__DEV__) {
+                console.error('Upload failed:', error);
+            }
+            Toast.show('Upload failed. Please try again.');
         }
     };
+
     const handleChoosePhoto = async (id) => {
         const options = {
             title: 'Choose an Image',
             mediaType: 'photo',
-            // includeBase64: true,
             maxWidth: 300,
             maxHeight: 300,
             quality: 0.9,
             videoQuality: 'low',
             noData: true,
-            fileSize: 1
+            fileSize: 1,
         };
-        if (id === 'id_proof_file_name') {
-            const result = await launchImageLibrary(options);
-            uploadImage(result?.assets[0].uri, result?.assets[0].type, result?.assets[0].fileName, 'idProof')
-            const base64 = `data:${result?.assets[0].type};base64`;
-            // setIdProof(base64);
-            // handleFormChange(id, result?.assets[0].base64);
-        } else {
-            const result = await launchImageLibrary(options);
-            uploadImage(result?.assets[0].uri, result?.assets[0].type, result?.assets[0].fileName, 'profile')
-            const base64 = `data:${result?.assets[0].type};base64`;
-            // setProfilePic(base64);
-            // handleFormChange(id, result?.assets[0].base64);
+
+        const result = await launchImageLibrary(options);
+        const asset = result?.assets?.[0];
+        if (!asset?.uri) {
+            return;
         }
 
+        if (id === 'id_proof_file_name') {
+            uploadImage(asset.uri, asset.type, asset.fileName, 'idProof');
+        } else {
+            uploadImage(asset.uri, asset.type, asset.fileName, 'profile');
+        }
     };
 
     const validateFields = () => {
-        // if (!zelle_id) return 'Zelle Id is required.';
-        // if (!ssn) return 'SSN is required.';
-        // if (!id_type) return 'ID Type is required.';
-        // if (!idProof) return 'ID Proof is required.';
+        if (!id_type) {return 'ID Type is required.';}
+        if (!id_number.trim()) {return 'Identity Number is required.';}
+        if (!idProof) {return 'ID Proof is required.';}
         return null;
     };
 
     const handleNext = async () => {
         const error = validateFields();
         if (error) {
-            // alert(error)
-            Toast.show(error)
-            return false;
+            Toast.show(error);
+            return;
         }
 
-        let payload = {
-            'zelle_id': zelle_id,
-            'profile_pic': profilePic,
-            'id_type': id_type,
-            'id_proof_file_name': idProof,
-            'ssn': ssn,
-            'id_number': id_number
+        const payload = {
+            zelle_id,
+            profile_pic: profilePic,
+            id_type,
+            id_proof_file_name: idProof,
+            ssn,
+            id_number,
+        };
+
+        try {
+            await apiPut(
+                `/user/profile/verification/details/${userDetails?.uuid}`,
+                payload,
+            );
+            Toast.show('Success!');
+            navigation.navigate('User');
+        } catch (_error) {
+            Toast.show('Something went wrong');
         }
-
-        let headers = { 'x-auth-token': userDetails?.token }
-        axios.put(`${baseUrl}/user/profile/verification/details/${userDetails?.uuid}`, payload, {
-            headers: headers
-        }).then((response) => {
-            Toast.show("Success!")
-
-            navigation.navigate('User')
-        }).catch((error) => {
-            Toast.show("Something went wrong")
-        })
-
-        // 
     };
 
     return (
+        <SecureScreen>
         <ScrollView>
             <View style={styles.container}>
                 <Text style={{ fontSize: 16, color: 'black' }}> Please provide necessary information to verify </Text>
@@ -195,6 +185,7 @@ const VerificationInformation = ({ navigation }) => {
                     onChangeText={onChangeSSN}
                     value={ssn}
                     placeholder="Enter SSN Number (Optional)"
+                    secureTextEntry
                 />
 
                 <Text style={styles.label}>Identity Type</Text>
@@ -219,7 +210,6 @@ const VerificationInformation = ({ navigation }) => {
                         onBlur={() => setIsFocusRce(false)}
                         onChange={item => {
                             setIdType(item.value);
-                            // handleFormChange('ethnicity',item.value)
                             setIsFocusRce(false);
                         }}
                         renderLeftIcon={() => (
@@ -274,7 +264,7 @@ const VerificationInformation = ({ navigation }) => {
                 <TouchableOpacity
                     style={{ width: '100%' }}
                     onPress={() => {
-                        navigation.navigate('AddressDetails')
+                        navigation.navigate('AddressDetails');
                     }}
                 >
                     <View style={{ flexDirection: 'row', padding: 10, borderWidth: 0.5, margin: 10, marginTop: 10, alignItems: 'center', justifyContent: 'center' }}>
@@ -284,21 +274,22 @@ const VerificationInformation = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
         </ScrollView>
-    )
-}
+        </SecureScreen>
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
         padding: 10,
-        marginTop: 20
+        marginTop: 20,
     },
     label: {
         fontSize: 18,
         fontWeight: '400',
         marginLeft: 10,
-        color: '#222'
+        color: '#222',
     },
     input: {
         backgroundColor: 'white',
@@ -307,15 +298,15 @@ const styles = StyleSheet.create({
         borderWidth: 0.5,
         borderColor: '##515a5a',
         padding: 10,
-        color: '#222'
+        color: '#222',
     },
     placeholderStyle: {
         fontSize: 16,
-        color: 'black'
+        color: 'black',
     },
     selectedTextStyle: {
         fontSize: 16,
-        color: 'black'
+        color: 'black',
     },
     inputSearchStyle: {
         color: 'black',
@@ -329,7 +320,6 @@ const styles = StyleSheet.create({
     dropdown: {
         height: 50,
         color: 'black',
-        // width: screenWidth - 70,
         borderColor: 'gray',
         borderWidth: 0.5,
         borderRadius: 8,
@@ -345,14 +335,14 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: 'black',
         borderStyle: 'dotted',
-        borderRadius: 8, // Optional for rounded corners
+        borderRadius: 8,
     },
     text: {
         color: '#007BFF',
         fontSize: 16,
         fontWeight: 'bold',
     },
-})
+});
 
 
 export default VerificationInformation;

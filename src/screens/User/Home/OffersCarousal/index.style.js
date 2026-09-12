@@ -11,11 +11,12 @@ export const styles = () => {
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: colors.cardsPlaceholder,
-      borderRadius: 8,
+      borderRadius: 20,
       overflow: 'hidden',
+      marginHorizontal: 16,
     },
     image: {
-      height: 220,
+      height: 140,
       width: '100%',
     },
   });

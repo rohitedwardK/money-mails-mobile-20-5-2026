@@ -1,9 +1,9 @@
-import { useEffect, useState, useContext } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useEffect, useState, useContext } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 
 export const usePopUpAds = () => {
-  const { userDetails } = useContext(UserContext); // Use user context
+  const { userDetails } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [data, setData] = useState();
@@ -13,12 +13,12 @@ export const usePopUpAds = () => {
     const fetchData = async () => {
       setIsLoading(true);
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
       try {
         await fetch(
@@ -32,11 +32,9 @@ export const usePopUpAds = () => {
             return JSON.parse(res);
           })
           .then((result) => {
-            console.log(result?.data, "result?.data")
             setData(result?.data);
           })
-          .catch((err) => {
-            console.log(result?.data, "result?.data err")
+          .catch(() => {
             setData(null);
           });
       } catch (err) {
@@ -47,7 +45,7 @@ export const usePopUpAds = () => {
     };
 
     fetchData();
-  }, [payload]);
+  }, [payload, userDetails?.token]);
 
-  return { PopUpAddData: data, isLoading, error, setPopUpAds }; // Returning the state and setSubCatPayload function
+  return { PopUpAddData: data, isLoading, error, setPopUpAds };
 };

@@ -1,7 +1,35 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
+// Only public production configuration belongs in the release bundle.
+project.ext.envConfigFiles = [debug: ".env", release: ".env.production"]
 apply from: "../../node_modules/react-native-config/android/dotenv.gradle"
+
+def validateProductionConfig = tasks.register("validateProductionConfig") {
+    group = "verification"
+    description = "Reject missing or non-production configuration before packaging a release."
+    doLast {
+        def apiUrl = (project.env.get("API_URL") ?: "").trim().replaceAll('/+$', '')
+        def bingoUrl = (project.env.get("BINGO_URL") ?: "").trim().replaceAll('/+$', '')
+        if (apiUrl != "https://api.money-mails.com/api/v1") {
+            throw new GradleException("Release API_URL must be https://api.money-mails.com/api/v1. Use .env.production.")
+        }
+        if (bingoUrl != "https://bingo.money-mails.com") {
+            throw new GradleException("Release BINGO_URL must be https://bingo.money-mails.com/.")
+        }
+        if (!(project.env.get("GOOGLE_WEB_CLIENT_ID") ?: "").trim().endsWith(".apps.googleusercontent.com")) {
+            throw new GradleException("Release GOOGLE_WEB_CLIENT_ID must be configured.")
+        }
+        if (["AWS_API_KEY", "REACT_APP_AWS_API_KEY"].any { (project.env.get(it) ?: "").trim() }) {
+            throw new GradleException("Do not embed an AWS Places key in release configuration. Use the backend proxy.")
+        }
+    }
+}
+tasks.configureEach { task ->
+    if (task.name in ["preReleaseBuild", "assembleRelease", "bundleRelease"]) {
+        task.dependsOn(validateProductionConfig)
+    }
+}
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -53,6 +81,11 @@ react {
 
     /* Autolinking */
     autolinkLibrariesWithApp()
+    //
+
+
+
+
 }
 
 /**
@@ -97,8 +130,9 @@ android {
         applicationId "com.moneymails.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 7010
-        versionName "1.4.5"
+        versionCode 7015
+        versionName "1.0.1"
+        resValue "string", "build_config_package", "com.moneymails.app"
     }
     signingConfigs {
         debug {
@@ -107,13 +141,16 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
-         release {
-            // if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+        release {
+            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')
+                    && project.hasProperty('MYAPP_UPLOAD_STORE_PASSWORD')
+                    && project.hasProperty('MYAPP_UPLOAD_KEY_ALIAS')
+                    && project.hasProperty('MYAPP_UPLOAD_KEY_PASSWORD')) {
                 storeFile file(MYAPP_UPLOAD_STORE_FILE)
                 storePassword MYAPP_UPLOAD_STORE_PASSWORD
                 keyAlias MYAPP_UPLOAD_KEY_ALIAS
                 keyPassword MYAPP_UPLOAD_KEY_PASSWORD
-            // }
+            }
         }
     }
     buildTypes {
@@ -121,8 +158,6 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             shrinkResources false

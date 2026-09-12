@@ -1,3 +1,5 @@
+import {useContext} from 'react';
+import {UserContext} from '../context/UserContext';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {
   downloadCampaignTicket,
@@ -15,6 +17,19 @@ export const campaignKeys = {
   list: ['campaigns', 'list'],
   detail: campaignUuid => ['campaigns', 'detail', campaignUuid],
   tickets: ['campaigns', 'tickets'],
+};
+
+// Status and ticket responses depend on the signed-in account, even for one campaign.
+const useCampaignQuery = ({authenticated = false, ...options}) => {
+  const {userDetails} = useContext(UserContext);
+  const userUuid = userDetails?.token
+    ? userDetails.uuid || userDetails.user_uuid || null
+    : null;
+  return useQuery({
+    ...options,
+    queryKey: [...options.queryKey, {userUuid}],
+    enabled: options.enabled !== false && (!authenticated || !!userUuid),
+  });
 };
 
 export const getCollection = payload => {
@@ -40,34 +55,35 @@ export const getTotalCount = (payload, fallbackLength = 0) =>
   Number(payload?.count ?? payload?.total ?? payload?.total_count ?? fallbackLength);
 
 export const useActiveCampaigns = ({enabled = true, limit = 4} = {}) =>
-  useQuery({
+  useCampaignQuery({
     queryKey: [...campaignKeys.active, {limit}],
-    queryFn: () => fetchActiveCampaigns({limit}),
+    queryFn: ({signal}) => fetchActiveCampaigns({limit}, {signal}),
     enabled,
     staleTime: 30000,
   });
 
 export const useCampaigns = ({enabled = true} = {}) =>
-  useQuery({
+  useCampaignQuery({
     queryKey: campaignKeys.list,
-    queryFn: fetchCampaigns,
+    queryFn: ({signal}) => fetchCampaigns({signal}),
     enabled,
     staleTime: 30000,
   });
 
 export const useCampaignDetail = ({campaignUuid, enabled = true}) =>
-  useQuery({
+  useCampaignQuery({
     queryKey: campaignKeys.detail(campaignUuid),
-    queryFn: () => fetchCampaignDetail(campaignUuid),
+    queryFn: ({signal}) => fetchCampaignDetail(campaignUuid, {signal}),
     enabled: enabled && !!campaignUuid,
     staleTime: 15000,
     refetchInterval: 30000,
   });
 
 export const useCampaignTicketHistory = ({enabled = true} = {}) =>
-  useQuery({
+  useCampaignQuery({
     queryKey: campaignKeys.tickets,
-    queryFn: () => fetchUserCampaignTickets({page: 0, limit: 20}),
+    queryFn: ({signal}) => fetchUserCampaignTickets({page: 0, limit: 20}, {signal}),
+    authenticated: true,
     enabled,
     staleTime: 30000,
   });

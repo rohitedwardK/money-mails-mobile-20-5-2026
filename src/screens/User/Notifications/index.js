@@ -7,17 +7,17 @@ import AntIcon from 'react-native-vector-icons/AntDesign';
 import getColors from '../../../utils/colors';
 
 const renderItem = ({ item, navigation, styles, colors }) => {
-    let navigateRoute = "Notification";
-    let param = {}
+    let navigateRoute = 'Notification';
+    let param = {};
     if(item.item.mlink){
         param = {
             brand_uuid : item.item.mlink.brand_uuid,
             category_uuid : item.item.mlink.category_uuid,
             sub_category_uuid : item.item.mlink.sub_category_uuid,
             mail_uuid : item.item.mlink.mail_uuid,
-        }
-        if(item.item.mlink.page == 'home') navigateRoute = 'Home';
-        if(item.item.mlink.page == 'redeem_history') navigateRoute = 'PointRedeemHistory'
+        };
+        if(item.item.mlink.page == 'home') {navigateRoute = 'Home';}
+        if(item.item.mlink.page == 'redeem_history') {navigateRoute = 'PointRedeemHistory';}
     }
     return (
         <TouchableOpacity activeOpacity={0.84} onPress={() => navigation.navigate(navigateRoute, param)}>
@@ -49,7 +49,7 @@ const Notification = () => {
 
     useEffect(() => {
         if(isFocused){
-            setPage(0)
+            setPage(0);
         }
         setPege(page);
         setNotificationPayload({ user_uuid: userDetails?.uuid, page: page, key: Math.random(5) });
@@ -74,23 +74,23 @@ const Notification = () => {
             <Text style={styles.headerTitle}>Notifications</Text>
             <Text style={styles.headerSubtitle}>Updates, rewards, and mail activity.</Text>
         </View>
-        {data.length > 0&&<FlatList
+        {data.length > 0 && <FlatList
             contentContainerStyle={styles.listContent}
             data={data}
             renderItem={(item) => renderItem({ item, navigation, styles, colors })}
             keyExtractor={(item, index) => index.toString()}
             onEndReached={() => {
                 setPage((prevPage) => prevPage + 1);
-                
+
             }}
             onEndReachedThreshold={0.1}
         />}
-        {data.length === 0&&<View style={styles.emptyState}>
+        {data.length === 0 && <View style={styles.emptyState}>
             <Text style={styles.emptyTitle}>No notifications</Text>
             <Text style={styles.emptyText}>New alerts will show up here.</Text>
             </View>}
         </View>
-        
+
     );
 };
 

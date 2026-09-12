@@ -7,12 +7,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import EntypoIcon from 'react-native-vector-icons/Entypo';
 import LinearGradient from 'react-native-linear-gradient';
 import Snackbar from 'react-native-snackbar';
 import {useLogin} from '../../../hooks/services/useLogin';
 import {UserContext} from '../../../context/UserContext';
+import {clearAuthSession} from '../../../utils/authSession';
 import { styles } from './index.style';
 
 const getInitials = userDetails => {
@@ -73,23 +73,18 @@ const AccountMenu = ({ navigation }) => {
 
   const logoutHandler = async () => {
     try {
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('auth');
-      await AsyncStorage.removeItem('user');
-      await AsyncStorage.clear();
+      await clearAuthSession();
       setData({});
       setUserDetails({});
       Snackbar.show({
         text: 'User Logged Out Successfully.',
         duration: Snackbar.LENGTH_SHORT,
       });
-      const parentNavigation = navigation.getParent();
-      if (parentNavigation) {
-        parentNavigation.navigate('LoginScreens', {screen: 'SignIn'});
-      } else {
-        navigation.navigate('LoginScreens', {screen: 'SignIn'});
-      }
-    } catch (exception) {
+    } catch (_error) {
+      Snackbar.show({
+        text: 'Unable to finish signing out. Please try again.',
+        duration: Snackbar.LENGTH_SHORT,
+      });
       return false;
     }
   };

@@ -1,17 +1,17 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect } from 'react';
 import {
     ScrollView,
     Text, View,
     StyleSheet,
     TextInput,
     TouchableOpacity,
-    BackHandler
-} from "react-native";
+    BackHandler,
+} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { UserContext } from "../../../../context/UserContext";
-import axios from "axios";
-import { baseUrl } from "../../../../connections";
-import { useFocusEffect } from "@react-navigation/native";
+import { UserContext } from '../../../../context/UserContext';
+import axios from 'axios';
+import { baseUrl } from '../../../../connections';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 const ProfileSetting = ({ navigation }) => {
@@ -42,12 +42,12 @@ const ProfileSetting = ({ navigation }) => {
     );
 
     const getProfileData = () => {
-        if (!userDetails?.uuid) return; // Prevent API call if uuid is undefined
+        if (!userDetails?.uuid) {return;} // Prevent API call if uuid is undefined
 
         axios.get(`${baseUrl}/user/consumer/get/profile/${userDetails?.uuid}`, {
             headers: {
-                'x-auth-token': userDetails?.token
-            }
+                'x-auth-token': userDetails?.token,
+            },
         })
             .then((res) => {
                 setuserData(res?.data?.data); // Ensure `userDetails` is updated properly
@@ -58,7 +58,7 @@ const ProfileSetting = ({ navigation }) => {
 
             })
             .catch((err) => {
-                console.log(err, "Error fetching profile data");
+                console.log(err, 'Error fetching profile data');
             });
     };
 
@@ -109,7 +109,7 @@ const ProfileSetting = ({ navigation }) => {
                 <TouchableOpacity
                     style={{ width: '100%' }}
                     onPress={() => {
-                        navigation.navigate('PersonalizationDetails')
+                        navigation.navigate('PersonalizationDetails');
                     }}
                 >
                     <View style={{ flexDirection: 'row', padding: 10, backgroundColor: '#45b39d', margin: 10, marginTop: 30, alignItems: 'center', justifyContent: 'center' }}>
@@ -123,21 +123,21 @@ const ProfileSetting = ({ navigation }) => {
 
 
         </ScrollView>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
         padding: 10,
-        marginTop: 20
+        marginTop: 20,
     },
     label: {
         fontSize: 18,
         fontWeight: '400',
         marginLeft: 10,
-        color : '#222'
+        color : '#222',
     },
     input: {
         backgroundColor: 'white',
@@ -146,9 +146,9 @@ const styles = StyleSheet.create({
         borderWidth: 0.5,
         borderColor: '##515a5a',
         padding: 10,
-        color: '#222'
+        color: '#222',
     },
-})
+});
 
 
 export default ProfileSetting;

@@ -1,11 +1,11 @@
-import { useEffect, useState,useContext } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useEffect, useState,useContext } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 import {
   ToastAndroid,
   Platform,
   AlertIOS,
-  Alert
+  Alert,
 } from 'react-native';
 import Toast from '../../components/atoms/Snackbar';
 
@@ -23,15 +23,15 @@ export const usePointRedeem = () => {
       setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
 
       const body = JSON.stringify(payload);
       const requestOptions = {
-        method: "POST",
+        method: 'POST',
         headers: headers,
         body: body,
-        redirect: "follow",
+        redirect: 'follow',
       };
       fetch(`${baseUrl}/point/redeemed/check`, requestOptions)
         .then(async (response) => {
@@ -47,16 +47,16 @@ export const usePointRedeem = () => {
             setError(false);
         })
         .catch((err) => {
-            setData(null)
+            setData(null);
           if (Platform.OS === 'android') {
-            ToastAndroid.show(err, ToastAndroid.SHORT)
+            ToastAndroid.show(err, ToastAndroid.SHORT);
           } else {
             Alert.alert('Alert', err, [
               {
                   text: 'ok',
                   onPress: str => console.log('Entered string: ' + str),
               },
-              
+
           ]);
           }
           setError(err);
@@ -70,15 +70,15 @@ export const usePointRedeem = () => {
       setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
 
       const body = JSON.stringify(payloads);
       const requestOptions = {
-        method: "POST",
+        method: 'POST',
         headers: headers,
         body: body,
-        redirect: "follow",
+        redirect: 'follow',
       };
       fetch(`${baseUrl}/point/redeemed`, requestOptions)
         .then(async (response) => {
@@ -94,12 +94,12 @@ export const usePointRedeem = () => {
             setError(false);
         })
         .catch((err) => {
-            setDatas(null)
+            setDatas(null);
           if (Platform.OS === 'android') {
-            ToastAndroid.show(err, ToastAndroid.SHORT)
+            ToastAndroid.show(err, ToastAndroid.SHORT);
           } else {
             // AlertIOS.alert(err);
-            return <Toast message={err} isOpen={true} />
+            return <Toast message={err} isOpen={true} />;
           }
           setError(err);
           setIsLoading(false);
@@ -113,6 +113,6 @@ export const usePointRedeem = () => {
     error,
     setRedeemPayload,
     setRedeemPayloads,
-    datas
+    datas,
   };
 };

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState, useContext } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useEffect, useState, useContext } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 
 export const useMail = () => {
   const { userDetails } = useContext(UserContext);
@@ -23,15 +23,15 @@ export const useMail = () => {
     setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
 
 
       const params = JSON.stringify(payload);
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
       // country_uuid=CO-42A82D09&state_uuid=ST-D8830887&city_uuid=CITY-DF2C30CF&sub_category_uuid=SCAT-AA55973A&user_uuid=CN-DE684BE9&county_uuid=CNTY-2C7F097B&brand_uuid=&category_uuid=CAT-AB727D5A&type=filter&seen=
       // fetch(`${baseUrl}/mail/list?${payload}&seen=`, requestOptions)
@@ -54,15 +54,15 @@ export const useMail = () => {
           setError(err);
           setIsLoading(false);
         });
-  }
+  };
 
   useEffect(() => {
     if(payload) {
       onMailLoad();
       const intervalID =  setInterval(()=>{
-        onMailLoad()
+        onMailLoad();
       },30000);
-      return ()=> clearInterval(intervalID)
+      return ()=> clearInterval(intervalID);
     }
   }, [payload]);
 
@@ -71,16 +71,16 @@ export const useMail = () => {
     setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
 
       const params = JSON.stringify(updateMailFav);
 
       const requestOptions = {
-        method: "PUT",
+        method: 'PUT',
         headers: headers,
         body: params,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/mail/update/favourite`, requestOptions)
@@ -105,20 +105,20 @@ export const useMail = () => {
 
   useEffect(() => {
     if(updateMailRedeem) {
-    if(!updateMailRedeem?.mail_uuid) return;
+    if(!updateMailRedeem?.mail_uuid) {return;}
     setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
 
       const params = JSON.stringify(updateMailRedeem);
 
       const requestOptions = {
-        method: "PUT",
+        method: 'PUT',
         headers: headers,
         body: params,
-        redirect: "follow",
+        redirect: 'follow',
       };
       setRedeemSuccessMessage('');
       fetch(`${baseUrl}/mail/update/redeem`, requestOptions)
@@ -146,20 +146,20 @@ export const useMail = () => {
 
   useEffect(() => {
     if(mailURL) {
-    if(!mailURL) return;
+    if(!mailURL) {return;}
     setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
 
       const params = JSON.stringify(mailURL);
 
       const requestOptions = {
-        method: "POST",
+        method: 'POST',
         headers: headers,
         body: params,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/mail/read/html/file`, requestOptions)
@@ -171,7 +171,7 @@ export const useMail = () => {
           return JSON.parse(res);
         })
         .then((result) => {
-          setMailHTML(result?.htmlData)
+          setMailHTML(result?.htmlData);
         })
         .catch((err) => {
           // console.log('result', err);
@@ -192,6 +192,6 @@ export const useMail = () => {
     setMailPayload,
     setUpdateMailFav,
     setUpdateMailRedeem,
-    setMailURL
+    setMailURL,
   };
 };

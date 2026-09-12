@@ -1,6 +1,5 @@
 import React from 'react';
 import {ActivityIndicator, Text, TouchableOpacity, View} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import getColors from '../../../utils/colors';
 import {getCollection, useActiveCampaigns} from '../../../hooks/useCampaignQueries';
 import CampaignsCarousel from './CampaignsCarousel';
@@ -17,25 +16,15 @@ const CampaignsPanel = ({navigation}) => {
   }
 
   return (
-    <View>
+    <View style={styles.homePanel}>
       <View style={styles.sectionHeader}>
         <View style={styles.sectionHeaderCopy}>
-          <Text style={styles.sectionTitle}>Ongoing Campaigns</Text>
-          <Text style={styles.sectionSubtitle}>Claim your spot</Text>
-        </View>
-        <View style={styles.sectionActions}>
+          <Text style={styles.sectionTitle}>Ongoing campaigns</Text>
           <TouchableOpacity
-            style={styles.sectionAction}
-            onPress={() => navigation.navigate('CampaignTicketHistory')}>
-            <Ionicons name={'ticket-outline'} size={15} color={themeColors.fontMuted} />
-            <Text style={styles.sectionLink}>My Bookings</Text>
-          </TouchableOpacity>
-          <View style={styles.sectionActionDivider} />
-          <TouchableOpacity
-            style={styles.sectionAction}
-            onPress={() => navigation.navigate('Campaigns')}>
-            <Ionicons name={'megaphone-outline'} size={15} color={themeColors.fontMuted} />
-            <Text style={styles.sectionLink}>All Campaigns</Text>
+            onPress={() => navigation.navigate('Campaigns')}
+            accessibilityRole="button"
+            accessibilityLabel="See all campaigns">
+            <Text style={styles.sectionSubtitle}>See all</Text>
           </TouchableOpacity>
         </View>
       </View>

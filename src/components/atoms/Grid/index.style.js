@@ -1,6 +1,6 @@
 import {StyleSheet} from 'react-native';
 
-export const gridStyles = ({containerStyles, fontStrong, size}) => {
+export const gridStyles = ({containerStyles, dir = 'row', justify = 'flex-start', items = 'center', wrap = false}) => {
   return StyleSheet.create({
     container: {
       display: 'flex',

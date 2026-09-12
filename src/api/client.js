@@ -1,5 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {API_URL} from '../config';
+import {getAuthToken, migrateFromAsyncStorage} from '../utils/secureStorage';
+import {assertAllowedRequestUrl} from '../utils/urlSecurity';
 
 export class ApiError extends Error {
   constructor(message, {status, payload, url} = {}) {
@@ -28,23 +29,13 @@ export const buildQuery = params => {
 };
 
 export const getStoredToken = async () => {
-  try {
-    const storedToken = await AsyncStorage.getItem('token');
-    const parsedToken = storedToken ? JSON.parse(storedToken) : '';
-    if (parsedToken) {
-      return parsedToken;
-    }
-  } catch (_error) {
-    // Fall back to user session below.
+  const token = await getAuthToken();
+  if (token) {
+    return token;
   }
 
-  try {
-    const storedUser = await AsyncStorage.getItem('user');
-    const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-    return parsedUser?.token || '';
-  } catch (_error) {
-    return '';
-  }
+  const migratedUser = await migrateFromAsyncStorage();
+  return migratedUser?.token || '';
 };
 
 const parseResponse = async response => {
@@ -82,9 +73,18 @@ const getFallbackErrorMessage = (payload, response) => {
   return `Request failed with HTTP ${response.status}`;
 };
 
+const resolveRequestUrl = path => {
+  if (path.startsWith('http')) {
+    assertAllowedRequestUrl(path);
+    return path;
+  }
+
+  return `${API_URL}${path}`;
+};
+
 export const apiRequest = async (
   path,
-  {method = 'GET', body, headers = {}, auth = true, token, isFormData} = {},
+  {method = 'GET', body, headers = {}, auth = true, token, isFormData, signal} = {},
 ) => {
   const requestHeaders = {...headers};
 
@@ -92,13 +92,14 @@ export const apiRequest = async (
     requestHeaders['Content-Type'] = 'application/json';
   }
 
+  const url = resolveRequestUrl(path);
   const authToken = token || (auth ? await getStoredToken() : '');
   if (authToken) {
     requestHeaders['x-auth-token'] = authToken;
   }
 
-  const url = path.startsWith('http') ? path : `${API_URL}${path}`;
   const response = await fetch(url, {
+    signal,
     method,
     headers: requestHeaders,
     body: isFormData ? body : body ? JSON.stringify(body) : undefined,

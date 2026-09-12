@@ -41,6 +41,6 @@ export const avatarStyles = ({size, rounded, fit, flatStyle}) => {
       lineHeight: Math.max(18, size * 0.3),
       textAlign: 'center',
       borderRadius: rounded ? 500 : 28,
-    }
+    },
   });
 };

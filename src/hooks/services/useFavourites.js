@@ -1,6 +1,6 @@
-import { useEffect, useState, useContext } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useEffect, useState, useContext } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 
 export const useFavourites = () => {
   const { userDetails } = useContext(UserContext);
@@ -13,15 +13,15 @@ export const useFavourites = () => {
   const [updateBrandFav, setUpdateBrandFav] = useState();
 
   const headers = new Headers();
-  headers.append("Content-Type", "application/json");
-  headers.append("x-auth-token", userDetails?.token);
+  headers.append('Content-Type', 'application/json');
+  headers.append('x-auth-token', userDetails?.token);
 
   const onBrandLoad = () => {
     setIsLoading(true);
     const requestOptions = {
-      method: "GET",
+      method: 'GET',
       headers: headers,
-      redirect: "follow",
+      redirect: 'follow',
     };
     fetch(`${baseUrl}/favourite/brand/list?${payload}`, requestOptions)
           .then(async (response) => {
@@ -40,16 +40,16 @@ export const useFavourites = () => {
             setError(err);
             setIsLoading(false);
           });
-  }
+  };
 
   const onMailLoad = () => {
     setIsLoading(true);
     const params = JSON.stringify(payload);
 
     const requestOptions = {
-      method: "GET",
+      method: 'GET',
       headers: headers,
-      redirect: "follow",
+      redirect: 'follow',
     };
 
     fetch(`${baseUrl}/favourite/mail/list?${payload}`, requestOptions)
@@ -69,7 +69,7 @@ export const useFavourites = () => {
         setError(err);
         setIsLoading(false);
       });
-  }
+  };
 
   useEffect(() => {
     if(payload) {
@@ -82,16 +82,16 @@ export const useFavourites = () => {
     if(updateBrandFav) {
     setIsLoading(true);
     const headers = new Headers();
-    headers.append("Content-Type", "application/json");
-    headers.append("x-auth-token", userDetails?.token);
+    headers.append('Content-Type', 'application/json');
+    headers.append('x-auth-token', userDetails?.token);
 
     const params = JSON.stringify(updateBrandFav);
 
     const requestOptions = {
-      method: "POST",
+      method: 'POST',
       headers: headers,
       body: params,
-      redirect: "follow",
+      redirect: 'follow',
     };
 
     fetch(`${baseUrl}/favourite`, requestOptions)
@@ -119,16 +119,16 @@ export const useFavourites = () => {
     setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
 
       const params = JSON.stringify(updateMailFav);
 
       const requestOptions = {
-        method: "PUT",
+        method: 'PUT',
         headers: headers,
         body: params,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/mail/update/favourite`, requestOptions)
@@ -140,7 +140,7 @@ export const useFavourites = () => {
           return JSON.parse(res);
         })
         .then((result) => {
-          if(payload !== null) onMailLoad();
+          if(payload !== null) {onMailLoad();}
           setError(false);
           setIsLoading(false);
         })
@@ -158,6 +158,6 @@ export const useFavourites = () => {
     error,
     setFavPayload,
     setUpdateBrandFav,
-    setUpdateMailFav
+    setUpdateMailFav,
   };
 };

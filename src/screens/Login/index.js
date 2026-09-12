@@ -10,7 +10,6 @@ import ResetInstructions from './ResetInstructions';
 import NewPassword from './NewPassword';
 import SignUp from './SignUp';
 import UserVerification from './UserVerification';
-import PointRedeemHistory from '../User/PointRedeemHistory';
 import Instruction from './Instructions';
 import PendingVerification from './PendingVerification';
 import SigupInfo from './SignupInfo';
@@ -66,19 +65,18 @@ const LoginScreens = () => {
          options={{
           headerShown:true,
           headerBackTitleVisible: false,
-          title: 'Sign Up'
+          title: 'Sign Up',
         }}
          name="SignUp" component={SignUp} />
-        <Stack.Screen 
+        <Stack.Screen
         options={{
           headerShown:true,
-          title: 'Sign Up Information'
+          title: 'Sign Up Information',
         }}
         name="SignUpInfo" component={SigupInfo} />
         <Stack.Screen name="Verification" component={UserVerification} />
         <Stack.Screen name="Instruction" component={Instruction} />
         <Stack.Screen name="PendingVerification" component={PendingVerification} />
-        <Stack.Screen name="PointRedeemHistory"  component={PointRedeemHistory} />
       </Stack.Navigator>
     </View>
   );

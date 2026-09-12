@@ -1,6 +1,6 @@
-import { useEffect, useState, useContext } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useEffect, useState, useContext } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 import {
   ToastAndroid,
   Platform,
@@ -20,13 +20,13 @@ export const useNotification = () => {
     if (payload) {
       setIsLoading(true);
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
 
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
       fetch(`${baseUrl}/notification/list/consumer?limit=10&user_uuid=${payload.user_uuid}&page=${payload.page}`, requestOptions)
         .then(async (response) => {
@@ -38,17 +38,17 @@ export const useNotification = () => {
         })
         .then((result) => {
           if (page == 0) {
-            setData([])
+            setData([]);
             setData([...result.data]);
           } else {
             setData((prevData) => [...prevData, ...result.data]);
           }
-          setCount(result.unread)
+          setCount(result.unread);
           setIsLoading(false);
           setError(false);
         })
         .catch((err) => {
-          setData(null)
+          setData(null);
           // if (payload?.user_uuid) {
           //   if (Platform.OS === 'android') {
           //     ToastAndroid.show(err, ToastAndroid.SHORT)
@@ -70,6 +70,6 @@ export const useNotification = () => {
     error,
     count,
     setPege,
-    setNotificationPayload
+    setNotificationPayload,
   };
 };

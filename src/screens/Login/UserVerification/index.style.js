@@ -15,24 +15,24 @@ export const styles = ({ screenHeight, isIos }) => {
       width: '100%',
     },
     otpFieldsWrapper: {
-      display: "flex",
+      display: 'flex',
       gap: 12,
     },
     otpField: {
       width: 30,
       height: 30,
       border: 0,
-      outline: `1px solid #ccc`,
+      outline: '1px solid #ccc',
       borderRadius: 5,
-      textAlign: "center",
+      textAlign: 'center',
       fontSize: 20,
-      "&:focus": {
+      '&:focus': {
         // outline: `2px solid ${themeColors?.accent}`,
       },
-      "&::-webkit-inner-spin-button, &::-webkit-outer-spin-button": {
-        "-webkit-appearance": "none",
-        "-moz-appearance": "none",
-        appearance: "none",
+      '&::-webkit-inner-spin-button, &::-webkit-outer-spin-button': {
+        '-webkit-appearance': 'none',
+        '-moz-appearance': 'none',
+        appearance: 'none',
         margin: 0,
       },
     },
@@ -46,7 +46,7 @@ export const styles = ({ screenHeight, isIos }) => {
       borderColor: '#00000030',
       textAlign: 'center',
       borderRadius: 8,
-      color: '#222'
+      color: '#222',
     },
     focusCell: {
       borderColor: '#000',
@@ -77,7 +77,7 @@ export const styles = ({ screenHeight, isIos }) => {
       color: '#707070',
       marginTop: 28,
     },
-    termconditionLink :{ 
+    termconditionLink :{
       fontSize: 12,
       textAlign:'center',
       color: 'rgb(0, 173, 239)',
@@ -111,13 +111,13 @@ export const styles = ({ screenHeight, isIos }) => {
       borord: 1,
       borderColor:'black',
       borderRadius:20,
-      padding:5
+      padding:5,
     },
     heading:{
         color:'black',
         fontSize: 18,
         fontWeight:'bold',
-        textAlign:'center'
+        textAlign:'center',
     },
     subHeading:{
       color:'black',

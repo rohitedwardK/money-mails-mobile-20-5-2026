@@ -1,6 +1,6 @@
-import { useEffect, useState,useContext } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useEffect, useState,useContext } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 import {
   ToastAndroid,
   Platform,
@@ -16,17 +16,17 @@ export const useMailPage = () => {
   const [page, setPage] = useState(0);
 
   useEffect(() => {
-    
+
     if (payload) {
       setIsLoading(true);
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
 
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
       fetch(`${baseUrl}/mail/list?${payload}`, requestOptions)
         .then(async (response) => {
@@ -38,8 +38,8 @@ export const useMailPage = () => {
         })
         .then((result) => {
           if(page == 1){
-            setData("");
-            setData([...result.data])
+            setData('');
+            setData([...result.data]);
           }else{
             setData((prevData) => [...prevData, ...result.data]);
           }
@@ -47,9 +47,9 @@ export const useMailPage = () => {
           setError(false);
         })
         .catch((err) => {
-            setData(null)
+            setData(null);
           if (Platform.OS === 'android') {
-            ToastAndroid.show(err, ToastAndroid.SHORT)
+            ToastAndroid.show(err, ToastAndroid.SHORT);
           } else {
             AlertIOS.alert(err);
           }
@@ -66,6 +66,6 @@ export const useMailPage = () => {
     isLoading,
     error,
     setPage,
-    setMailPagePayload
+    setMailPagePayload,
   };
 };

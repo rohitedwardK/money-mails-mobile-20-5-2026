@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { baseUrl } from "../../connections";
+import { useEffect, useState } from 'react';
+import { baseUrl } from '../../connections';
 
 export const useCountyData = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -12,13 +12,13 @@ export const useCountyData = () => {
     setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
+      headers.append('Content-Type', 'application/json');
       const params = JSON.stringify(payload);
 
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/county/list/by/state/${payload}`, requestOptions)
@@ -36,11 +36,11 @@ export const useCountyData = () => {
             item.label = val.name;
             return item;
           });
-          if(countyData.length != ""){
+          if(countyData.length != ''){
             countyData[countyData.length] = {
-              value : "other",
-              label : "Other"
-            }
+              value : 'other',
+              label : 'Other',
+            };
           }
           setData(countyData);
           setError(false);

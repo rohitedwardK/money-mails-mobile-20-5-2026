@@ -1,13 +1,14 @@
+import {PRIVACY_POLICY_URL} from '../../../constants';
 import React, {useContext, useState, useEffect, useRef} from 'react';
 import {View, Text,TouchableOpacity,Modal,Pressable,ScrollView,Linking,
-  ToastAndroid, AlertIOS, Platform
+  ToastAndroid, AlertIOS, Platform,
 } from 'react-native';
 import EntypoIcon from 'react-native-vector-icons/Entypo';
 import Button from '../../../components/atoms/Button';
 import {DeviceContext} from '../../../context/DeviceContext';
 import {styles as resetPasswordStyles} from './index.style';
-import { useVerification } from "../../../hooks/services/useVerification";
-import { UserContext } from "../../../context/UserContext";
+import { useVerification } from '../../../hooks/services/useVerification';
+import { UserContext } from '../../../context/UserContext';
 import Toast from '../../../components/atoms/Snackbar';
 import {Checkbox} from 'react-native-paper';
 
@@ -38,26 +39,26 @@ const UserVerification = ({navigation}) => {
 
   const otpOnSubmit = async(e) => {
     if(!checked){
-      let msg = "Please accept Terms and Conditions.";
+      let msg = 'Please accept Terms and Conditions.';
       if (Platform.OS === 'android') {
-        ToastAndroid.show(msg, ToastAndroid.SHORT)
+        ToastAndroid.show(msg, ToastAndroid.SHORT);
       } else {
         AlertIOS.alert(msg);
       }
     }else{
       await setOTPPayload({
-        user_uuid: userDetails.user_uuid? userDetails?.user_uuid : '',
-        code: value
+        user_uuid: userDetails.user_uuid ? userDetails?.user_uuid : '',
+        code: value,
       });
       setIsVerify(true);
     }
-    
-  }
+
+  };
 
   useEffect(()=>{
     setIsVerify(false);
-    if(isOTPVerified) navigation.navigate("SignIn")
-  },[isOTPVerified, error])
+    if(isOTPVerified) {navigation.navigate('SignIn');}
+  },[isOTPVerified, error]);
 
   return (
     <View style={styles.pageContainer}>
@@ -96,7 +97,7 @@ const UserVerification = ({navigation}) => {
       </View>
       <View style={{flexDirection:'row'}}>
           <View style={{marginTop:12}}>
-              <Checkbox.Item 
+              <Checkbox.Item
               style={{marginLeft:-20,marginRight:-10}}
               status={checked ? 'checked' : 'unchecked'}
               onPress={() => {
@@ -113,7 +114,7 @@ const UserVerification = ({navigation}) => {
           </View>
           <View>
           <TouchableOpacity onPress={()=>{
-             setModalVisible(true)
+             setModalVisible(true);
           }}><Text style={styles.termconditionLink}>Terms and Conditions.</Text></TouchableOpacity>
           </View>
       </View>
@@ -221,8 +222,8 @@ const UserVerification = ({navigation}) => {
               <Text style={styles.modalText}>Certain content and services available via our website may include materials from third-parties. Third-party links on this site may direct you to third-party websites or applications that are not affiliated with us. money-mails.com is not responsible for examining or evaluating the content or accuracy of such website or application and we do not warrant and will not have any liability or responsibility for any third-party materials or websites, or for any other materials, products, or services of third-parties. We are not liable for any harm or damages related to the purchase or use of goods, services, resources, content, or any other transactions made in connection with any third-party websites.</Text>
               <Text style={styles.modalText}>You’re obliged to review carefully the third-party's policies and practices and make sure you understand them before you engage in any transaction. Complaints, claims, concerns, or questions regarding third-party products should be directed to the third-party.</Text>
               <Text style={styles.subHeading}>PERSONAL INFORMATION</Text>
-              <Text style={styles.modalText}>Your submission of personal information through the store is regulated by our Privacy Policy. You are to view our <Pressable onPress={()=>{ Linking.openURL("https://moneymails.scienstechnologies.com/privacy")}}><Text style={{color:'#6495ED',marginTop:15}}>Privacy Policy</Text></Pressable>.</Text>
-              
+              <Text style={styles.modalText}>Your submission of personal information through the store is regulated by our Privacy Policy. You are to view our <Pressable onPress={()=>{ Linking.openURL(PRIVACY_POLICY_URL);}}><Text style={{color:'#6495ED',marginTop:15}}>Privacy Policy</Text></Pressable>.</Text>
+
 
 
 
@@ -238,7 +239,7 @@ const UserVerification = ({navigation}) => {
         </View>
       </Modal>
       {/* Modal Code End */}
-       
+
       <Button
                   btnText="submit"
                   variant="primary"
@@ -256,7 +257,7 @@ const UserVerification = ({navigation}) => {
         onPress={otpOnSubmit}
       /> */}
       {isVerify && <Toast message={!error ? 'Verification successfully done' : error} isOpen={true} />}
-          
+
     </View>
   );
 };

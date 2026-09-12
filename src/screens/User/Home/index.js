@@ -1,66 +1,72 @@
 import React, { useState, useEffect, useContext, useCallback, useLayoutEffect, useRef, useMemo } from 'react';
 import { Image, ActivityIndicator, ScrollView, Text, View, TouchableOpacity, StyleSheet, FlatList, Button, Dimensions, Switch, Modal, ToastAndroid } from 'react-native';
-import { WebView } from 'react-native-webview';
 import OffersCarousal from './OffersCarousal';
-import BrandIconCard from '../../../components/molecules/BrandIconCard';
 import AppHeader from '../../../components/molecules/AppHeader';
+import HomeStoreCard from './HomeStoreCard';
 import { styles as homeScreenStyles } from './index.style';
 import TabView from '../../../components/organisms/TabView';
-import DoYouKnowSection from './DoYouKnowSection';
 import { useInterval } from '../../../hooks/useInterval';
 import OfferCard from '../../../components/organisms/OfferCard';
 import { ModalContext } from '../../../context/ModalContext';
 import RedeemModalContent from './RedeemModalContent';
-import { useHome } from "../../../hooks/services/useHome";
-import { useBrand } from "../../../hooks/services/useBrand";
-import { useCategory } from "../../../hooks/services/useCategory";
-import { useSubCategory } from "../../../hooks/services/useSubCategory";
-import { useMail } from "../../../hooks/services/useMail";
-import { useCountry } from "../../../hooks/services/useCountry";
-import { useStates } from "../../../hooks/services/useStates";
-import { useCounty } from "../../../hooks/services/useCounty";
-import { useCity } from "../../../hooks/services/useCity";
-import { UserContext } from "../../../context/UserContext";
+import { useHome } from '../../../hooks/services/useHome';
+import { useBrand } from '../../../hooks/services/useBrand';
+import { useCategory } from '../../../hooks/services/useCategory';
+import { useSubCategory } from '../../../hooks/services/useSubCategory';
+import { useMail } from '../../../hooks/services/useMail';
+import { useCountry } from '../../../hooks/services/useCountry';
+import { useStates } from '../../../hooks/services/useStates';
+import { useCounty } from '../../../hooks/services/useCounty';
+import { useCity } from '../../../hooks/services/useCity';
+import { UserContext } from '../../../context/UserContext';
 import { DeviceContext } from '../../../context/DeviceContext';
-import { useStateData } from "../../../hooks/services/useStateData";
-import { useCountyData } from "../../../hooks/services/useCountyData";
-import { useCityData } from "../../../hooks/services/useCityData";
-import { useAllCities } from "../../../hooks/services/useAllCities";
+import { useStateData } from '../../../hooks/services/useStateData';
+import { useCountyData } from '../../../hooks/services/useCountyData';
+import { useCityData } from '../../../hooks/services/useCityData';
+import { useAllCities } from '../../../hooks/services/useAllCities';
 import EntypoIcon from 'react-native-vector-icons/Entypo';
 import { usePopUpAds } from '../../../hooks/services/usePopupads';
 import getColors from '../../../utils/colors';
 import { useRoute } from '@react-navigation/native';
 import { BackHandler } from 'react-native';
-import { useFocusEffect } from "@react-navigation/core";
+import { useFocusEffect } from '@react-navigation/core';
 import Toast from 'react-native-simple-toast';
 import YouTubePlayer from '../Youtube';
-import Pdf from 'react-native-pdf';
 
-import Ionicons from 'react-native-vector-icons/Ionicons'
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import { baseUrl } from '../../../connections';
 import StoriesScreen from './stories';
 import Carousel from 'react-native-reanimated-carousel';
 
 import FastImage from 'react-native-fast-image';
-import { useQuery } from '@tanstack/react-query';
-import { fetchStoreProfile } from '../../../api/moneyMails';
-import { useHomeQueries } from '../../../hooks/useHomeQueries';
+import { useHomeQueries, DO_YOU_KNOW_TAB_UUID } from '../../../hooks/useHomeQueries';
 import CampaignsPanel from '../Campaigns/CampaignsPanel';
+import MailDetailModal from '../../../components/organisms/MailDetailModal';
+import DoYouKnowSection from './DoYouKnowSection';
 
 const arr = new Array(15).fill('');
 const brandsArr = new Array(6).fill('');
 
-const categoryDoodleItems = [
-  { name: 'mail', size: 24, top: 8, left: 14, rotate: '-12deg' },
-  { name: 'price-tag', size: 18, top: 42, left: 72, rotate: '14deg' },
-  { name: 'star', size: 20, top: 18, left: 138, rotate: '18deg' },
-  { name: 'shopping-cart', size: 22, top: 44, left: 214, rotate: '-10deg' },
-  { name: 'credit-card', size: 24, top: 9, left: 286, rotate: '12deg' },
-  { name: 'mail', size: 23, top: 43, right: 86, rotate: '-14deg' },
-  { name: 'price-tag', size: 20, top: 13, right: 28, rotate: '18deg' },
-];
-const DO_YOU_KNOW_TAB_UUID = '__do_you_know__';
+const getCategoryIconName = (name = '') => {
+  const label = String(name).toLowerCase();
+  if (label.includes('air') || label.includes('flight') || label.includes('travel')) {
+    return 'airplane-outline';
+  }
+  if (label.includes('box') || label.includes('movie') || label.includes('office')) {
+    return 'film-outline';
+  }
+  if (label.includes('day') || label.includes('care') || label.includes('child')) {
+    return 'happy-outline';
+  }
+  if (label.includes('rest') || label.includes('food') || label.includes('dining')) {
+    return 'restaurant-outline';
+  }
+  if (label.includes('sport')) {
+    return 'football-outline';
+  }
+  return 'grid-outline';
+};
 
 const getProfileLocationValue = value => {
   if (value && typeof value === 'object') {
@@ -172,7 +178,7 @@ const getCategoryUuid = category =>
 
 const Home = ({ navigation }) => {
   const route = useRoute();
-  const [actBrand, setActBrand] = useState("");
+  const [actBrand, setActBrand] = useState('');
   const { themeColors } = getColors();
   const [seconds, setSeconds] = useState(0);
   const [selectedOfferIndex, setSelectedOfferIndex] = useState();
@@ -181,7 +187,7 @@ const Home = ({ navigation }) => {
   const { userDetails, location, activeBrand, setActiveCategory, activeCategory, setActiveBrand } = useContext(UserContext);
   const { screenWidth, screenHeight } = useContext(DeviceContext);
   const [showDrawer, setShowDrawer] = useState(false);
-  const [drawerContentRoute, setDrawerContentRoute] = useState("search");
+  const [drawerContentRoute, setDrawerContentRoute] = useState('search');
   const offerDetailsCardRef = (null);
   const { data, isLoading, error, setPayload } = useHome();
   const { isBrandLoading: legacyBrandLoading, brandError, setBrandPayload, setUpdateBrandFav } = useBrand();
@@ -190,7 +196,8 @@ const Home = ({ navigation }) => {
   const { setPopUpAds, PopUpAddData } = usePopUpAds();
 
   const { isMailLoading: legacyMailLoading, mailCount: legacyMailCount, isRedeem, redeemMessage, redeemSuccessMessage, redeemError, mailHTML, setMailPayload, setUpdateMailFav, setUpdateMailRedeem, setMailURL } = useMail();
-  const [subCatActive, setSubCatActive] = useState();
+  const [subCatActive, setSubCatActive] = useState(DO_YOU_KNOW_TAB_UUID);
+  const [subCheck, setSubCheck] = useState(true);
   const { countryList, setCountry } = useCountry();
   const { countyList, setCounty } = useCounty();
   const { cityList, setCity } = useCity();
@@ -212,13 +219,12 @@ const Home = ({ navigation }) => {
   const [isFocus, setIsFocus] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [cityName, setcityname] = useState('');
-  const [changeCity, setChangeCity] = useState(false)
+  const [changeCity, setChangeCity] = useState(false);
   const [selectedCity, setSelectedCity] = useState(null);
   const [isCityPickerVisible, setIsCityPickerVisible] = useState(false);
   const [isCityTransitioning, setIsCityTransitioning] = useState(false);
-  const [seen, setSeen] = useState(false)
+  const [seen, setSeen] = useState(false);
   const [profileCityLabel, setProfileCityLabel] = useState('');
-  const previousSelectedStoreUuidRef = useRef('');
   const homeCityUuid = getProfileLocationUuid(
     userDetails,
     'city',
@@ -234,7 +240,7 @@ const Home = ({ navigation }) => {
   );
   const getCityPickerLabel = useCallback(
     city => {
-      if ((cityNameCounts[city?.name] || 0) <= 1) return city?.name;
+      if ((cityNameCounts[city?.name] || 0) <= 1) {return city?.name;}
       const county = city?.counties?.[0]?.name;
       const state = city?.states?.[0]?.name;
       const suffix = [county, state].filter(Boolean).join(', ');
@@ -268,6 +274,8 @@ const Home = ({ navigation }) => {
     mailList = [],
     isMailLoading,
     mailCount,
+    doYouKnowData,
+    isDoYouKnowLoading,
   } = useHomeQueries({
     selCity,
     selState,
@@ -281,7 +289,7 @@ const Home = ({ navigation }) => {
   });
 
   useEffect(() => {
-    if (!isCityTransitioning) return undefined;
+    if (!isCityTransitioning) {return undefined;}
     if (
       isCategoryLoading ||
       isBrandLoading ||
@@ -307,7 +315,7 @@ const Home = ({ navigation }) => {
   useEffect(() => {
     const matchedCity = cityData?.find(city => city?.uuid === selCity || city?.value === selCity);
     setcityname(profileCityLabel || matchedCity?.name || matchedCity?.label || getReadableLocationValue(selCity));
-  }, [cityData, profileCityLabel, selCity])
+  }, [cityData, profileCityLabel, selCity]);
 
   useEffect(() => {
     const normalizedState = getLocationItemValue(stateData, selState);
@@ -349,6 +357,7 @@ const Home = ({ navigation }) => {
     setSelBrand([]);
     setActiveBrand([]);
     setSubCatActive(DO_YOU_KNOW_TAB_UUID);
+    setSubCheck(true);
     setIsCityPickerVisible(false);
   };
 
@@ -454,7 +463,7 @@ const Home = ({ navigation }) => {
 
   useLayoutEffect(() => {
     setChangeCat(false);
-  },)
+  }, []);
 
   // useEffect(()=>{
   //    let intervalIDS = setInterval(()=>{
@@ -475,8 +484,8 @@ const Home = ({ navigation }) => {
         if (route.params.category_uuid && route.params.brand_uuid && route.params.sub_category_uuid) {
           // categoryList.unshift(categoryList.splice(categoryList.findIndex(elt => elt.uuid === route.params.category_uuid), 1)[0]);
           // alert(route.params.brand_uuid)
-          setChangeCat(true)
-          setSubCatActive(route.params.sub_category_uuid)
+          setChangeCat(true);
+          setSubCatActive(route.params.sub_category_uuid);
           setActBrand(route.params.brand_uuid);
         } else {
           let key = Math.random();
@@ -490,7 +499,7 @@ const Home = ({ navigation }) => {
             setSelCategory(categoryObj);
             setActiveCategory(foundCategory);
           }
-          setChangeCat(true)
+          setChangeCat(true);
           setActBrand(route.params.brand_uuid);
         }
 
@@ -508,10 +517,10 @@ const Home = ({ navigation }) => {
           setSelCategory(categoryObj);
           setActiveCategory(foundCategory);
         }
-        setChangeCat(true)
+        setChangeCat(true);
       }
     }
-  }, [route.params])
+  }, [route.params]);
   // useFocusEffect(useCallback(()=>{
   //   let key = Math.random();
   //   setBrandPayload(`pagenum=0&limit=6&user_uuid=${userDetails?.uuid}&category_uuid=${selCategory?.uuid}&country_uuid=${selCountry}&state_uuid=${selState}&city_uuid=${selCity}&county_uuid=${selCounty}&brand_uuid=${actBrand}&key=${key}`);
@@ -519,30 +528,30 @@ const Home = ({ navigation }) => {
 
   useEffect(() => {
     if (seconds == 0) {
-      if (redeemSuccessMessage != "") {
+      if (redeemSuccessMessage != '') {
         onLoad();
         let key = Math.random();
         setBrandPayload(`key=${key}&pagenum=0&limit=6&user_uuid=${userDetails?.uuid}&category_uuid=${selectedCategoryUuid}&country_uuid=${selCountry}&state_uuid=${selState}&city_uuid=${selCity}&county_uuid=${selCounty}${(actBrand) ? `&brand_uuid=${actBrand}` : ''}`);
         if (offerCard?.type == 'paid' && offerCard?.is_seen != 'true') {
           Toast.show(redeemSuccessMessage, Toast.LONG, {
             backgroundColor: '#45B39D',
-          })
+          });
         }
       }
     }
-  }, [seconds])
+  }, [seconds]);
 
   const { start, stop, setTimer } = useInterval(count => {
 
     if (offerCard?.type == 'paid' && offerCard?.is_seen === 'true') {
-      secondsCountClick.current = 0
+      secondsCountClick.current = 0;
     }
     else {
       setSeconds(count);
-      secondsCountClick.current = count
+      secondsCountClick.current = count;
       if (count === 18) {
         setSeconds(0);
-        secondsCountClick.current = 0
+        secondsCountClick.current = 0;
         setRedeemedOfferIndexes([...redeemedOfferIndexes, selectedOfferIndex]);
         setSelectedOfferIndex();
         // setIsOfferClicked(false);
@@ -577,32 +586,20 @@ const Home = ({ navigation }) => {
 
   const styles = homeScreenStyles();
 
-  const isOfferContentDrawerActive = drawerContentRoute === "offerCard";
+  const isOfferContentDrawerActive = drawerContentRoute === 'offerCard';
   const selectedStoreUuid = Array.isArray(selBrand) ? selBrand[0] : selBrand;
   const selectedStore = Array.isArray(barndList)
     ? barndList.find(item => item?.uuid === selectedStoreUuid)
     : null;
-  const storeTabs = useMemo(() => {
-    if (!selectedStoreUuid) {
-      return subCategoryList || [];
-    }
-
-    return [
-      {
-        uuid: DO_YOU_KNOW_TAB_UUID,
-        name: 'Do you Know',
-        mails_count: 0,
-        isProfileTab: true,
-      },
-      ...(subCategoryList || []),
-    ];
-  }, [selectedStoreUuid, subCategoryList]);
-  const storeProfileQuery = useQuery({
-    queryKey: ['store-profile', {storeUuid: selectedStoreUuid}],
-    queryFn: () => fetchStoreProfile(selectedStoreUuid),
-    enabled: !!selectedStoreUuid,
-    refetchInterval: 30000,
-  });
+  const exploreTabs = useMemo(() => {
+    const profileTab = {
+      uuid: DO_YOU_KNOW_TAB_UUID,
+      name: 'Do you know',
+      mails_count: 0,
+      isProfileTab: true,
+    };
+    return [profileTab, ...(subCategoryList || [])];
+  }, [subCategoryList]);
 
   const buildMailPayload = useCallback(
     subCategoryUuid => {
@@ -647,16 +644,16 @@ const Home = ({ navigation }) => {
   );
 
   useEffect(() => {
-    if (changeCity === true) return;
+    if (changeCity === true) {return;}
     const userCityRaw = getProfileLocationRawValue(userDetails, 'city');
     const userCity = getProfileLocationUuid(userDetails, 'city', userCityRaw);
     const userCountry = getProfileLocationUuid(userDetails, 'country', getProfileLocationRawValue(userDetails, 'country'));
     const userState = getProfileLocationUuid(userDetails, 'state', getProfileLocationRawValue(userDetails, 'state'));
     const userCounty = getProfileLocationUuid(userDetails, 'county', getProfileLocationRawValue(userDetails, 'county'));
 
-    if (userCountry) setSelCountry(userCountry);
-    if (userState) setSelState(userState);
-    if (userCounty) setSelCounty(userCounty);
+    if (userCountry) {setSelCountry(userCountry);}
+    if (userState) {setSelState(userState);}
+    if (userCounty) {setSelCounty(userCounty);}
     if (userCity || changeCity === true) {
       setSelCity(changeCity === true ? getProfileLocationValue(selectedCity) : userCity);
     }
@@ -673,29 +670,29 @@ const Home = ({ navigation }) => {
     if (userCity) {
       setSelCity(changeCity === true ? getProfileLocationValue(selectedCity) : userCity);
     }
-  }, [changeCity, userDetails?.address])
+  }, [changeCity, userDetails?.address]);
 
   useEffect(() => {
-    if (changeCity === true) return;
+    if (changeCity === true) {return;}
     // if (categoryList?.length > 0) setSelCategory(categoryList[0]);
     // (categoryList?.length > 0) ? setActiveCategory(categoryList[0]) : setActiveCategory('');
-    if (location.country?.uuid) setSelCountry(location.country?.uuid)
-    if (location.state?.uuid) setSelState(location.state?.uuid)
-    if (location.county?.uuid) setSelCounty(location.county?.uuid)
-    if (location.city?.uuid) setSelCity(changeCity === true ? getProfileLocationValue(selectedCity) : location.city?.uuid)
-  }, [changeCity, location])
+    if (location.country?.uuid) {setSelCountry(location.country?.uuid);}
+    if (location.state?.uuid) {setSelState(location.state?.uuid);}
+    if (location.county?.uuid) {setSelCounty(location.county?.uuid);}
+    if (location.city?.uuid) {setSelCity(changeCity === true ? getProfileLocationValue(selectedCity) : location.city?.uuid);}
+  }, [changeCity, location]);
 
   useEffect(() => {
     if (route.params?.category_uuid) {
-      const foundCategory = route.params?.category_uuid
+      const foundCategory = route.params?.category_uuid;
       const categoryObj = { ...foundCategory, value: foundCategory.uuid };
       setSelCategory(categoryObj);
-      setActiveCategory(foundCategory)
+      setActiveCategory(foundCategory);
     } else if (categoryList?.length > 0) {
       setSelCategory(selCategory ? selCategory : categoryList[0]);
-      setActiveCategory(selCategory ? selCategory : categoryList[0])
+      setActiveCategory(selCategory ? selCategory : categoryList[0]);
     }
-  }, [categoryList])
+  }, [categoryList]);
 
   useEffect(() => {
     if (!Array.isArray(barndList) || barndList.length === 0) {
@@ -711,14 +708,14 @@ const Home = ({ navigation }) => {
       setTabindexs(0);
       setSubCheck(true);
     }
-  }, [barndList, selBrand, setActiveBrand])
+  }, [barndList, selBrand, setActiveBrand]);
 
   useEffect(() => {
     if (hasCategoryFilters) {
       let key = Math.random();
       setSubCatPayload(`key=${key}&search=&user_uuid=${userDetails?.uuid}&category_uuid=${selectedCategoryUuid}&country_uuid=${selCountry}&state_uuid=${selState || ''}&city_uuid=${selCity}&county_uuid=${selCounty || ''}`);
     }
-  }, [hasCategoryFilters, selectedCategoryUuid, selBrand, selCountry, selState, selCounty, selCity, userDetails?.uuid])
+  }, [hasCategoryFilters, selectedCategoryUuid, selBrand, selCountry, selState, selCounty, selCity, userDetails?.uuid]);
 
   const onLoad = () => {
     if (!userDetails?.uuid) {
@@ -731,7 +728,7 @@ const Home = ({ navigation }) => {
     // setSubCatPayload(`search=`);
     // setSubCatPayload(`search=&user_uuid=${userDetails?.uuid}&category_uuid=${selCategory?.uuid}&country_uuid=${selCountry}&state_uuid=${selState}&city_uuid=${selCity}&county_uuid=${selCounty}${(selBrand)?`&brand_uuid=${selBrand}`:''}`);
 
-    setPayload(`page_name=home`);
+    setPayload('page_name=home');
     // setBrandPayload(`pagenum=0&limit=6&user_uuid=${userDetails?.uuid}&category_uuid=${selCategory?.uuid}&country_uuid=${selCountry}&state_uuid=${selState}&city_uuid=${selCity}&county_uuid=${selCounty}${(activeBrand)?`&brand_uuid=${activeBrand}`:''}`);
     let key = Math.random();
     if (hasLocationFilters) {
@@ -747,9 +744,9 @@ const Home = ({ navigation }) => {
     //   // setCatPayload(`key=${key}&search=&user_uuid=${userDetails?.uuid}&city_uuid=${selCity}`);
     //   setCatPayload(`key=${key}&search=&user_uuid=${userDetails?.uuid}`);
     // }
-    setCountry(`page=0&limit=10&search=United States`);
+    setCountry('page=0&limit=10&search=United States');
     // if (subCatActive && (selCountry || selState || selCounty || selCity)) setMailPayload(`country_uuid=${selCountry}&state_uuid=${selState}&city_uuid=${selCity}&sub_category_uuid=${subCatActive}&user_uuid=${userDetails?.uuid}&county_uuid=${selCounty}&type=filter&}&brand_uuid=${selBrand}`)
-  }
+  };
 
 
   // useEffect(()=>{
@@ -775,22 +772,22 @@ const Home = ({ navigation }) => {
     if (hasCategoryFilters) {
       setBrandPayload(`pagenum=0&limit=6&user_uuid=${userDetails?.uuid}&category_uuid=${selectedCategoryUuid}&country_uuid=${selCountry}&state_uuid=${selState || ''}&city_uuid=${selCity}&county_uuid=${selCounty || ''}${(actBrand) ? `&brand_uuid=${actBrand}` : ''}`);
     }
-  }, [hasCategoryFilters, selectedCategoryUuid, actBrand, selCountry, selState, selCounty, selCity, userDetails?.uuid])
+  }, [hasCategoryFilters, selectedCategoryUuid, actBrand, selCountry, selState, selCounty, selCity, userDetails?.uuid]);
   useEffect(() => {
     setSubCatBrand(selBrand);
 
-    if (hasCategoryFilters && selBrand != "") {
+    if (hasCategoryFilters && selBrand != '') {
       let key = Math.random();
       setSubCatPayload(`key=${key}&search=&user_uuid=${userDetails?.uuid}&category_uuid=${selectedCategoryUuid}&country_uuid=${selCountry}&state_uuid=${selState || ''}&city_uuid=${selCity}&county_uuid=${selCounty || ''}`);
     }
-  }, [hasCategoryFilters, selBrand, selectedCategoryUuid, selCountry, selState, selCounty, selCity, userDetails?.uuid])
+  }, [hasCategoryFilters, selBrand, selectedCategoryUuid, selCountry, selState, selCounty, selCity, userDetails?.uuid]);
 
   useEffect(() => {
     const nextPayload = buildMailPayload(subCatActive);
     if (nextPayload) {
       setMailPayload(nextPayload);
     }
-  }, [buildMailPayload, subCatActive, setMailPayload, setUpdateBrandFav, setUpdateMailFav])
+  }, [buildMailPayload, subCatActive, setMailPayload, setUpdateBrandFav, setUpdateMailFav]);
   // useFocusEffect(useCallback(()=>{
   //   setBrandPayload(`pagenum=0&limit=6&user_uuid=${userDetails?.uuid}&category_uuid=${selCategory?.uuid}&country_uuid=${selCountry}&state_uuid=${selState}&city_uuid=${selCity}&county_uuid=${selCounty}${(actBrand)?`&brand_uuid=${actBrand}`:''}`);
   //   barndList.map((it)=>{
@@ -801,49 +798,26 @@ const Home = ({ navigation }) => {
   // )
 
   useEffect(() => {
-    if (!Array.isArray(subCategoryList) || subCategoryList.length === 0) {
+    if (subCatActive === DO_YOU_KNOW_TAB_UUID) {
       return;
     }
 
-    // When a different store is selected, default to "Do you Know" once.
-    if (selectedStoreUuid) {
-      if (previousSelectedStoreUuidRef.current !== selectedStoreUuid) {
-        previousSelectedStoreUuidRef.current = selectedStoreUuid;
-        setSubCatActive(DO_YOU_KNOW_TAB_UUID);
-        setTabindexs(0);
-        setSubCheck(true);
-      }
-      return;
-    }
-
-    previousSelectedStoreUuidRef.current = '';
-
-    const currentTabExists = subCategoryList.some(item => item?.uuid === subCatActive);
+    const currentTabExists = exploreTabs.some(item => item?.uuid === subCatActive);
     if (subCheck && currentTabExists) {
       return;
     }
 
-    const nextTab =
-      subCategoryList.find(item => item?.is_mail_available === "true") ||
-      subCategoryList.find(item => Number(item?.mails_count || 0) > 0) ||
-      subCategoryList[0];
-    const nextIndex = subCategoryList.findIndex(item => item?.uuid === nextTab?.uuid);
-
-    if (nextTab?.uuid && nextTab.uuid !== subCatActive) {
-      setSubCatActive(nextTab.uuid);
-    }
-
-    if (nextIndex >= 0) {
-      setTabindexs(nextIndex);
-    }
-  }, [subCategoryList, subCheck, subCatActive, selectedStoreUuid])
+    setSubCatActive(DO_YOU_KNOW_TAB_UUID);
+    setTabindexs(0);
+    setSubCheck(true);
+  }, [exploreTabs, subCheck, subCatActive]);
 
 
   const onTabChane = (subCategoryIndexOrUuid) => {
     const selectedTab =
       typeof subCategoryIndexOrUuid === 'number'
-        ? storeTabs?.[subCategoryIndexOrUuid]
-        : storeTabs?.find(item => item?.uuid === subCategoryIndexOrUuid);
+        ? exploreTabs?.[subCategoryIndexOrUuid]
+        : exploreTabs?.find(item => item?.uuid === subCategoryIndexOrUuid);
     const selectedTabUuid = selectedTab?.uuid;
 
     if (!selectedTabUuid) {
@@ -873,8 +847,8 @@ const Home = ({ navigation }) => {
     //   setMailPayload(`country_uuid=${selCountry}&state_uuid=${selState}&city_uuid=${selCity}&sub_category_uuid=${subCatActive}&user_uuid=${userDetails?.uuid}&county_uuid=${selCounty}&brand_uuid=${selBrand}&category_uuid=${selCategory?.uuid}&seen=${seen === false ? '' : 'no' }`)
     // }
     // setMailPayload(`country_uuid=${selCountry}&state_uuid=${selState}&city_uuid=${selCity}&sub_category_uuid=${subCatActive}&user_uuid=${userDetails?.uuid}&county_uuid=${selCounty}&brand_uuid=${selBrand}&category_uuid=${selCategory?.uuid}&seen=${seen === false ? '' : 'no' }`)
-    setSeen(previousState => !previousState)
-  }
+    setSeen(previousState => !previousState);
+  };
 
 
 
@@ -882,7 +856,7 @@ const Home = ({ navigation }) => {
   const handleNavLinksClick = (route, item) => {
     if (item?.mime_type === 'text/html') {
       const url = item?.image_url?.split('/');
-      setMailURL({ html_url: url.slice(-1)[0] })
+      setMailURL({ html_url: url.slice(-1)[0] });
     }
     setIsAnimate(false);
     setOfferCard(item);
@@ -890,14 +864,14 @@ const Home = ({ navigation }) => {
     setDrawerContentRoute(route);
     setUpdateMailRedeem({
       user_uuid: userDetails?.uuid,
-      mail_uuid: item?.uuid
+      mail_uuid: item?.uuid,
     });
   };
 
   const toggleDrawer = (event) => {
     if (
-      (event.type === "keydown" &&
-        (event.key === "Tab" || event.key === "Shift")) ||
+      (event.type === 'keydown' &&
+        (event.key === 'Tab' || event.key === 'Shift')) ||
       isOfferContentDrawerActive
     ) {
       return;
@@ -909,24 +883,22 @@ const Home = ({ navigation }) => {
   const onFavouriteToggle = (brand_uuid) => {
     setUpdateBrandFav({
       user_uuid: userDetails?.uuid,
-      brand_uuid: brand_uuid
+      brand_uuid: brand_uuid,
     });
-  }
+  };
 
   const onFavouriteMailToggle = (mail_uuid) => {
     setUpdateMailFav({
       user_uuid: userDetails?.uuid,
-      mail_uuid: mail_uuid
+      mail_uuid: mail_uuid,
     });
-  }
-
-  const [subCheck, setSubCheck] = useState(false);
+  };
 
   const onChangeCategoryHandler = async (val) => {
-    if (!val) return;
+    if (!val) {return;}
     const isExist = selCategory === val ? true : false;
     if (!isExist) {
-      setActBrand("");
+      setActBrand('');
       setSubCheck(false);
       setSelBrand([]);
       setSubCatActive(DO_YOU_KNOW_TAB_UUID);
@@ -935,9 +907,9 @@ const Home = ({ navigation }) => {
     else {
       setSubCheck(true);
     }
-    setActiveCategory(val)
+    setActiveCategory(val);
     setSelCategory(val);
-  }
+  };
 
   //   useEffect(()=>{
   //     setInterval(()=>{
@@ -950,14 +922,14 @@ const Home = ({ navigation }) => {
 
 
   const onBrandSelect = (e, brandId) => {
-    if (!brandId) return;
+    if (!brandId) {return;}
     const brand = e ? [brandId] : selBrand.filter((el) => el !== brandId);
     setSelBrand([...brand]);
-    setActiveBrand(brandId)
+    setActiveBrand(brandId);
     setSubCatActive(DO_YOU_KNOW_TAB_UUID);
     setTabindexs(0);
     setSubCheck(true);
-  }
+  };
 
   const getYouTubeVideoId = (url) => {
     const regex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
@@ -965,218 +937,33 @@ const Home = ({ navigation }) => {
     return matches ? matches[1] : null;
   };
 
-  const getOfferDetailsContent = () => (
-    <>
-      <View style={{ backgroundColor: "#FFFFFF", flex: 1, minWidth: screenWidth - 10 }}>
-
-        <View>
-          <View style={styles.timerContainer}>
-            {/* <Text style={styles.secondsCounter}>{18 - seconds}</Text> */}
-            {seconds > 0 && <View style={{ alignItems: 'center' }}><Text style={{ fontSize: 18 }}>Please Wait...</Text></View>}
-            {seconds == 0 && <TouchableOpacity onPress={closeAdd} style={{
-              backgroundColor: '#45B39D',
-              borderRadius: 10,
-              padding: 10,
-              // maxWidth: 'auto',
-              // marginLeft: 'auto',
-            }}>
-              <EntypoIcon
-                name="chevron-left"
-                size={22}
-                style={styles.favIcon}
-              />
-            </TouchableOpacity>
-            }
-          </View>
-          <View style={{ alignItems: 'center' }}>
-            <Text style={{ color: '#fff', fontSize: 18, padding: 5 }}>{offerCard?.message}</Text>
-          </View>
-          {(offerCard?.mime_type === 'text/html' && offerCard?.image_url) && <View style={{ flex: 1 }}><WebView
-            source={{
-              html: mailHTML
-              // uri: `${offerCard?.image_url}`,
-            }}
-            style={{
-              flex: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
-              minWidth: screenWidth - 10,
-              minHeight: '40%'
-            }}
-          /></View>}
-
-          {(offerCard?.mime_type === 'application/pdf') && <Pdf
-            source={{
-              uri: offerCard?.image_url,
-              cache: true
-            }}
-            trustAllCerts={false}
-            onLoadComplete={(numberOfPages) => {
-            }}
-            onError={(error) => {
-            }}
-            style={{
-              flex: 1,
-              width: Dimensions.get('window').width,
-              height: Dimensions.get('window').height,
-            }}
-          />
-          }
-
-
-          {(offerCard?.mime_type === 'image/png' || offerCard?.mime_type === 'image/jpeg') && <View style={{ alignItems: 'center' }}>
-            <Image
-              resizeMode="contain"
-              style={{
-                width: Dimensions.get('window').width,
-                height: Dimensions.get('window').height,
-              }}
-              source={{ uri: `${offerCard?.image_url}` }}
-            />
-          </View>}
-
-          {(offerCard?.mime_type === '' && offerCard?.video_url) && <View style={{ flex: 1 }}>
-            <WebView
-              javaScriptEnabled={true}
-              domStorageEnabled={true}
-              scrollEnabled={false}
-              source={{
-                uri: `${offerCard?.video_url}?controls=0&showinfo=0&wmode=transparent&rel=0&mode=opaque`,
-              }}
-              style={{
-                flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
-                minWidth: screenWidth - 10,
-                minHeight: '40%'
-              }}
-              onError={(err) => {
-                alert(err);
-              }}
-            />
-          </View>}
-        </View>
-      </View>
-    </>
+  const renderOfferDetailModal = (withTimer = false) => (
+    <MailDetailModal
+      offerCard={offerCard}
+      mailHTML={mailHTML}
+      screenWidth={screenWidth}
+      screenHeight={screenHeight}
+      onClose={closeAdd}
+      seconds={withTimer ? seconds : 0}
+      renderVideo={url => <YouTubePlayer videoUrl={url} />}
+    />
   );
 
   const closeAdd = () => {
     setSeconds(18);
-    secondsCountClick.current = 18
+    secondsCountClick.current = 18;
     setIsOfferClicked(false);
     ModalClickCount.current = false;
     setTimer(0);
     stop();
-    setModalDetails({})
-  }
+    setModalDetails({});
+  };
 
   useEffect(() => {
     if (modalVisible && PopUpAddData?.[0]?.image) {
       FastImage.preload([{ uri: PopUpAddData?.[0].image }]);
     }
   }, [modalVisible]);
-
-  const getOfferDetailsContentWithoutTimer = () => (
-    <>
-
-
-      <View style={{ backgroundColor: "#FFFFFF", flex: 1, minWidth: screenWidth - 10 }}>
-
-        <View>
-          <View style={styles.timerContainer}>
-            <TouchableOpacity onPress={closeAdd} style={{
-              backgroundColor: '#45B39D',
-              borderRadius: 10,
-              padding: 10,
-              // maxWidth: 'auto',
-              // marginLeft: 'auto',
-            }}>
-              <EntypoIcon
-                name="chevron-left"
-                size={22}
-                style={styles.favIcon}
-              />
-            </TouchableOpacity>
-          </View>
-          <View style={{ alignItems: 'center' }}>
-            <Text style={{ color: '#000000', fontSize: 18, padding: 5 }}>{offerCard?.message}</Text>
-          </View>
-
-          {(offerCard?.mime_type === 'text/html' && offerCard?.image_url) && <View style={{ flex: 1 }}>
-            {/* <Text>{mailHTML}</Text> */}
-            <WebView
-              source={{
-                html: mailHTML
-                // uri: `${offerCard?.image_url}`,
-              }}
-              style={{
-                flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
-                minWidth: screenWidth - 10,
-                minHeight: '40%'
-              }}
-            /></View>}
-          {(offerCard?.mime_type === 'image/png' || offerCard?.mime_type === 'image/jpeg') &&
-            <View style={{ flex: 1 }}>
-              <Image
-                resizeMode="contain"
-                style={{
-                  width: Dimensions.get('window').width,
-                  // height: Dimensions.get('window').height,
-                  height: 600
-                }}
-                source={{ uri: `${offerCard?.image_url}` }}
-              />
-            </View>
-          }
-
-          {(offerCard?.mime_type === 'application/pdf') && <Pdf
-            source={{
-              uri: offerCard?.image_url,
-              cache: true
-            }}
-            trustAllCerts={false}
-            onLoadComplete={(numberOfPages) => {
-            }}
-            onError={(error) => {
-            }}
-            style={{
-              flex: 1,
-              width: Dimensions.get('window').width,
-              height: Dimensions.get('window').height,
-            }}
-          />
-          }
-
-          {(offerCard?.mime_type === '' && offerCard?.video_url) && <View style={{ flex: 1 }}>
-
-            {/* <WebView
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          scrollEnabled={false}
-          source={{
-            // uri: `https://www.youtube.com/embed/${getYouTubeVideoId(offerCard?.video_url)}?rel=0&autoplay=0&showinfo=0&controls=0`
-            uri: `${offerCard?.video_url}?controls=0&showinfo=0&wmode=transparent&rel=0&mode=opaque`,
-          }}
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            minWidth: screenWidth - 10,
-            minHeight: '40%'
-          }}
-          onError={(err) => {
-            alert(err);
-          }}
-        /> */}
-            <YouTubePlayer videoUrl={`${offerCard.video_url}`} />
-          </View>}
-        </View>
-      </View>
-
-    </>
-  );
 
   useEffect(() => {
     if (isOfferClicked) {
@@ -1190,11 +977,11 @@ const Home = ({ navigation }) => {
       setModalDetails({
         modalType: 'blurView',
         isOpen: true,
-        modalContent: (offerCard?.type == 'paid' && offerCard?.is_seen == 'false') ? getOfferDetailsContent() : getOfferDetailsContentWithoutTimer(),
+        modalContent: (offerCard?.type == 'paid' && offerCard?.is_seen == 'false') ? renderOfferDetailModal(true) : renderOfferDetailModal(false),
         modalStyles: {
           containerStyles: {
             alignItems: 'center',
-            marginTop: 0
+            marginTop: 0,
           },
           contentStyles: {
             alignItems: 'center',
@@ -1203,7 +990,7 @@ const Home = ({ navigation }) => {
         actions: [],
       });
     }
-  }, [seconds, isOfferClicked]);
+  }, [seconds, isOfferClicked, mailHTML, offerCard]);
 
   const onOfferCardClick = (index, item) => {
     if (!redeemedOfferIndexes.includes(index)) {
@@ -1215,11 +1002,11 @@ const Home = ({ navigation }) => {
       setOfferCard(item);
       if (item?.mime_type === 'text/html') {
         const url = item?.image_url?.split('/');
-        setMailURL({ html_url: url.slice(-1)[0] })
+        setMailURL({ html_url: url.slice(-1)[0] });
       }
       setUpdateMailRedeem({
         user_uuid: userDetails?.uuid,
-        mail_uuid: item?.uuid
+        mail_uuid: item?.uuid,
       });
       // if(item?.type == 'paid' && item?.is_seen == 'false'){
       //   setUpdateMailRedeem({
@@ -1238,11 +1025,11 @@ const Home = ({ navigation }) => {
       onOfferCardClickRef.current = item;
       if (item?.mime_type === 'text/html') {
         const url = item?.image_url?.split('/');
-        setMailURL({ html_url: url.slice(-1)[0] })
+        setMailURL({ html_url: url.slice(-1)[0] });
       }
       setUpdateMailRedeem({
         user_uuid: userDetails?.uuid,
-        mail_uuid: item?.uuid
+        mail_uuid: item?.uuid,
       });
       // if(item?.type == 'paid' && item?.is_seen == 'false'){
       //   setUpdateMailRedeem({
@@ -1259,52 +1046,66 @@ const Home = ({ navigation }) => {
     try {
       await axios.put(`${baseUrl}/modal/seen`, {
         modal_uuid: image,
-        user_uuid: userDetails?.uuid
+        user_uuid: userDetails?.uuid,
       }, {
         headers: {
-          "x-auth-token": userDetails?.token
+          'x-auth-token': userDetails?.token,
+        },
+      }).then(() => {
+        if (__DEV__) {
+          console.log('API triggered for: Modal');
         }
-      }).then((res) => {
-        console.log("API triggered for: Modal")
-      })
-      console.log('API triggered for:', image);
+      });
+      if (__DEV__) {
+        console.log('API triggered for:', image);
+      }
     } catch (error) {
-      console.error('Error API triggered for:', error);
+      if (__DEV__) {
+        console.error('Error API triggered for:', error);
+      }
     }
   };
 
   const updateStorySeen = () => {
     axios.put(`${baseUrl}/user/popup/seen`, {
-      "user_uuid": userDetails?.uuid
+      'user_uuid': userDetails?.uuid,
     }, {
       headers: {
-        "x-auth-token": userDetails?.token
-      }
+        'x-auth-token': userDetails?.token,
+      },
     })
-      .then((res) => {
-        console.log("API triggered for: user popup seen")
+      .then(() => {
+        if (__DEV__) {
+          console.log('API triggered for: user popup seen');
+        }
       })
-      .catch((err) => {
-        console.log('err : ', err)
-      })
-  }
+      .catch(err => {
+        if (__DEV__) {
+          console.log('err : ', err);
+        }
+      });
+  };
 
   const updateStorySeenPopup = (popupID) => {
     axios.put(`${baseUrl}/popup/seen`, {
-      "user_uuid": userDetails?.uuid,
-      popup_uuid: popupID
+      'user_uuid': userDetails?.uuid,
+      popup_uuid: popupID,
     }, {
       headers: {
-        "x-auth-token": userDetails?.token
-      }
+        'x-auth-token': userDetails?.token,
+      },
     })
-      .then((res) => {
-        console.log("API triggered for: popup seen")
+      .then(() => {
+        if (__DEV__) {
+          console.log('API triggered for: popup seen');
+        }
       })
-      .catch((err) => {
-        console.log('err : ', err)
-      })
-  }
+      .catch(err => {
+        if (__DEV__) {
+          console.log('err : ', err);
+        }
+      });
+  };
 
 
   const handleNext = () => {
@@ -1329,7 +1130,7 @@ const Home = ({ navigation }) => {
   const openModal = () => {
     setModalVisible(true);
     setPopUpAds(`?user_uuid=${userDetails?.uuid}`);
-  }
+  };
 
 
   const closeModal = () => {
@@ -1337,28 +1138,30 @@ const Home = ({ navigation }) => {
     updateStorySeen();
     axios.get(`${baseUrl}/popup/list?user_uuid=${userDetails?.uuid}`, {
       headers: {
-        "x-auth-token": userDetails?.token
-      }
+        'x-auth-token': userDetails?.token,
+      },
     })
       .then((res) => {
         res?.data?.data.forEach((item) => {
-          updateStorySeenPopup(res?.data?.data?.uuid)
-        })
+          updateStorySeenPopup(res?.data?.data?.uuid);
+        });
       })
-      .catch((err) => {
-        console.log(err, "errr")
-      })
+      .catch(err => {
+        if (__DEV__) {
+          console.log(err, 'errr');
+        }
+      });
     setModalVisible(false);
   };
 
 
   const getProfileData = () => {
-    if (!userDetails?.uuid) return;
+    if (!userDetails?.uuid) {return;}
 
     axios.get(`${baseUrl}/user/consumer/get/profile/${userDetails?.uuid}`, {
       headers: {
-        'x-auth-token': userDetails?.token
-      }
+        'x-auth-token': userDetails?.token,
+      },
     })
       .then((res) => {
         const profileData = res?.data?.data || {};
@@ -1377,7 +1180,7 @@ const Home = ({ navigation }) => {
       });
   };
 
-  const [addlistData, setaddlistData] = useState([])
+  const [addlistData, setaddlistData] = useState([]);
   const getHomeAdImage = item =>
     item?.image ||
     item?.image_url ||
@@ -1390,22 +1193,22 @@ const Home = ({ navigation }) => {
   const getAddsList = () => {
     axios.get(`${baseUrl}/add/get?page_name=home`, {
       headers: {
-        "x-auth-token": userDetails?.token
-      }
+        'x-auth-token': userDetails?.token,
+      },
     })
       .then((res) => {
         setaddlistData(res?.data?.data);
       })
       .catch((err) => {
         setaddlistData([]);
-      })
-  }
+      });
+  };
 
 
   useEffect(() => {
     getProfileData();
     getAddsList();
-  }, [userDetails])
+  }, [userDetails]);
 
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -1415,12 +1218,12 @@ const Home = ({ navigation }) => {
 
 
   const defaultDataWith6Colors = [
-    "#B0604D",
-    "#899F9C",
-    "#B3C680",
-    "#5C6265",
-    "#F5D399",
-    "#F1F1F1",
+    '#B0604D',
+    '#899F9C',
+    '#B3C680',
+    '#5C6265',
+    '#F5D399',
+    '#F1F1F1',
   ];
 
   const renderItem = ({ item }) => (
@@ -1441,7 +1244,7 @@ const Home = ({ navigation }) => {
     if (route.params?.brand_uuid) {
       setActBrand(route.params.brand_uuid);
       // setSelBrand([route.params.brand_uuid]);
-      onBrandSelect(true, route.params.brand_uuid)
+      onBrandSelect(true, route.params.brand_uuid);
     }
 
     if (route.params?.category_uuid && Array.isArray(categoryList) && categoryList.length > 0) {
@@ -1463,49 +1266,46 @@ const Home = ({ navigation }) => {
 
   const renderCategorySection = () => (
     <View style={styles.filterSection}>
-      <View pointerEvents="none" style={styles.categoryDoodleLayer}>
-        {categoryDoodleItems.map((item, index) => (
-          <EntypoIcon
-            key={`${item.name}-${index}`}
-            name={item.name}
-            size={item.size}
-            color={themeColors.white}
-            style={[
-              styles.categoryDoodleIcon,
-              {
-                top: item.top,
-                left: item.left,
-                right: item.right,
-                transform: [{ rotate: item.rotate }],
-              },
-            ]}
-          />
-        ))}
-      </View>
       {categoryList?.length > 0 && !changeCat && (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
+          style={styles.horizontalRow}
           contentContainerStyle={styles.categoryScroller}>
           {categoryList.map((item, i) => {
             const isSelectedCategory = selCategory?.uuid === item?.uuid || selCategory?.value === item?.uuid;
+            const categoryImage = item?.image || item?.icon || item?.logo;
             return (
               <TouchableOpacity
                 key={item?.uuid || i}
                 activeOpacity={0.85}
                 onPress={() => onChangeCategoryHandler(item)}
                 style={styles.categoryChip}>
-                <View style={styles.categoryIconWrap}>
-                  {item?.image ? (
-                    <Image resizeMode="cover" style={styles.categoryImage} source={{ uri: `${item.image}` }} />
-                  ) : (
-                    <EntypoIcon name="grid" size={20} color={themeColors.fontPrimary} />
-                  )}
+                <View style={[styles.categoryIconShadow, isSelectedCategory ? styles.categoryIconShadowActive : null]}>
+                  <View
+                    style={[
+                      styles.categoryIconWrap,
+                      isSelectedCategory ? styles.categoryIconWrapActive : null,
+                    ]}>
+                    {categoryImage ? (
+                      <Image
+                        source={{uri: categoryImage}}
+                        style={styles.categoryImage}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <Ionicons
+                        name={getCategoryIconName(item?.name || item?.title)}
+                        size={32}
+                        color={isSelectedCategory ? '#FFFFFF' : '#111827'}
+                      />
+                    )}
+                  </View>
                 </View>
                 <Text style={[
                   styles.categoryChipText,
                   isSelectedCategory ? styles.categoryChipTextActive : null,
-                ]} numberOfLines={1}>
+                ]} numberOfLines={2}>
                   {item?.name || item?.title || 'Category'}
                 </Text>
               </TouchableOpacity>
@@ -1517,8 +1317,9 @@ const Home = ({ navigation }) => {
   );
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.pageRoot}>
       <AppHeader
+        userDetails={userDetails}
         locationTitle={
           selectedCity?.name ||
           selectedCity?.label ||
@@ -1578,7 +1379,6 @@ const Home = ({ navigation }) => {
           </View>
         </TouchableOpacity>
       </Modal>
-      {renderCategorySection()}
       <ScrollView
 
         style={[styles.pageContainer]}
@@ -1588,82 +1388,29 @@ const Home = ({ navigation }) => {
         scrollEnabled={true}
       >
         <View style={{ flex: 1 }}>
-          {/* {userDetails?.uuid && userDetails?.token &&
-            <StoriesScreen userId={userDetails?.uuid} userToken={userDetails?.token} />
-          } */}
-          {data?.length > 0 && <OffersCarousal data={data} />}
-          {homeAds.length > 0 && (
-            <FlatList
-              data={homeAds}
-              horizontal
-              pagingEnabled
-              renderItem={renderItem}
-              keyExtractor={(item, index) => item?.uuid || item?._id || `${index}`}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.homeAdList}
-              snapToInterval={screenWidthss - 24}
-              decelerationRate="fast"
-            />
-          )}
+          {categoryList?.length > 0 && !changeCat ? renderCategorySection() : null}
           <CampaignsPanel navigation={navigation} />
-          <View style={styless.container123}>
-            {/* Modal component */}
-            <Modal
-              animationType="fade"
-              transparent={true}
-              visible={modalVisible}
-              onRequestClose={() => { closeModal() }}
-            >
-              <View style={styless.modalOverlay}>
-                <View style={styless.modalContainer}>
-                  <TouchableOpacity onPress={() => closeModal()} style={{ position: "absolute", top: 5, flex: 1, zIndex: 999, alignSelf: "flex-end" }}>
-                    <EntypoIcon name='circle-with-cross' size={30} />
-                  </TouchableOpacity>
-                  {loading && (
-                    <ActivityIndicator size="large" color="#000" style={{ position: 'absolute', top: '45%', alignSelf: 'center' }} />
-                  )}
-                  <FastImage
-                    source={{ uri: PopUpAddData?.[0]?.image }}
-                    style={{ height: "100%", width: "100%" }}
-                    resizeMode={FastImage.resizeMode.contain}
-                    onLoadStart={() => {
-                      console.log('Image loading started');
-                      setLoading(true);
-                    }}
-                    onLoad={() => {
-                      console.log('Image loaded successfully');
-                      setLoading(false);
-                    }}
-                  />
-                  {/* <Image
-                    source={{ uri: PopUpAddData?.[0]?.image }}
-                    style={{ height: "100%", width: "100%", objectFit: 'contain' }}
-                  /> */}
-                </View>
-              </View>
-            </Modal>
-          </View>
           <View style={styles.brandIconCardsWrapper}>
             {barndList?.length >= 1 ? (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.homeStoreScroller}>
-                {barndList.slice(0, 10).map((item, i) => (
-                  <BrandIconCard
-                    variant="storeFeature"
-                    isActive={selBrand?.indexOf(item?.uuid) !== -1 || item?.is_highlight === 'true' ? true : false}
-                    key={item?.uuid || i}
-                    item={item}
-                    isFavourite={item?.is_faviourate === 'true' ? true : false}
-                    wrapperStyles={styles.homeStoreFeature}
-                    onFavouriteToggle={(e) => onFavouriteToggle(item?.uuid)}
-                    onBrandSelect={(e) => onBrandSelect(e, item?.uuid)}
-                    src={item?.logo_url}
-                    showActionByDefault={true}
-                  />
-                ))}
-              </ScrollView>
+              <>
+                <View style={styles.partnersHeader}>
+                  <Text style={styles.partnersTitle}>Nearby partners</Text>
+                </View>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.horizontalRow}
+                  contentContainerStyle={styles.homeStoreScroller}>
+                  {barndList.slice(0, 10).map((item, i) => (
+                    <HomeStoreCard
+                      key={item?.uuid || i}
+                      item={item}
+                      isActive={selBrand?.indexOf(item?.uuid) !== -1}
+                      onPress={() => onBrandSelect(true, item?.uuid)}
+                    />
+                  ))}
+                </ScrollView>
+              </>
             ) : (
               !isBrandLoading && (
                 <View style={styles.emptyStoreState}>
@@ -1676,89 +1423,150 @@ const Home = ({ navigation }) => {
               )
             )}
           </View>
+          <View style={styless.container123}>
+            {/* Modal component */}
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => { closeModal(); }}
+            >
+              <View style={styless.modalOverlay}>
+                <View style={styless.modalContainer}>
+                  <TouchableOpacity onPress={() => closeModal()} style={{ position: 'absolute', top: 5, flex: 1, zIndex: 999, alignSelf: 'flex-end' }}>
+                    <EntypoIcon name="circle-with-cross" size={30} />
+                  </TouchableOpacity>
+                  {loading && (
+                    <ActivityIndicator size="large" color="#000" style={{ position: 'absolute', top: '45%', alignSelf: 'center' }} />
+                  )}
+                  <FastImage
+                    source={{ uri: PopUpAddData?.[0]?.image }}
+                    style={{ height: '100%', width: '100%' }}
+                    resizeMode={FastImage.resizeMode.contain}
+                    onLoadStart={() => {
+                      if (__DEV__) {
+                        console.log('Image loading started');
+                      }
+                      setLoading(true);
+                    }}
+                    onLoad={() => {
+                      if (__DEV__) {
+                        console.log('Image loaded successfully');
+                      }
+                      setLoading(false);
+                    }}
+                  />
+                  {/* <Image
+                    source={{ uri: PopUpAddData?.[0]?.image }}
+                    style={{ height: "100%", width: "100%", objectFit: 'contain' }}
+                  /> */}
+                </View>
+              </View>
+            </Modal>
+          </View>
         </View>
 
-        {barndList?.length >= 1 && storeTabs.length > 0 && <TabView
-          tabs={storeTabs}
-          actTab={subCatActive}
-          subCheck={subCheck}
+        {exploreTabs.length > 0 && (
+          <>
+            <View style={styles.partnersHeader}>
+              <Text style={styles.partnersTitle}>Mails</Text>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('Mails', {
+                    category_uuid: selCategory?.uuid,
+                    sub_cat_uuid: subCatActive,
+                    brand_uuid: selBrand,
+                  })
+                }
+                accessibilityRole="button"
+                accessibilityLabel="See all mails">
+                <Text style={styles.sectionSeeAll}>See all</Text>
+              </TouchableOpacity>
+            </View>
+            <TabView
+          variant="pills"
+          tabs={exploreTabs}
+          actTab={subCatActive || DO_YOU_KNOW_TAB_UUID}
+          subCheck
+          key={`explore-tabs-${selectedStoreUuid || 'home'}`}
           onTabChange={(index) => onTabChane(index)}
           tabContentBaseStyles={{
-            paddingBottom: 16,
+            paddingBottom: 8,
           }}
           renderActiveTabContent={() => (
-            <>
-              {subCatActive === DO_YOU_KNOW_TAB_UUID ? (
-                <DoYouKnowSection
-                  data={storeProfileQuery.data}
-                  fallbackStore={selectedStore}
-                  hasSelectedBrand={!!selectedStoreUuid}
-                  hasData={!!storeProfileQuery.data}
-                  isLoading={storeProfileQuery.isLoading}
-                  errorMessage={storeProfileQuery.error?.message || ''}
+            subCatActive === DO_YOU_KNOW_TAB_UUID ? (
+              <DoYouKnowSection
+                data={doYouKnowData}
+                fallbackStore={selectedStore}
+                hasSelectedBrand={!!selectedStoreUuid}
+                hasData={!!doYouKnowData}
+                isLoading={isDoYouKnowLoading}
+                errorMessage=""
+              />
+            ) : (
+            <View style={styles.mailSection}>
+              <View style={styles.mailToolbar}>
+                <Switch
+                  trackColor={{ false: '#D0D5DD', true: '#81b0ff' }}
+                  thumbColor={seen ? '#f5dd4b' : '#f4f3f4'}
+                  ios_backgroundColor="#D0D5DD"
+                  onValueChange={toggleSwitch}
+                  value={seen}
+                  style={styles.mailToggle}
                 />
-              ) : (
-              <View style={styles.mailSection}>
-                <View style={styles.mailToolbar}>
-                  <Switch
-                    trackColor={{ false: '#D0D5DD', true: '#81b0ff' }}
-                    thumbColor={seen ? '#f5dd4b' : '#f4f3f4'}
-                    ios_backgroundColor="#D0D5DD"
-                    onValueChange={toggleSwitch}
-                    value={seen}
-                    style={styles.mailToggle}
-                  />
-                </View>
-
-                {mailList?.length > 0 ? (
-                  <ScrollView>
-                    <View style={styles.tabContent}>
-                      {mailList.map((_item, idx) => {
-                        return (
-                          <OfferCard
-                            variant="reward"
-                            containerStyles={{
-                              marginBottom: idx + 1 < mailList?.length ? 14 : 0,
-                            }}
-                            isRedeemed={_item?.is_seen === 'true' ? true : false}
-                            onTap={() => onOfferCardClick(idx, _item)}
-                            isFavourite={_item?.is_favourite === 'true' ? true : false}
-                            onFavouriteToggle={(e) => onFavouriteMailToggle(_item?.uuid)}
-                            key={idx}
-                            item={_item}
-                          />
-                        )
-                      })}
-                    </View>
-                  </ScrollView>
-                ) : !isMailLoading && (
-                  <View style={styles.emptyMailState}>
-                    <View style={styles.emptyMailIconWrap}>
-                      <Ionicons name="search-outline" size={34} color={themeColors.fontMuted} />
-                    </View>
-                    <Text style={styles.emptyMailTitle}>No Results Found</Text>
-                    <Text style={styles.emptyMailText}>Try another category or check back for new mail.</Text>
-                  </View>
-                )}
               </View>
-              )}
-              {subCatActive !== DO_YOU_KNOW_TAB_UUID && mailCount > 0 && !isMailLoading && <View style={{ marginTop: -20, width: '100%', display: 'flex', alignContent: 'flex-end', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
-                {/* <TouchableOpacity onPress={() => navigation.navigate('Mails', { category_uuid: selCategory?.uuid, sub_cat_uuid: subCatActive, brand_uuid: selBrand })}>
-                      <EntypoIcon
-                        name="arrow-right"
-                        size={22}
-                        style={styles.favIcon}
+
+              {isMailLoading && mailList?.length < 1 ? (
+                <View style={styles.emptyMailState}>
+                  <ActivityIndicator color="#168F79" />
+                </View>
+              ) : mailList?.length > 0 ? (
+                <ScrollView>
+                  <View style={styles.tabContent}>
+                    {mailList.map((_item, idx) => (
+                      <OfferCard
+                        variant="reward"
+                        containerStyles={{
+                          marginBottom: idx + 1 < mailList?.length ? 14 : 0,
+                        }}
+                        isRedeemed={_item?.is_seen === 'true' ? true : false}
+                        onTap={() => onOfferCardClick(idx, _item)}
+                        isFavourite={_item?.is_favourite === 'true' ? true : false}
+                        onFavouriteToggle={() => onFavouriteMailToggle(_item?.uuid)}
+                        key={_item?.uuid || idx}
+                        item={_item}
                       />
-                    </TouchableOpacity> */}
-              </View>}
-              {/* {
-                  isMailLoading && <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                    <ActivityIndicator size="large" color="#00ff00" />
+                    ))}
                   </View>
-                } */}
-            </>
+                </ScrollView>
+              ) : (
+                <View style={styles.emptyMailState}>
+                  <View style={styles.emptyMailIconWrap}>
+                    <Ionicons name="mail-outline" size={34} color={themeColors.fontMuted} />
+                  </View>
+                  <Text style={styles.emptyMailTitle}>No mail yet</Text>
+                  <Text style={styles.emptyMailText}>Try another tab or check back for new mail.</Text>
+                </View>
+              )}
+            </View>
+            )
           )}
-        />}
+        />
+          </>
+        )}
+        {homeAds.length > 0 && (
+          <FlatList
+            data={homeAds}
+            horizontal
+            pagingEnabled
+            renderItem={renderItem}
+            keyExtractor={(item, index) => item?.uuid || item?._id || `${index}`}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.homeAdList}
+            snapToInterval={screenWidthss - 32}
+            decelerationRate="fast"
+          />
+        )}
       </ScrollView>
       {isCityTransitioning && (
         <View
@@ -1853,7 +1661,7 @@ const styless = StyleSheet.create({
     paddingHorizontal: 0,
     right: 0,
     top: 0,
-    zIndex: 1
+    zIndex: 1,
   },
   container123: {
     // flex: 1,
@@ -1882,15 +1690,15 @@ const styless = StyleSheet.create({
 
   // },
   modalContainer: {
-    width: "90%",
-    height: "80%",
+    width: '90%',
+    height: '80%',
     // padding: 20,
     backgroundColor: '#fff',
     borderRadius: 20,
     alignItems: 'center',
-    justifyContent: "center",
+    justifyContent: 'center',
     marginTop: 100,
-    marginLeft: 20
+    marginLeft: 20,
   },
   modalText: {
     fontSize: 18,

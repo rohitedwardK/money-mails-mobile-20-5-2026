@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState, useContext } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useEffect, useState, useContext } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 
 export const useBrand = () => {
   const { userDetails } = useContext(UserContext);
@@ -16,15 +16,15 @@ export const useBrand = () => {
     // setData([]);
     setIsLoading(true);
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
 
       const params = JSON.stringify(payload);
 
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       // console.log(`HERE I AM Brand: brand/list?${payload}`);
@@ -48,7 +48,7 @@ export const useBrand = () => {
           setError(err);
           setIsLoading(false);
         });
-  }
+  };
 
   useEffect(() => {
     if(payload) {
@@ -56,7 +56,7 @@ export const useBrand = () => {
      const intervalID =  setInterval(()=>{
         onBrandLoad();
       },30000);
-      return ()=> clearInterval(intervalID)
+      return ()=> clearInterval(intervalID);
     }
   }, [payload]);
 
@@ -65,16 +65,16 @@ export const useBrand = () => {
     setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
 
       const params = JSON.stringify(updateBrandFav);
 
       const requestOptions = {
-        method: "POST",
+        method: 'POST',
         headers: headers,
         body: params,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/favourite`, requestOptions)
@@ -103,6 +103,6 @@ export const useBrand = () => {
     isBrandLoading,
     brandError,
     setBrandPayload,
-    setUpdateBrandFav
+    setUpdateBrandFav,
   };
 };

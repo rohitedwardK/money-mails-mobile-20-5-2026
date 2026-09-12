@@ -11,7 +11,7 @@ export const myProfileScreenStyles = () => {
     container : {
         flex : 1,
         justifyContent : 'center',
-        padding:10
+        padding:10,
     },
     detailsItem: {
       borderWidth: 1,
@@ -26,10 +26,10 @@ export const myProfileScreenStyles = () => {
       flexDirection: 'row',
     },
     detailsItemNew: {
-      width: screenWidth - 70, 
+      width: screenWidth - 70,
       backgroundColor: 'transparent',
-      color : '#454545'
+      color : '#454545',
     },
-   
+
   });
 };

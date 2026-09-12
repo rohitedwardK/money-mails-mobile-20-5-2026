@@ -2,11 +2,11 @@ import {useContext} from 'react';
 import {StyleSheet} from 'react-native';
 import {DeviceContext} from '../../../context/DeviceContext';
 import getColors from '../../../utils/colors';
- 
+
 const useMyProfileScreenStyles = () => {
   const {screenWidth} = useContext(DeviceContext);
   const {themeColors, myProfileScreenColors, isDarkMode} = getColors();
- 
+
   return StyleSheet.create({
     pageContainer: {
       flex: 1,

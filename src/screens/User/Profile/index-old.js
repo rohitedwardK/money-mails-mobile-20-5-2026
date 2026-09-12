@@ -6,12 +6,12 @@ import Grid from '../../../components/atoms/Grid';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import { myProfileScreenStyles } from './index.style';
 import getColors from '../../../utils/colors';
-import { UserContext } from "../../../context/UserContext";
-import { zipFormat } from "../../../utils";
-import { useStateData } from "../../../hooks/services/useStateData";
-import { useCountyData } from "../../../hooks/services/useCountyData";
-import { useCityData } from "../../../hooks/services/useCityData";
-import { COUNTRY } from "../../../constants";
+import { UserContext } from '../../../context/UserContext';
+import { zipFormat } from '../../../utils';
+import { useStateData } from '../../../hooks/services/useStateData';
+import { useCountyData } from '../../../hooks/services/useCountyData';
+import { useCityData } from '../../../hooks/services/useCityData';
+import { COUNTRY } from '../../../constants';
 
 const Profile = () => {
   const styles = myProfileScreenStyles();
@@ -30,35 +30,35 @@ const Profile = () => {
     setCountyData(userDetails?.address?.state);
     setCityData(userDetails?.address?.county);
 
-  },[userDetails])
+  },[userDetails]);
 
   useEffect(()=>{
     if(userDetails) {
       const country = COUNTRY.find((val) => userDetails?.address?.country == val.id);
       setSelCountry(country?.title);
     }
-  },[userDetails])
+  },[userDetails]);
 
   useEffect(()=>{
     if(stateData) {
       const state = stateData.find((val) => userDetails?.address?.state === val.uuid);
       setSelState(state?.name);
     }
-  },[stateData])
+  },[stateData]);
 
   useEffect(()=>{
     if(countyData) {
       const county = countyData.find((val) => userDetails?.address?.county === val.uuid);
       setSelCounty(county?.name);
     }
-  },[countyData])
+  },[countyData]);
 
   useEffect(()=>{
     if(cityData) {
       const city = cityData.find((val) => userDetails?.address?.city === val.uuid);
       setSelCity(city?.name);
     }
-  },[cityData])
+  },[cityData]);
 
   return (
     <ScrollView

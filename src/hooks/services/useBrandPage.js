@@ -1,6 +1,6 @@
-import { useEffect, useState,useContext } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useEffect, useState,useContext } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 import {
   ToastAndroid,
   Platform,
@@ -19,13 +19,13 @@ export const useBrandPage = () => {
     if (payload && userDetails?.token) {
       setIsLoading(true);
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("x-auth-token", userDetails?.token);
+      headers.append('Content-Type', 'application/json');
+      headers.append('x-auth-token', userDetails?.token);
 
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
       fetch(`${baseUrl}/user/brand/list?${payload}`, requestOptions)
         .then(async (response) => {
@@ -39,14 +39,14 @@ export const useBrandPage = () => {
           const isFirstPage = /(?:^|&)pagenum=0(?:&|$)/.test(payload);
           setData(current =>
             isFirstPage ? [...result.data] : [...current, ...result.data],
-          )
+          );
             setIsLoading(false);
             setError(false);
         })
         .catch((err) => {
-            setData(null)
+            setData(null);
           if (Platform.OS === 'android') {
-            ToastAndroid.show(err, ToastAndroid.SHORT)
+            ToastAndroid.show(err, ToastAndroid.SHORT);
           } else {
             AlertIOS.alert(err);
           }
@@ -62,6 +62,6 @@ export const useBrandPage = () => {
     isLoading,
     setPage,
     error,
-    setBrandPagePayload
+    setBrandPagePayload,
   };
 };

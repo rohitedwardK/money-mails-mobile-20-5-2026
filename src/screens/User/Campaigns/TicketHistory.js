@@ -2,7 +2,6 @@ import React from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  Linking,
   Text,
   TouchableOpacity,
   View,
@@ -25,6 +24,7 @@ import {
   getDownloadUrl,
   getTicketCampaign,
   getTicketUuid,
+  openPaymentUrl,
 } from './utils';
 
 const TicketHistory = () => {
@@ -52,7 +52,7 @@ const TicketHistory = () => {
       const payload = await downloadMutation.mutateAsync(ticketUuid);
       const url = getDownloadUrl(payload);
       if (url) {
-        await Linking.openURL(url);
+        await openPaymentUrl(url);
       } else {
         Toast.show('Ticket download is ready.', Toast.SHORT);
       }

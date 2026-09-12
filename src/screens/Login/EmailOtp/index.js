@@ -100,11 +100,11 @@ const styles = {
 
 const EmailOtp = ({navigation, route}) => {
   const mode = route?.params?.mode === 'signup' ? 'signup' : 'login';
-  const {setUserDetails} = useContext(UserContext);
+  const {setUserDetails, setPostAuthScreen, setPendingGuestRoute} = useContext(UserContext);
   const otpRefs = useRef([]);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(route?.params?.email || '');
   const [password, setPassword] = useState('');
-  const [step, setStep] = useState('entry');
+  const [step, setStep] = useState(mode === 'login' && route?.params?.passwordLogin ? 'password' : 'entry');
   const [otpValues, setOtpValues] = useState(Array(OTP_LENGTH).fill(''));
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
@@ -117,7 +117,7 @@ const EmailOtp = ({navigation, route}) => {
   const navigateAfterAuth = sessionData => {
     const target = getPostAuthRoute(sessionData);
     if (target.stack === 'UserScreens') {
-      navigation.navigate('UserScreens', target.screen ? {screen: target.screen} : undefined);
+      setPostAuthScreen(target.screen || 'Home');
       return;
     }
     navigation.navigate(target.screen || 'SignIn');
@@ -221,7 +221,7 @@ const EmailOtp = ({navigation, route}) => {
       }
 
       if (mode === 'signup' && emailVerificationToken) {
-        navigation.navigate('UserScreens', {
+        setPendingGuestRoute({
           screen: 'CompleteInfo',
           params: {
             prefillEmail: email.trim().toLowerCase(),

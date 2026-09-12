@@ -1,9 +1,9 @@
 import {AWS_API_KEY, AWS_REGION} from '../config';
 
 const asText = value => {
-  if (value == null) return '';
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number') return String(value);
+  if (value == null) {return '';}
+  if (typeof value === 'string') {return value;}
+  if (typeof value === 'number') {return String(value);}
   return value?.Name || value?.Value || value?.Code || '';
 };
 
@@ -12,7 +12,7 @@ const extractCity = address => {
     asText(address?.Municipality) ||
     asText(address?.Locality) ||
     asText(address?.City);
-  if (municipality) return municipality;
+  if (municipality) {return municipality;}
 
   const subRegion = asText(address?.SubRegion);
   return /county/i.test(subRegion) ? '' : subRegion;
@@ -72,7 +72,7 @@ const requestAwsPlaces = async (path, options = {}) => {
 
 export const fetchPlaceAutocomplete = async (query, countryAlpha3 = 'USA') => {
   const body = {QueryText: query, MaxResults: 6};
-  if (countryAlpha3) body.Filter = {IncludeCountries: [countryAlpha3]};
+  if (countryAlpha3) {body.Filter = {IncludeCountries: [countryAlpha3]};}
 
   const payload = await requestAwsPlaces('autocomplete', {
     method: 'POST',
@@ -97,7 +97,7 @@ export const reverseGeocode = async (lng, lat) => {
   });
   const item = payload?.ResultItems?.[0];
 
-  if (!item) return null;
+  if (!item) {return null;}
 
   return normalizeAddress(item?.Address || {}, item?.Position || [lng, lat]);
 };

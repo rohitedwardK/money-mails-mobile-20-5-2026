@@ -1,5 +1,40 @@
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
+# MoneyMails development and Android release
+
+This is a bare React Native app. The committed `android` and `ios` projects
+are the native source of truth. Expo/EAS build scripts are not configured.
+
+Install dependencies with `npm ci`, then copy `.env.example` to `.env` for
+development. Run `npm start` and `npm run android` to use Metro and a debug build.
+
+Android release builds automatically load `.env.production`, which contains
+public endpoints and an OAuth client ID only. Never add signing passwords,
+backend secrets, or AWS keys to this file: native config is embedded in the app.
+An `ENVFILE` override is validated too; staging and missing production settings
+cause release validation to fail.
+
+From the project root in PowerShell:
+
+```powershell
+npm.cmd ci
+npm.cmd test -- --runInBand
+.\android\gradlew.bat -p android :app:bundleRelease
+python scripts/check_android_page_sizes.py android/app/build/outputs/bundle/release/app-release.aab
+```
+
+The release uses API 36, AGP 8.9.2, Gradle 8.11.1, Java 17, and NDK
+27.1.12297006. Install Android SDK Platform 36 and Build Tools 36.0.0.
+Configure the existing upload key and credentials in your user Gradle properties;
+never commit signing passwords. The generated bundle is
+`android/app/build/outputs/bundle/release/app-release.aab`.
+
+The native alignment script checks ARM64 and x86_64 ELF libraries. Also validate
+generated APK ZIP alignment and run the release on a 16 KB device before upload.
+For iOS, run CocoaPods installation on macOS after dependency changes.
+
+See `docs/RELEASE_READINESS.md` for completed fixes and remaining release gates.
+
 # Getting Started
 
 > **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.

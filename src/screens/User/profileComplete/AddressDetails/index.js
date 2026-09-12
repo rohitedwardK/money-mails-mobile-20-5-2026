@@ -1,20 +1,20 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from 'react';
 import {
     ScrollView, Text, View, StyleSheet,
     TextInput, TouchableOpacity,
-    BackHandler
-} from "react-native";
+    BackHandler,
+} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { Dropdown } from "react-native-element-dropdown";
-import { RACES, COUNTRYS, IDENTITYTYPES } from "../../../../constants";
-import { useStateData } from "../../../../hooks/services/useStateData";
-import { useCountyData } from "../../../../hooks/services/useCountyData";
-import { useCityData } from "../../../../hooks/services/useCityData";
-import { UserContext } from "../../../../context/UserContext";
-import axios from "axios";
-import { baseUrl } from "../../../../connections";
+import { Dropdown } from 'react-native-element-dropdown';
+import { RACES, COUNTRYS, IDENTITYTYPES } from '../../../../constants';
+import { useStateData } from '../../../../hooks/services/useStateData';
+import { useCountyData } from '../../../../hooks/services/useCountyData';
+import { useCityData } from '../../../../hooks/services/useCityData';
+import { UserContext } from '../../../../context/UserContext';
+import axios from 'axios';
+import { baseUrl } from '../../../../connections';
 import Toast from 'react-native-simple-toast';
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from '@react-navigation/native';
 
 const AddressDetails = ({ navigation }) => {
     const { userDetails } = useContext(UserContext);
@@ -57,12 +57,12 @@ const AddressDetails = ({ navigation }) => {
     );
 
     const getProfileData = () => {
-        if (!userDetails?.uuid) return; // Prevent API call if uuid is undefined
+        if (!userDetails?.uuid) {return;} // Prevent API call if uuid is undefined
 
         axios.get(`${baseUrl}/user/consumer/get/profile/${userDetails?.uuid}`, {
             headers: {
-                'x-auth-token': userDetails?.token
-            }
+                'x-auth-token': userDetails?.token,
+            },
         })
             .then((res) => {
                 setuserData(res?.data?.data); // Ensure `userDetails` is updated properly
@@ -101,7 +101,7 @@ const AddressDetails = ({ navigation }) => {
 
         const error = validateFields();
         if (error) {
-            Toast.show(error)
+            Toast.show(error);
             return false;
         }
 
@@ -113,18 +113,18 @@ const AddressDetails = ({ navigation }) => {
             'county': county,
             'city': city,
             'apartment_number': houseno,
-            'pincode': zipcode
-        }
+            'pincode': zipcode,
+        };
 
-        let headers = { 'x-auth-token': userDetails?.token }
+        let headers = { 'x-auth-token': userDetails?.token };
         axios.put(`${baseUrl}/user/profile/address/details/${userDetails?.uuid}`, payload, {
-            headers: headers
+            headers: headers,
         }).then((response) => {
-            Toast.show("Success!")
-            navigation.navigate('VerificationInformation')
+            Toast.show('Success!');
+            navigation.navigate('VerificationInformation');
         }).catch((error) => {
-            Toast.show("Something went wrong.")
-        })
+            Toast.show('Something went wrong.');
+        });
 
     };
 
@@ -163,7 +163,7 @@ const AddressDetails = ({ navigation }) => {
                     marginLeft: 10,
                     fontSize: 16,
                     fontWeight: '600',
-                    color: '#222'
+                    color: '#222',
                 }}>Country</Text>
 
                 <View style={{ margin: 10 }}>
@@ -187,7 +187,7 @@ const AddressDetails = ({ navigation }) => {
                         onFocus={() => setIsFocusCountry(true)}
                         onBlur={() => setIsFocusCountry(false)}
                         onChange={item => {
-                            setCountry(item.value)
+                            setCountry(item.value);
                             setStateData(item.value);
                             setIsFocusCountry(false);
                         }}
@@ -206,7 +206,7 @@ const AddressDetails = ({ navigation }) => {
                             marginBottom: 10,
                             fontSize: 16,
                             fontWeight: '600',
-                            color: '#222'
+                            color: '#222',
                         }}>State</Text>
                         <Dropdown
                             mode="modal"
@@ -227,7 +227,7 @@ const AddressDetails = ({ navigation }) => {
                             onFocus={() => setIsFocusState(true)}
                             onBlur={() => setIsFocusState(false)}
                             onChange={item => {
-                                setState(item.value)
+                                setState(item.value);
                                 setCountyData(item.value);
                                 setIsFocusState(false);
                             }}
@@ -248,7 +248,7 @@ const AddressDetails = ({ navigation }) => {
                             marginBottom: 10,
                             fontSize: 16,
                             fontWeight: '600',
-                            color: '#222'
+                            color: '#222',
                         }}>County</Text>
                         <Dropdown
                             style={[styles.dropdown, isFocusCounty && { borderColor: 'black' }]}
@@ -268,7 +268,7 @@ const AddressDetails = ({ navigation }) => {
                             onFocus={() => setIsFocusCounty(true)}
                             onBlur={() => setIsFocusCounty(false)}
                             onChange={item => {
-                                setCounty(item.value)
+                                setCounty(item.value);
                                 setCityData(item.value);
                                 setIsFocusCounty(false);
                             }}
@@ -290,7 +290,7 @@ const AddressDetails = ({ navigation }) => {
                             marginBottom: 10,
                             fontSize: 16,
                             fontWeight: '600',
-                            color: '#222'
+                            color: '#222',
                         }}>City</Text>
                         <Dropdown
                             style={[styles.dropdown, isFocusCity && { borderColor: 'black' }]}
@@ -310,7 +310,7 @@ const AddressDetails = ({ navigation }) => {
                             onFocus={() => setIsFocusCity(true)}
                             onBlur={() => setIsFocusCity(false)}
                             onChange={item => {
-                                setCity(item.value)
+                                setCity(item.value);
                                 setIsFocusCity(false);
                             }}
                             renderLeftIcon={() => (
@@ -347,21 +347,21 @@ const AddressDetails = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
         </ScrollView>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
         padding: 10,
-        marginTop: 20
+        marginTop: 20,
     },
     label: {
         fontSize: 18,
         fontWeight: '400',
         marginLeft: 10,
-        color: '#222'
+        color: '#222',
     },
     input: {
         backgroundColor: 'white',
@@ -370,16 +370,16 @@ const styles = StyleSheet.create({
         borderWidth: 0.5,
         borderColor: '##515a5a',
         padding: 10,
-        color: '#222'
+        color: '#222',
     },
 
     placeholderStyle: {
         fontSize: 16,
-        color: 'black'
+        color: 'black',
     },
     selectedTextStyle: {
         fontSize: 16,
-        color: 'black'
+        color: 'black',
     },
     inputSearchStyle: {
         color: 'black',
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingHorizontal: 8,
     },
-})
+});
 
 
 export default AddressDetails;

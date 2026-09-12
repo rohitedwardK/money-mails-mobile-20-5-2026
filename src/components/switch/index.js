@@ -9,7 +9,7 @@ const CustomSwitch = ({
   option1,
   option2,
   onSelectSwitch,
-  selectionColor
+  selectionColor,
 }) => {
   const [getSelectionMode, setSelectionMode] = useState(selectionMode);
   const [getRoundCorner, setRoundCorner] = useState(roundCorner);

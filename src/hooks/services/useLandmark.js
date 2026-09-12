@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { baseUrl } from "../../connections";
+import { useEffect, useState } from 'react';
+import { baseUrl } from '../../connections';
 
 export const useLandmarkData = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -12,14 +12,14 @@ export const useLandmarkData = () => {
     setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
+      headers.append('Content-Type', 'application/json');
 
       const params = JSON.stringify(payload);
 
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/pincode/housing/communities/list?${payload}`, requestOptions)

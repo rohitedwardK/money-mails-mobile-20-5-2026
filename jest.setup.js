@@ -20,9 +20,22 @@ jest.mock('@react-native-google-signin/google-signin', () => ({
 
 jest.mock('react-native-config', () => ({}));
 
+jest.mock('@react-native-cookies/cookies', () => ({
+  clearAll: jest.fn(() => Promise.resolve(true)),
+}));
+
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
+
+jest.mock('react-native-keychain', () => ({
+  setGenericPassword: jest.fn(() => Promise.resolve(true)),
+  getGenericPassword: jest.fn(() => Promise.resolve(false)),
+  resetGenericPassword: jest.fn(() => Promise.resolve(true)),
+  ACCESSIBLE: {
+    WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'AccessibleWhenUnlockedThisDeviceOnly',
+  },
+}));
 
 jest.mock('react-native-snackbar', () => ({
   LENGTH_SHORT: 1500,
@@ -45,3 +58,20 @@ jest.mock('react-native-email-link', () => ({
   openComposer: jest.fn(() => Promise.resolve()),
   getEmailClients: jest.fn(() => Promise.resolve([])),
 }));
+
+jest.mock('react-native-webview', () => {
+  const React = require('react');
+  const {View} = require('react-native');
+
+  return {
+    WebView: props => <View {...props} testID={props.testID || 'webview'} />,
+  };
+});
+
+
+jest.mock('react-native-elements', () => {
+  const React = require('react');
+  return {
+    Tooltip: ({children}) => React.createElement(React.Fragment, null, children),
+  };
+});

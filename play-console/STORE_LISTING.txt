@@ -1,0 +1,133 @@
+Money Mails — paste these answers into Google Play Console
+Package name: com.moneymails.app
+Privacy policy URL: https://app.termly.io/policy-viewer/policy.html?policyUUID=7089623c-d46c-4c3f-8c53-cf21a21be25c
+Website: https://money-mails.com
+
+============================================================
+STORE LISTING
+============================================================
+App name: Money Mails
+
+Short description (max 80 characters):
+Get personalized deals, offers, and rewards tailored to you.
+
+Full description:
+Money Mails helps you discover personalized deals, offers, and rewards based on your interests and location.
+
+Create an account with Google or email, complete your profile, and browse campaigns and offers selected for you. Earn and track rewards, get in-app notifications about new mail and offers, and redeem securely.
+
+Features:
+• Personalized deals and rewards
+• Campaigns and offers matched to your interests
+• Google or email sign-in
+• Profile and identity verification for secure redemption
+• In-app notifications for new mail and updates
+
+Money Mails is for adults. Some profile details (such as date of birth and address) are used to show relevant, eligible offers.
+
+Graphics to upload (from this play-console folder):
+• App icon (512 x 512): icon-512.png
+• Feature graphic (1024 x 500): feature-graphic-1024x500.png
+• Phone screenshots: take at least 2 from a real device or emulator
+  (login, home/offers, profile). JPEG or PNG, 16:9 or 9:16.
+
+Categorization:
+• App category: Lifestyle  (or Shopping if Console prefers)
+• Tags: deals, rewards, offers, coupons, shopping
+
+Contact details:
+• Email: use your real support email (required)
+• Phone: optional
+• Website: https://money-mails.com
+
+============================================================
+APP ACCESS
+============================================================
+All or some functionality is restricted: YES (login required)
+
+Instructions for Google reviewers:
+Sign in with the test account below. After login, open Home to see offers and Account to view profile.
+
+Test account (YOU MUST FILL THIS — Google will reject without a working login):
+Email:
+Password:
+
+============================================================
+ADS / OTHER DECLARATIONS
+============================================================
+Does this app contain ads?: REVIEW REQUIRED - the app includes promotional mail and popup-ad screens. Confirm the production content and declare ads accurately; do not submit an automatic NO.
+News app?: NO
+COVID-19 contact tracing / status?: NO
+Government / political app?: NO
+Financial features: rewards / offer redemption (not a bank). Declare in-app purchases only if users can pay inside the app.
+
+============================================================
+TARGET AUDIENCE
+============================================================
+Target age group: 18 and over
+Appeal to children: NO
+Store presence designed for children: NO
+
+============================================================
+CONTENT RATING (IARC questionnaire — typical answers)
+============================================================
+Violence: No
+Sexual content: No
+Language: No
+Controlled substances: No
+Miscellaneous / user-generated content: Users may upload profile or ID photos. Moderate if needed.
+Gambling: No real-money casino. Promotional bingo/rewards only — answer according to the form; do not mark as a gambling app unless Play’s wording clearly matches your Bingo feature.
+
+============================================================
+DATA SAFETY (based on this app’s signup/profile code)
+============================================================
+Does your app collect or share user data?: YES
+Is data encrypted in transit?: YES (HTTPS API)
+Users can request data deletion?: In-app deletion is implemented.
+Account deletion web URL: REQUIRED BEFORE SUBMISSION - provide a public page with a working deletion request path; a generic privacy/support link alone is insufficient.
+
+Collected (and sent to your backend at money-mails.com / api):
+• Name — Account, App functionality
+• Email — Account, App functionality, Communications
+• Phone — Account, App functionality
+• Date of birth — App functionality (eligibility / relevant offers)
+• Physical address — App functionality, identity
+• Gender, race/ethnicity, religion, language, interests — App functionality (personalization)
+• Photos (profile / ID proof) — App functionality, identity verification
+• User IDs / account identifiers — Account
+• Approximate or precise location if you collect address/region — App functionality
+• Zelle ID / payout identifiers — App functionality (reward redemption)
+• Device identifiers as used by Google Sign-In — Account
+
+Sharing declarations (verify actual backend and SDK transfers before submitting):
+• Google (Google Sign-In) — Account authentication
+• Your own servers (not “sold”)
+
+Ephemeral / not sold: Confirm the backend data practices before making a no-sale claim. The app describes business access to user lists; reconcile that description with the privacy policy and Data safety declarations.
+
+Photo and video permissions (Play declaration):
+• Photos and videos: YES — users pick images from the gallery for profile and ID verification
+• Camera: the AndroidManifest currently requests CAMERA. Current app code uses the gallery (launchImageLibrary). Either keep Camera and explain “optional capture of ID/profile photo” if you still use it, or remove CAMERA from the manifest before upload if it is unused.
+
+Notifications:
+• POST_NOTIFICATIONS — in-app and system notifications about mail, offers, and account updates
+
+============================================================
+PRIVACY POLICY
+============================================================
+Paste this URL exactly:
+https://app.termly.io/policy-viewer/policy.html?policyUUID=7089623c-d46c-4c3f-8c53-cf21a21be25c
+
+Confirm the page loads in a browser without signing in. Play rejects apps if this URL is broken.
+
+============================================================
+YOU STILL MUST DO IN THE CONSOLE (requires your Google login)
+============================================================
+1. Open https://play.google.com/console and select Money Mails
+2. Grow users > Store presence > Main store listing — paste texts and upload graphics
+3. Policy > App content — fill Access, Ads, Target audience, News, COVID, Data safety
+4. Policy > Content ratings — start questionnaire
+5. Policy > Privacy policy — paste the URL
+6. Publishing overview — fix remaining red items
+
+Screenshots cannot be invented from this PC without running the app. Capture them on a phone or emulator after login.

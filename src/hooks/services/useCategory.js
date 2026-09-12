@@ -1,6 +1,6 @@
-import { useEffect, useState, useContext } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useEffect, useState, useContext } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const useCategory = () => {
@@ -16,17 +16,17 @@ export const useCategory = () => {
   const [pege, SetPege] = useState(0);
 
   const headers = new Headers();
-  headers.append("Content-Type", "application/json");
-  headers.append("x-auth-token", userDetails?.token);
+  headers.append('Content-Type', 'application/json');
+  headers.append('x-auth-token', userDetails?.token);
 
   useEffect(() => {
     if(payload) {
     setIsLoading(true);
       const params = JSON.stringify(payload);
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
       fetch(`${baseUrl}/category/list?${payload}`, requestOptions)
         .then(async (response) => {
@@ -69,18 +69,18 @@ export const useCategory = () => {
       //   setCatPayload(`key=${key}&search=&user_uuid=${user?.uuid}`);
 
       // }
-     },5000)
-     return ()=> clearInterval(intervalIDS)
-  },[])
+     },5000);
+     return ()=> clearInterval(intervalIDS);
+  },[]);
 
   useEffect(() => {
     if(catDetaisPayload) {
     setIsLoading(true);
       const params = JSON.stringify(catDetaisPayload);
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/mail/user/point/history?${catDetaisPayload}`, requestOptions)
@@ -120,6 +120,6 @@ export const useCategory = () => {
     setCatDetails,
     setCatDetailsPayload,
     point,
-    SetPege
+    SetPege,
   };
 };

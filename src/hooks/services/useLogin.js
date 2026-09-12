@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { baseUrl } from "../../connections";
+import { useEffect, useState } from 'react';
+import { baseUrl } from '../../connections';
 import Snackbar from 'react-native-snackbar';
 
 export const useLogin = () => {
@@ -14,15 +14,15 @@ export const useLogin = () => {
       setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
+      headers.append('Content-Type', 'application/json');
 
       const body = JSON.stringify(payload);
 
       const requestOptions = {
-        method: "POST",
+        method: 'POST',
         headers: headers,
         body: body,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/user/login`, requestOptions)
@@ -47,7 +47,7 @@ export const useLogin = () => {
               duration: Snackbar.LENGTH_SHORT,
             });
           }
-          
+
           setIsLoading(false);
         })
         .catch((err) => {
@@ -68,6 +68,6 @@ export const useLogin = () => {
     error,
     message,
     setPayload,
-    setData
+    setData,
   };
 };

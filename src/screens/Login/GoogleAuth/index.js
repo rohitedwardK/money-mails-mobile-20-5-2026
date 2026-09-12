@@ -20,15 +20,12 @@ import {
 } from '../../../config';
 
 const GoogleAuth = ({navigation}) => {
-  const {setUserDetails} = useContext(UserContext);
+  const {setUserDetails, setPostAuthScreen} = useContext(UserContext);
 
   const navigateAfterAuth = sessionData => {
     const target = getPostAuthRoute(sessionData);
     if (target.stack === 'UserScreens') {
-      navigation.navigate(
-        'UserScreens',
-        target.screen ? {screen: target.screen} : undefined,
-      );
+      setPostAuthScreen(target.screen || 'Home');
       return;
     }
     navigation.navigate(target.screen || 'SignIn');
@@ -65,9 +62,8 @@ const GoogleAuth = ({navigation}) => {
         const googleUser = googleData?.user || {};
         const tokens = await GoogleSignin.getTokens();
         const idToken = tokens?.idToken || googleData?.idToken || '';
-        const accessToken = tokens?.accessToken || '';
 
-        if (!googleUser?.email || !accessToken) {
+        if (!googleUser?.email || !idToken) {
           throw new Error('Google sign in could not be verified.');
         }
 
@@ -82,7 +78,6 @@ const GoogleAuth = ({navigation}) => {
           googleSub: googleUser.id || '',
           provider: 'google',
           idToken,
-          accessToken,
         };
 
         const response = await registerGoogle(profile);

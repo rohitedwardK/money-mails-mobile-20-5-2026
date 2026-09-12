@@ -155,6 +155,20 @@ import {
 } from 'react-native';
 import getColors from '../../../utils/colors';
 
+const getActiveTabIndex = (tabs = [], actTab) => {
+  const byActTab = tabs.findIndex(item => item?.uuid === actTab);
+  if (byActTab >= 0) {
+    return byActTab;
+  }
+
+  const profileTabIndex = tabs.findIndex(item => item?.isProfileTab);
+  if (profileTabIndex >= 0) {
+    return profileTabIndex;
+  }
+
+  return 0;
+};
+
 const TabView = ({
   tabs,
   actTab,
@@ -164,40 +178,18 @@ const TabView = ({
   tabHeaderWrapperStyles,
   onTabChange,
   renderActiveTabContent,
+  variant,
 }) => {
   const { themeColors: colors, tabBarColors } = getColors();
+  const isPills = variant === 'pills';
 
-  // State to track the active tab index
-  const [activeTabIndex, setActiveTabIndex] = useState(() => {
-    const initialIndex = subCheck
-      ? tabs.findIndex(item => item?.uuid === actTab)
-      : tabs.findIndex(item => item?.isProfileTab) >= 0
-        ? tabs.findIndex(item => item?.isProfileTab)
-        : tabs.findIndex(item => item?.mails_count > 0);
-    return initialIndex >= 0 ? initialIndex : 0;
-  });
+  const [activeTabIndex, setActiveTabIndex] = useState(() =>
+    getActiveTabIndex(tabs, actTab),
+  );
 
-  // Keep the visible tab stable across data refreshes.
   useEffect(() => {
-    setActiveTabIndex(previousIndex => {
-      const activeTabIndexByUuid = tabs.findIndex(item => item?.uuid === actTab);
-      if (activeTabIndexByUuid >= 0) {
-        return activeTabIndexByUuid;
-      }
-
-      if (tabs[previousIndex]) {
-        return previousIndex;
-      }
-
-      const profileTabIndex = tabs.findIndex(item => item?.isProfileTab);
-      if (!subCheck && profileTabIndex >= 0) {
-        return profileTabIndex;
-      }
-
-      const tabWithMailIndex = tabs.findIndex(item => item?.mails_count > 0);
-      return tabWithMailIndex >= 0 ? tabWithMailIndex : 0;
-    });
-  }, [actTab, tabs, subCheck]);
+    setActiveTabIndex(getActiveTabIndex(tabs, actTab));
+  }, [actTab, tabs]);
 
   // Handle tab button press
   const handleTabPress = (index) => {
@@ -236,15 +228,16 @@ const TabView = ({
    <View style={[
      styles.tabStrip,
      {
-       backgroundColor: colors.homeBand || colors.surfacePrimary,
+            backgroundColor: isPills ? 'transparent' : (colors.homeBand || colors.surfacePrimary),
        borderColor: colors.borderSubtle,
+       borderBottomWidth: isPills ? 0 : 1,
      },
      tabHeaderWrapperStyles,
    ]}>
      <ScrollView
        horizontal
        showsHorizontalScrollIndicator={false}
-       contentContainerStyle={styles.tabScrollContent}>
+       contentContainerStyle={[styles.tabScrollContent, isPills && {paddingHorizontal: 16}]}>
      <View style={styles.tabBar}>
       {tabs.map((tab, index) => (
         <TouchableOpacity
@@ -252,8 +245,11 @@ const TabView = ({
           activeOpacity={0.82}
           style={[
             styles.tabButton,
+            isPills ? [styles.pillTabButton, {backgroundColor: colors.homeCard, borderColor: colors.borderSubtle}] : null,
             activeTabIndex === index
-              ? [styles.activeTabButton, {borderBottomColor: tabBarColors.activeColor}]
+              ? (isPills
+                  ? [styles.pillTabButtonActive, {backgroundColor: tabBarColors.activeColor}]
+                  : [styles.activeTabButton, {borderBottomColor: tabBarColors.activeColor}])
               : null,
           ]}
           onPress={() => handleTabPress(index)}
@@ -261,7 +257,12 @@ const TabView = ({
         >
           <Text style={[
             styles.tabButtonText,
-            { color: activeTabIndex === index ? tabBarColors.activeColor : tabBarColors.inactiveColor },
+            isPills && styles.pillTabButtonText,
+            {
+              color: activeTabIndex === index
+                ? (isPills ? colors.white : tabBarColors.activeColor)
+                : tabBarColors.inactiveColor,
+            },
           ]}>
             {tab.name}
           </Text>
@@ -316,6 +317,24 @@ const styles = StyleSheet.create({
   },
   activeTabButton: {
   },
+  pillTabButton: {
+    minHeight: 36,
+    paddingHorizontal: 16,
+    marginRight: 8,
+    borderRadius: 20,
+    borderBottomWidth: 0,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  pillTabButtonActive: {
+    borderColor: 'transparent',
+  },
+  pillTabButtonText: {
+    fontSize: 13,
+    lineHeight: 16,
+    fontWeight: '600',
+  },
   tabButtonText: {
     fontSize: 12,
     lineHeight: 16,
@@ -367,6 +386,7 @@ TabView.propTypes = {
   tabHeaderWrapperStyles: PropTypes.object,
   onTabChange: PropTypes.func,
   renderActiveTabContent: PropTypes.func.isRequired,
+  variant: PropTypes.oneOf(['default', 'pills']),
 };
 
 TabView.defaultProps = {
@@ -378,6 +398,7 @@ TabView.defaultProps = {
   tabHeaderWrapperStyles: {},
   onTabChange: () => {},
   renderActiveTabContent: () => null,
+  variant: 'default',
 };
 
 export default TabView;

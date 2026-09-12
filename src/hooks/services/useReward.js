@@ -1,27 +1,27 @@
-import { useEffect, useState, useContext } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useEffect, useState, useContext } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 
 export const useReward = () => {
   const { userDetails } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
   const [data, setData] = useState(null);
-  const [rewardData, setRewardData] = useState(null)
+  const [rewardData, setRewardData] = useState(null);
   const [payload, setPayload] = useState(null);
 
   const headers = new Headers();
-  headers.append("Content-Type", "application/json");
-  headers.append("x-auth-token", userDetails?.token);
+  headers.append('Content-Type', 'application/json');
+  headers.append('x-auth-token', userDetails?.token);
 
   useEffect(() => {
     if(payload) {
     setIsLoading(true);
       const params = JSON.stringify(payload);
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/user/point/${payload}`, requestOptions)
@@ -48,6 +48,6 @@ export const useReward = () => {
     rewards: rewardData,
     isLoading,
     error,
-    setPayload
+    setPayload,
   };
 };

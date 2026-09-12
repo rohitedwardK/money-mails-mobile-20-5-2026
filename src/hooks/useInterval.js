@@ -5,6 +5,11 @@ export function useInterval(callback) {
   const [start, setStart] = useState(false);
   const firstStart = useRef(true);
   const tick = useRef();
+  const savedCallback = useRef(callback);
+
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
 
   useEffect(() => {
     if (firstStart.current) {
@@ -14,7 +19,7 @@ export function useInterval(callback) {
     if (start) {
       tick.current = setInterval(() => {
         setTimer(timer => {
-          callback(timer + 1);
+          savedCallback.current(timer + 1);
           return timer + 1;
         });
       }, 1000);
@@ -27,13 +32,13 @@ export function useInterval(callback) {
 
   const toggleStart = shouldStart => {
     setStart(shouldStart);
-    if (!shouldStart) setTimeout(() => setTimer(0), 1000);
+    if (!shouldStart) {setTimeout(() => setTimer(0), 1000);}
   };
 
   return {
     start: () => toggleStart(true),
     stop: () => toggleStart(false),
     timer,
-    setTimer
+    setTimer,
   };
 }

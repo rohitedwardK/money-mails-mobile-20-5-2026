@@ -71,8 +71,11 @@ export const offerCardStyles = ({size, maxSize, containerStyles = {}}) => {
       marginBottom: 14,
       borderWidth: 1,
       borderColor: colors.borderSubtle,
-      shadowOpacity: 0,
-      elevation: 0,
+      shadowColor: colors.shadowColor,
+      shadowOffset: {width: 0, height: 4},
+      shadowOpacity: 0.08,
+      shadowRadius: 10,
+      elevation: 3,
     },
     feedImageWrap: {
       width: '100%',

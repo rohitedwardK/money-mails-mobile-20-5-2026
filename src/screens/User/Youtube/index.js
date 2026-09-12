@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import YoutubeIframe from 'react-native-youtube-iframe';
 
 const YouTubePlayer = ({ videoUrl }) => {
@@ -7,6 +7,7 @@ const YouTubePlayer = ({ videoUrl }) => {
 
   // Extract the video ID from the YouTube URL
   const getVideoIdFromUrl = (url) => {
+    if (typeof url !== 'string') {return null;}
     const videoIdMatch = url.match(/(?:https?:\/\/)?(?:www\.)?youtube\.com\/.*v=([^&]+)/) ||
                          url.match(/(?:https?:\/\/)?youtu\.be\/([^?]+)/);
     return videoIdMatch ? videoIdMatch[1] : null;
@@ -15,9 +16,9 @@ const YouTubePlayer = ({ videoUrl }) => {
   const videoId = getVideoIdFromUrl(videoUrl);
 
   const onStateChange = useCallback((state) => {
-    if (state === "ended") {
+    if (state === 'ended') {
       setPlaying(false);
-      alert("Video has finished playing!");
+      alert('Video has finished playing!');
     }
   }, []);
 
@@ -26,7 +27,7 @@ const YouTubePlayer = ({ videoUrl }) => {
       {videoId ? (
         <YoutubeIframe
           height={250}
-          width={Dimensions.get("window").width - 20}
+          width={Dimensions.get('window').width - 20}
           videoId={videoId}
           play={playing}
           onChangeState={onStateChange}
@@ -43,15 +44,15 @@ const YouTubePlayer = ({ videoUrl }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   errorContainer: {
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   errorText: {
-    color: "red",
+    color: 'red',
     fontSize: 16,
   },
 });

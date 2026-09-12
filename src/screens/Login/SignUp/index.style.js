@@ -3,7 +3,7 @@ import {StyleSheet} from 'react-native';
 import {DeviceContext} from '../../../context/DeviceContext';
 import getColors from '../../../utils/colors';
 
-export const signupScreenStyles = () => {
+export const useSignupScreenStyles = () => {
   const {screenWidth} = useContext(DeviceContext);
   const {themeColors, myProfileScreenColors, isDarkMode} = getColors();
 
@@ -30,12 +30,12 @@ export const signupScreenStyles = () => {
     detailsItem: {
       width: screenWidth - 70,
       backgroundColor: 'transparent',
-      flex: 1
+      flex: 1,
     },
     detailsItemCalender :{
       width: screenWidth - 70,
       backgroundColor: 'transparent',
-      flex: 1
+      flex: 1,
     },
     detailsItemInfo: {
       color: myProfileScreenColors.fontColor,
@@ -53,7 +53,7 @@ export const signupScreenStyles = () => {
     },
     container: {
      marginTop:10,
-     color:'black'
+     color:'black',
     },
     dropdown: {
       height: 50,
@@ -66,7 +66,7 @@ export const signupScreenStyles = () => {
     },
     icon: {
       marginRight: 5,
-      color:'black'
+      color:'black',
     },
     label: {
       // position: 'absolute',
@@ -80,16 +80,16 @@ export const signupScreenStyles = () => {
 
     backButton: {
       width: 70,
-      backgroundColor:'white'
+      backgroundColor:'white',
       // marginLeft: -15,
     },
     placeholderStyle: {
       fontSize: 16,
-      color:'black'
+      color:'black',
     },
     selectedTextStyle: {
       fontSize: 16,
-      color:'black'
+      color:'black',
     },
     iconStyle: {
       width: 20,

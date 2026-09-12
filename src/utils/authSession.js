@@ -1,5 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {fetchUserProfile} from '../api/moneyMails';
+import {
+  clearAuthSession,
+  mergeSensitiveIntoUser,
+  setSessionSecrets,
+  stripSensitiveFromUser,
+} from './secureStorage';
+
+export {clearAuthSession};
 
 const getPhoneValue = mobile => String(mobile || '').replace('+', '');
 
@@ -195,14 +203,24 @@ export const buildUserSession = (data = {}) => {
 
 export const persistUserSession = async (data, setUserDetails) => {
   const userData = buildUserSession(data);
+  const zelleId = userData.zelle_id || userData.address?.zelle_id || '';
+
+  await setSessionSecrets({
+    authToken: userData.token || '',
+    ssn: userData.ssn || '',
+    id_number: userData.id_number || '',
+    id_proof: userData.id_proof || '',
+    zelle_id: zelleId,
+  });
+
+  const storedUser = stripSensitiveFromUser(userData);
 
   if (typeof setUserDetails === 'function') {
     setUserDetails(userData);
   }
 
   await AsyncStorage.setItem('auth', JSON.stringify(true));
-  await AsyncStorage.setItem('user', JSON.stringify(userData));
-  await AsyncStorage.setItem('token', JSON.stringify(userData.token || ''));
+  await AsyncStorage.setItem('user', JSON.stringify(storedUser));
   if (userData.bingo !== undefined) {
     await AsyncStorage.setItem('bingo', JSON.stringify(userData.bingo));
   }

@@ -1,5 +1,6 @@
 import {StyleSheet} from 'react-native';
 import getColors from '../../utils/colors';
+import {elevation, layout, spacing, typography} from '../../utils/theme';
 
 export const styles = () => {
   const {themeColors: colors} = getColors();
@@ -18,14 +19,14 @@ export const styles = () => {
       left: 0,
       right: 0,
       bottom: 0,
-      height: 260,
+      height: 220,
       backgroundColor: colors.homeBackground || colors.bgPrimary,
       overflow: 'hidden',
     },
     appBackgroundImage: {
       width: '100%',
       height: '100%',
-      opacity: 0.12,
+      opacity: 0,
     },
     safeArea: {
       flex: 1,
@@ -41,22 +42,21 @@ export const styles = () => {
     },
     screenContentWithFooter: {
       flex: 1,
-      paddingBottom: 18,
+      paddingBottom: layout.footerHeight,
     },
     footerNav: {
       position: 'absolute',
-      left: 8,
-      right: 8,
+      left: 0,
+      right: 0,
       bottom: 0,
-      height: 62,
-      paddingTop: 6,
-      paddingBottom: 5,
-      paddingHorizontal: 6,
-      borderTopLeftRadius: 18,
-      borderTopRightRadius: 18,
+      minHeight: layout.footerHeight,
+      paddingTop: spacing.sm,
+      paddingBottom: spacing.sm,
+      paddingHorizontal: spacing.sm,
+      borderTopLeftRadius: 0,
+      borderTopRightRadius: 0,
       backgroundColor: colors.surfaceElevated,
-      borderWidth: 1,
-      borderBottomWidth: 0,
+      borderTopWidth: 1,
       borderColor: colors.borderSubtle,
       flexDirection: 'row',
       alignItems: 'center',
@@ -66,57 +66,35 @@ export const styles = () => {
     },
     footerNavItem: {
       flex: 1,
-      height: 50,
+      minHeight: 56,
       alignItems: 'center',
       justifyContent: 'center',
+      paddingHorizontal: 2,
     },
     footerIconWrap: {
-      width: 30,
-      height: 25,
-      borderRadius: 13,
+      width: 36,
+      height: 32,
+      borderRadius: 16,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: 'transparent',
     },
     footerIconWrapActive: {
-      backgroundColor: colors.brandSoft,
+      backgroundColor: 'transparent',
     },
     footerNavLabel: {
       color: colors.fontMuted,
-      fontSize: 9,
-      lineHeight: 12,
-      fontWeight: '700',
+      fontSize: 11,
+      lineHeight: 14,
+      fontWeight: '600',
       marginTop: 2,
     },
     footerNavLabelActive: {
       color: colors.highlightPrimary,
+      fontWeight: '700',
     },
     pageContainer: {
       backgroundColor: 'transparent',
-    },
-    tabBar: {
-      position: 'absolute',
-      left: 16,
-      right: 16,
-      bottom: 14,
-      height: 68,
-      paddingTop: 8,
-      paddingBottom: 10,
-      paddingHorizontal: 8,
-      backgroundColor: colors.surfaceElevated,
-      borderTopWidth: 1,
-      borderTopColor: colors.borderSubtle,
-      borderRadius: 18,
-      shadowOpacity: 0,
-      elevation: 0,
-    },
-    tabBarItem: {
-      borderRadius: 14,
-    },
-    tabBarLabel: {
-      fontSize: 11,
-      fontWeight: '700',
-      letterSpacing: 0,
     },
     notificationBadgeWrapper: {
       position: 'absolute',
@@ -150,10 +128,8 @@ export const styles = () => {
       justifyContent: 'flex-start',
     },
     drawerName: {
-      fontSize: 22,
-      lineHeight: 28,
+      ...typography.title,
       color: colors.white,
-      fontWeight: '700',
     },
     drawerBody: {
       paddingHorizontal: 10,
@@ -208,6 +184,5 @@ export const styles = () => {
     stackContent: {
       backgroundColor: 'transparent',
     },
-    btnText: {},
   });
 };

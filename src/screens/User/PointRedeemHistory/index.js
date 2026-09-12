@@ -38,7 +38,7 @@ const renderItem = ({item, styles}) => {
   };
 
 const PointRedeemHistory = ({ navigation }) => {
-   
+
     const {userDetails} = useContext(UserContext);
     const {setRedeemPayload, data} = usePointRedeemHistory();
     const [page, setPage] = useState(0);
@@ -86,7 +86,7 @@ const PointRedeemHistory = ({ navigation }) => {
           onEndReachedThreshold={0.1}
           />
         }
-        {data.length === 0&&<View style={styles.emptyState}>
+        {data.length === 0 && <View style={styles.emptyState}>
             <Text style={styles.emptyTitle}>No history yet</Text>
             <Text style={styles.emptyText}>Your redeemed points will appear here.</Text>
             </View>}

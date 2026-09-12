@@ -126,7 +126,7 @@ export const styles = ({screenHeight, isIos}) => {
       width: '100%',
       paddingHorizontal: 35,
       paddingVertical: 5,
-      marginBottom: isIos ? 25 : 5
+      marginBottom: isIos ? 25 : 5,
     },
   });
 };

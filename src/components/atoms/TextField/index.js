@@ -66,7 +66,7 @@ const TextField = props => {
     },
     onChangeText: text => {
       onChange(
-        type === "phone" ? {
+        type === 'phone' ? {
           code: countryCode,
           value: text,
         } : text);

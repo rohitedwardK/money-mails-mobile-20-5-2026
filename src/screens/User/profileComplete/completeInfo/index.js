@@ -50,7 +50,7 @@ const normalizeName = value =>
 
 const normalizeCountyForCreate = value => {
   const clean = String(value || '').trim();
-  if (!clean) return '';
+  if (!clean) {return '';}
   return /\b(county|parish|borough|municipality|census area)\b/i.test(clean)
     ? clean
     : `${clean} County`;
@@ -66,7 +66,8 @@ const getProfileImageValue = response =>
   '';
 
 const CompleteInfo = ({navigation, route}) => {
-  const {userDetails, setUserDetails} = useContext(UserContext);
+  const {userDetails, setUserDetails, setPostAuthScreen, setPendingGuestRoute} =
+    useContext(UserContext);
   const params = route?.params || {};
   const emailVerificationToken = params?.emailVerificationToken || '';
   const isVerifiedEmailFlow = Boolean(emailVerificationToken);
@@ -128,22 +129,20 @@ const CompleteInfo = ({navigation, route}) => {
   };
 
   const navigateAfterAuth = sessionData => {
+    setPendingGuestRoute(null);
     const target = getPostAuthRoute(sessionData);
     if (target.stack === 'UserScreens') {
-      navigation.navigate(
-        'UserScreens',
-        target.screen ? {screen: target.screen} : undefined,
-      );
+      setPostAuthScreen(target.screen || 'Home');
       return;
     }
-    navigation.navigate('LoginScreens', {screen: target.screen || 'SignIn'});
+    navigation.navigate(target.screen || 'SignIn');
   };
 
   useEffect(() => {
     let mounted = true;
     fetchStatesByCountry(DEFAULT_COUNTRY_UUID)
       .then(payload => {
-        if (mounted) setStates(resolveList(payload));
+        if (mounted) {setStates(resolveList(payload));}
       })
       .catch(() => showError('State list could not be loaded.'));
 
@@ -175,7 +174,7 @@ const CompleteInfo = ({navigation, route}) => {
       selectionLimit: 1,
     });
     const asset = result?.assets?.[0];
-    if (!asset?.uri) return;
+    if (!asset?.uri) {return;}
 
     setProfileImageUri(asset.uri);
     setUploadingImage(true);
@@ -188,7 +187,7 @@ const CompleteInfo = ({navigation, route}) => {
       });
       const response = await uploadUserFile(data);
       const fileName = getProfileImageValue(response);
-      if (fileName) setProfileImageFileName(fileName);
+      if (fileName) {setProfileImageFileName(fileName);}
     } catch (error) {
       showError(error?.message || 'Profile photo upload failed.');
     } finally {
@@ -214,7 +213,7 @@ const CompleteInfo = ({navigation, route}) => {
     const match = counties.find(
       county => normalizeName(county?.name) === normalizeName(countyName),
     );
-    if (match?.uuid) return match;
+    if (match?.uuid) {return match;}
 
     const created = await createCounty(
       stateUuid,
@@ -228,7 +227,7 @@ const CompleteInfo = ({navigation, route}) => {
     const match = cities.find(
       city => normalizeName(city?.name) === normalizeName(cityName),
     );
-    if (match?.uuid) return match;
+    if (match?.uuid) {return match;}
 
     const created = await createCity(countyUuid, String(cityName || '').trim());
     return created?.data || created;
@@ -246,10 +245,10 @@ const CompleteInfo = ({navigation, route}) => {
       const street =
         details?.street || details?.displayLine1 || details?.address1 || '';
 
-      if (!state?.uuid) throw new Error('Selected address state is unavailable.');
-      if (!countyName) throw new Error('Pick an address with a county.');
-      if (!cityName) throw new Error('Pick an address with a city.');
-      if (!zip) throw new Error('Pick an address with a valid ZIP code.');
+      if (!state?.uuid) {throw new Error('Selected address state is unavailable.');}
+      if (!countyName) {throw new Error('Pick an address with a county.');}
+      if (!cityName) {throw new Error('Pick an address with a city.');}
+      if (!zip) {throw new Error('Pick an address with a valid ZIP code.');}
 
       const county = await findOrCreateCounty(state.uuid, countyName);
       const city = await findOrCreateCity(county.uuid, cityName);
@@ -284,9 +283,9 @@ const CompleteInfo = ({navigation, route}) => {
   const validate = () => {
     const email = String(formData.email || '').trim();
     const phoneValue = String(formData.phone?.value || '').trim();
-    if (!String(formData.firstName || '').trim()) return 'Enter first name.';
-    if (!String(formData.lastName || '').trim()) return 'Enter last name.';
-    if (!email) return 'Enter your email address.';
+    if (!String(formData.firstName || '').trim()) {return 'Enter first name.';}
+    if (!String(formData.lastName || '').trim()) {return 'Enter last name.';}
+    if (!email) {return 'Enter your email address.';}
     if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)) {
       return 'Enter a valid email address.';
     }
@@ -296,16 +295,16 @@ const CompleteInfo = ({navigation, route}) => {
     if (isVerifiedEmailFlow && !emailVerificationToken) {
       return 'Email verification expired. Please verify your email again.';
     }
-    if (!formData.country) return 'Select your country.';
-    if (!formData.state) return 'Select your state.';
+    if (!formData.country) {return 'Select your country.';}
+    if (!formData.state) {return 'Select your state.';}
     if (!formData.street || !formData.county || !formData.city) {
       return 'Pick an address to continue.';
     }
     if (!/^\d{5}$/.test(String(formData.pincode || ''))) {
       return 'Pick an address with a valid 5 digit ZIP code.';
     }
-    if (uploadingImage) return 'Please wait for the profile photo upload.';
-    if (resolvingAddress) return 'Please wait for address resolution.';
+    if (uploadingImage) {return 'Please wait for the profile photo upload.';}
+    if (resolvingAddress) {return 'Please wait for address resolution.';}
     return '';
   };
 

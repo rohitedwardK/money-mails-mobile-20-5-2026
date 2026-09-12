@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import Snackbar from 'react-native-snackbar';
-import { baseUrl } from "../../connections";
+import { baseUrl } from '../../connections';
 import {
   ToastAndroid,
   Platform,
@@ -19,15 +19,15 @@ export const useSignUp = () => {
       setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
+      headers.append('Content-Type', 'application/json');
 
       const body = JSON.stringify(payload);
-      
+
       const requestOptions = {
-        method: "POST",
+        method: 'POST',
         headers: headers,
         body: body,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/user/register`, requestOptions)
@@ -39,7 +39,7 @@ export const useSignUp = () => {
           return JSON.parse(res);
         })
         .then((result) => {
-          if (result.message === "Register Successfully!") {
+          if (result.message === 'Register Successfully!') {
             Snackbar.show({
               text: result.message,
               duration: Snackbar.LENGTH_SHORT,
@@ -48,7 +48,7 @@ export const useSignUp = () => {
             setIsLoading(false);
             setError(false);
           } else {
-            throw "Something went wrong! Please try again later.";
+            throw 'Something went wrong! Please try again later.';
           }
         })
         .catch((err) => {

@@ -26,7 +26,7 @@ const RedeemModalContent = ({points, totalAmount, onActionClick}) => {
             color : 'green',
             flexWrap: 'wrap',
             fontSize : 20,
-            margin : 10
+            margin : 10,
             }}>{points}</Text>
       </View>
       <View

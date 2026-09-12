@@ -14,12 +14,12 @@ import getColors from '../../../utils/colors';
 import {myProfileScreenStyles} from './index.style';
 
 const asList = value => {
-  if (Array.isArray(value)) return value.join(', ');
+  if (Array.isArray(value)) {return value.join(', ');}
   return value || '';
 };
 
 const formatDate = value => {
-  if (!value) return '';
+  if (!value) {return '';}
   const date = moment(value);
   return date.isValid() ? date.format('DD-MM-YYYY') : String(value);
 };
@@ -54,9 +54,9 @@ const Profile = ({navigation}) => {
   const {cityData, setCityData} = useCityData();
 
   useEffect(() => {
-    if (address.country) setStateData(address.country);
-    if (address.state) setCountyData(address.state);
-    if (address.county) setCityData(address.county);
+    if (address.country) {setStateData(address.country);}
+    if (address.state) {setCountyData(address.state);}
+    if (address.county) {setCityData(address.county);}
   }, [address.country, address.county, address.state, setCityData, setCountyData, setStateData]);
 
   useEffect(() => {

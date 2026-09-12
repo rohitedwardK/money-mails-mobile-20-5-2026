@@ -7,37 +7,37 @@ export const TERMS_CONDITIONS_URL =
     'https://app.termly.io/policy-viewer/policy.html?policyUUID=1153fdbd-a0a0-4473-b12f-cf0057c434ca';
 export const IDENTITYTYPE = [
     {title: 'Driving Licence', id: 'driving_licence'},
-    {title: 'Voter ID', id: 'voter_id'}
-]
+    {title: 'Voter ID', id: 'voter_id'},
+];
 export const RACE = [
     {title: 'American', id:'American'},
-    {title:'Indian-American', id:"Indian-American"},
-    {title:'Indian', id:"Indian"},
-    {title:'Asian', id:"Asian"},
-    {title:"Other", id:"Other"}
+    {title:'Indian-American', id:'Indian-American'},
+    {title:'Indian', id:'Indian'},
+    {title:'Asian', id:'Asian'},
+    {title:'Other', id:'Other'},
     // {title: 'American Indian or Alaska Native', id: 'American Indian or Alaska Native'},
     // {title: 'Asian-Indian', id: 'Asian-Indian'},
     // {title: 'Native Hawaiian', id: 'Native Hawaiian'},
     // {title: 'Other Pacific Islander', id: 'Other Pacific Islander'}
-]
+];
 export const COUNTRY = [
-    {title: 'United States', id: 'CO-42A82D09'}
-]
+    {title: 'United States', id: 'CO-42A82D09'},
+];
 
 export const COUNTRYS = [
-    {label : 'United States', value:'CO-42A82D09'}
-]
+    {label : 'United States', value:'CO-42A82D09'},
+];
 export const RACES = [
     {label: 'American', value:'American'},
-    {label:'Indian-American', value:"Indian-American"},
-    {label:'Indian', value:"Indian"},
-    {label:'Asian', value:"Asian"},
-    {label:"Other", value:"Other"}
-]
+    {label:'Indian-American', value:'Indian-American'},
+    {label:'Indian', value:'Indian'},
+    {label:'Asian', value:'Asian'},
+    {label:'Other', value:'Other'},
+];
 export const IDENTITYTYPES = [
     {label: 'Driving Licence', value: 'driving_licence'},
-    {label: 'Voter ID', value: 'voter_id'}
-]
+    {label: 'Voter ID', value: 'voter_id'},
+];
 
 export const LANGUAGES = [
     {label: 'Telugu', value: 'Telugu'},

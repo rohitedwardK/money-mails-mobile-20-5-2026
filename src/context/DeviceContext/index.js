@@ -8,7 +8,7 @@ const DeviceContextProvider = ({children}) => {
   const isAndroid = !isIos;
   const screenWidth = Dimensions.get('window').width;
   const screenHeight = Dimensions.get('window').height;
-  const isDarkMode = false //useColorScheme() === 'dark';
+  const isDarkMode = false; //useColorScheme() === 'dark';
 
   const value = {
     isIos,

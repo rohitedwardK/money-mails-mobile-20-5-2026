@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useContext, useEffect, useState } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useContext, useEffect, useState } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 
 export const useVerification = () => {
   const { userDetails } = useContext(UserContext);
@@ -15,16 +15,16 @@ export const useVerification = () => {
       setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      if (userDetails?.token) headers.append("x-auth-token", userDetails.token);
+      headers.append('Content-Type', 'application/json');
+      if (userDetails?.token) {headers.append('x-auth-token', userDetails.token);}
 
       const body = JSON.stringify(payload);
 
       const requestOptions = {
-        method: "PUT",
+        method: 'PUT',
         headers: headers,
         body: body,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/user/verify/by/code`, requestOptions)
@@ -41,7 +41,7 @@ export const useVerification = () => {
             setIsLoading(false);
             setError(false);
           } else {
-            throw "Something went wrong! Please try again later.";
+            throw 'Something went wrong! Please try again later.';
           }
         })
         .catch((err) => {

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useContext, useEffect, useState } from "react";
-import { baseUrl } from "../../connections";
-import { UserContext } from "../../context/UserContext";
+import { useContext, useEffect, useState } from 'react';
+import { baseUrl } from '../../connections';
+import { UserContext } from '../../context/UserContext';
 
 export const useCounty = () => {
   const { userDetails } = useContext(UserContext);
@@ -15,15 +15,15 @@ export const useCounty = () => {
     setIsLoading(true);
 
       const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      if (userDetails?.token) headers.append("x-auth-token", userDetails.token);
+      headers.append('Content-Type', 'application/json');
+      if (userDetails?.token) {headers.append('x-auth-token', userDetails.token);}
 
       const params = JSON.stringify(payload);
 
       const requestOptions = {
-        method: "GET",
+        method: 'GET',
         headers: headers,
-        redirect: "follow",
+        redirect: 'follow',
       };
 
       fetch(`${baseUrl}/setting/county?${payload}`, requestOptions)

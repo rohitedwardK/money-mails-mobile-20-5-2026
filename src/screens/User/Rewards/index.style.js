@@ -138,7 +138,7 @@ const useRewardsScreenStyles = () => {
       marginVertical: 12,
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
     },
     categoryView: {
       display: 'flex',
@@ -146,7 +146,7 @@ const useRewardsScreenStyles = () => {
       flexWrap: 'wrap',
       alignContent: 'space-between',
       marginBottom: 20,
-      justifyContent: 'center'
+      justifyContent: 'center',
     },
     tabContentBase: {
       paddingTop: 12,

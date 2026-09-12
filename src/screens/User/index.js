@@ -1,7 +1,7 @@
-import React, {useEffect, useRef} from 'react';
-import {Animated, Image, StatusBar, Text, TouchableOpacity, View} from 'react-native';
+import React from 'react';
+import {Image, StatusBar, Text, TouchableOpacity, View} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Home from './Home';
 import Category from './Category';
@@ -39,16 +39,19 @@ const Stack = createNativeStackNavigator();
 
 const footerItems = [
   {label: 'Home', routeName: 'Home', icon: 'home'},
-  {label: 'Bookings', routeName: 'CampaignTicketHistory', icon: 'calendar-outline'},
-  {label: 'Campaign', routeName: 'Campaigns', icon: 'megaphone-outline'},
+  {label: 'Mails', routeName: 'Mails', icon: 'mail-outline'},
+  {label: 'Saved', routeName: 'Favourites', icon: 'heart-outline'},
+  {label: 'Campaigns', routeName: 'Campaigns', icon: 'megaphone-outline'},
+  {label: 'More', routeName: 'AccountMenu', icon: 'grid-outline'},
 ];
 
-const FooterNav = ({navigation, activeRouteName, animatedStyle, onInteraction}) => {
+const FooterNav = ({navigation, activeRouteName}) => {
   const {themeColors} = getColors();
   const styles = userScreenStyles();
+  const insets = useSafeAreaInsets();
 
   return (
-    <Animated.View style={[styles.footerNav, animatedStyle]}>
+    <View style={[styles.footerNav, {paddingBottom: Math.max(insets.bottom, 8)}]}>
       {footerItems.map(item => {
         const isActive = activeRouteName === item.routeName;
 
@@ -57,10 +60,7 @@ const FooterNav = ({navigation, activeRouteName, animatedStyle, onInteraction}) 
             key={item.routeName}
             activeOpacity={0.82}
             style={styles.footerNavItem}
-            onPress={() => {
-              onInteraction();
-              navigation.navigate(item.routeName);
-            }}>
+            onPress={() => navigation.navigate(item.routeName)}>
             <View
               style={[
                 styles.footerIconWrap,
@@ -68,7 +68,7 @@ const FooterNav = ({navigation, activeRouteName, animatedStyle, onInteraction}) 
               ]}>
               <Ionicons
                 name={item.icon}
-                size={19}
+                size={21}
                 color={isActive ? themeColors.highlightPrimary : themeColors.fontMuted}
               />
             </View>
@@ -76,80 +76,48 @@ const FooterNav = ({navigation, activeRouteName, animatedStyle, onInteraction}) 
               style={[
                 styles.footerNavLabel,
                 isActive ? styles.footerNavLabelActive : null,
-              ]}>
+              ]}
+              numberOfLines={1}>
               {item.label}
             </Text>
           </TouchableOpacity>
         );
       })}
-    </Animated.View>
+    </View>
   );
 };
 
 const ScreenWithFooter = ({component: Component, ...props}) => {
   const styles = userScreenStyles();
-  const footerTranslateY = useRef(new Animated.Value(90)).current;
-  const hideFooterTimer = useRef(null);
-
-  const hideFooter = () => {
-    Animated.timing(footerTranslateY, {
-      toValue: 90,
-      duration: 240,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const showFooter = () => {
-    if (hideFooterTimer.current) {
-      clearTimeout(hideFooterTimer.current);
-    }
-
-    Animated.timing(footerTranslateY, {
-      toValue: 0,
-      duration: 220,
-      useNativeDriver: true,
-    }).start();
-
-    hideFooterTimer.current = setTimeout(hideFooter, 1500);
-  };
-
-  useEffect(() => () => {
-    if (hideFooterTimer.current) {
-      clearTimeout(hideFooterTimer.current);
-    }
-  }, []);
 
   return (
-    <View
-      style={styles.screenWithFooter}
-      onTouchStart={showFooter}
-      onMoveShouldSetResponderCapture={() => {
-        showFooter();
-        return false;
-      }}>
+    <View style={styles.screenWithFooter}>
       <View style={styles.screenContentWithFooter}>
         <Component {...props} />
       </View>
       <FooterNav
         navigation={props.navigation}
         activeRouteName={props.route?.name || 'Home'}
-        animatedStyle={{transform: [{translateY: footerTranslateY}]}}
-        onInteraction={showFooter}
       />
     </View>
   );
 };
 
 const HomeWithFooter = props => <ScreenWithFooter component={Home} {...props} />;
+const MailsWithFooter = props => <ScreenWithFooter component={Mails} {...props} />;
+const FavouritesWithFooter = props => <ScreenWithFooter component={Favourites} {...props} />;
 const BookingsWithFooter = props => <ScreenWithFooter component={CampaignTicketHistory} {...props} />;
 const OffersWithFooter = props => <ScreenWithFooter component={Rewards} {...props} />;
 const ProfileWithFooter = props => <ScreenWithFooter component={Profile} {...props} />;
 const CampaignsWithFooter = props => <ScreenWithFooter component={Campaigns} {...props} />;
 const MoreWithFooter = props => <ScreenWithFooter component={AccountMenu} {...props} />;
 
-const UserScreens = () => {
+const UserScreens = ({route}) => {
   const {themeColors} = getColors();
   const styles = userScreenStyles();
+  const nestedScreen = route?.params?.screen;
+  const nestedParams = route?.params?.params;
+  const initialRouteName = nestedScreen || 'Home';
   const internalHeader = title => ({
     headerShown: true,
     title,
@@ -186,7 +154,7 @@ const UserScreens = () => {
       translucent={false}
     />
     <Stack.Navigator
-      initialRouteName="Home"
+      initialRouteName={initialRouteName}
       screenOptions={{
         headerShown: false,
         contentStyle: {
@@ -197,21 +165,26 @@ const UserScreens = () => {
       <Stack.Screen name="Category" component={Category} options={internalHeader('Category')} />
       <Stack.Screen name="Store" component={Store} options={internalHeader('Stores')} />
       <Stack.Screen name="MoreBrands" component={Store} options={internalHeader('More Brands')} />
-      <Stack.Screen name="Mails" component={Mails} options={internalHeader('Mails')} />
-      <Stack.Screen name="MoreMails" component={Mails} options={internalHeader('More Mails')} />
+      <Stack.Screen name="Mails" component={MailsWithFooter} />
+      <Stack.Screen name="MoreMails" component={MailsWithFooter} options={internalHeader('More Mails')} />
       <Stack.Screen name="Rewards" component={OffersWithFooter} options={internalHeader('Rewards')} />
       <Stack.Screen name="RewardsDrawer" component={Rewards} options={internalHeader('Rewards')} />
-      <Stack.Screen name="Favourites" component={Favourites} options={internalHeader('Favourites')} />
+      <Stack.Screen name="Favourites" component={FavouritesWithFooter} />
       <Stack.Screen name="Profile" component={ProfileWithFooter} options={internalHeader('Profile')} />
       <Stack.Screen name="profileDrawer" component={Profile} options={internalHeader('Profile')} />
       <Stack.Screen name="AccountMenu" component={MoreWithFooter} />
       <Stack.Screen name="Bingo" component={Bingo} options={internalHeader('Bingo')} />
       <Stack.Screen name="Notification" component={Notification} options={internalHeader('Notifications')} />
       <Stack.Screen name="PointRedeemHistory" component={PointRedeemHistory} options={internalHeader('Redeem History')} />
-      <Stack.Screen name="Campaigns" component={CampaignsWithFooter} options={internalHeader('Campaigns')} />
-      <Stack.Screen name="CampaignDetail" component={CampaignDetail} options={internalHeader('Campaign Detail')} />
+      <Stack.Screen name="Campaigns" component={CampaignsWithFooter} />
+      <Stack.Screen name="CampaignDetail" component={CampaignDetail} />
       <Stack.Screen name="CampaignTicketHistory" component={BookingsWithFooter} options={internalHeader('Ticket History')} />
-      <Stack.Screen name="CompleteInfo" component={CompleteInfo} options={internalHeader('Complete Profile')} />
+      <Stack.Screen
+        name="CompleteInfo"
+        component={CompleteInfo}
+        options={internalHeader('Complete Profile')}
+        initialParams={nestedScreen === 'CompleteInfo' ? nestedParams : undefined}
+      />
       <Stack.Screen name="ProfileSetting" component={ProfileSetting} options={internalHeader('Profile Settings')} />
       <Stack.Screen name="AddressDetails" component={AddressDetails} options={internalHeader('Address Details')} />
       <Stack.Screen

@@ -14,7 +14,7 @@ const useFavouritesScreenStyles = () => {
     pageContainer: {
       flex: 1,
       backgroundColor: 'transparent',
-      paddingBottom: 104,
+      paddingBottom: 88,
       paddingHorizontal: 14,
       width: screenWidth,
     },
@@ -183,6 +183,30 @@ const useFavouritesScreenStyles = () => {
     brandCard: {
       width: '100%',
       height: '100%',
+    },
+    mailList: {
+      paddingTop: 16,
+      paddingBottom: 24,
+    },
+    emptyState: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 48,
+      paddingHorizontal: 24,
+    },
+    emptyTitle: {
+      fontSize: 17,
+      lineHeight: 24,
+      fontWeight: '700',
+      color: themeColors.fontPrimary,
+      textAlign: 'center',
+    },
+    emptySubtitle: {
+      fontSize: 13,
+      lineHeight: 18,
+      color: themeColors.fontMuted,
+      textAlign: 'center',
+      marginTop: 8,
     },
   });
 };
